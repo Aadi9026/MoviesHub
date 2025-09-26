@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthChange } from '../services/auth';
+import { onAuthChange, getCurrentUser } from '../services/auth';
 
 const AuthContext = createContext();
 
@@ -12,6 +12,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is already logged in
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+      setLoading(false);
+    }
+
+    // Set up auth state listener
     const unsubscribe = onAuthChange((currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -22,7 +30,8 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    loading
+    loading,
+    isAdmin: user !== null // Only true for your specific admin account
   };
 
   return (
