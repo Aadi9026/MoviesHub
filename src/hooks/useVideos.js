@@ -11,25 +11,39 @@ export const useVideos = () => {
   }, []);
 
   const loadVideos = async () => {
-    setLoading(true);
-    const result = await getVideos();
-    if (result.success) {
-      setVideos(result.videos);
-    } else {
-      setError(result.error);
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getVideos();
+      if (result.success) {
+        setVideos(result.videos);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Failed to load videos');
+      console.error('Error loading videos:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const search = async (term) => {
-    setLoading(true);
-    const result = await searchVideos(term);
-    if (result.success) {
-      setVideos(result.videos);
-    } else {
-      setError(result.error);
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await searchVideos(term);
+      if (result.success) {
+        setVideos(result.videos);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Search failed');
+      console.error('Error searching videos:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return {
@@ -53,37 +67,56 @@ export const useVideo = (id) => {
   }, [id]);
 
   const loadVideo = async (videoId) => {
-    setLoading(true);
-    const result = await getVideo(videoId);
-    if (result.success) {
-      setVideo(result.video);
-    } else {
-      setError(result.error);
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getVideo(videoId);
+      if (result.success) {
+        setVideo(result.video);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Failed to load video');
+      console.error('Error loading video:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  return { video, loading, error };
+  return { video, loading, error, reload: loadVideo };
 };
 
 export const useRelatedVideos = (genre, excludeId) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (genre) {
       loadRelatedVideos(genre, excludeId);
+    } else {
+      setLoading(false);
     }
   }, [genre, excludeId]);
 
   const loadRelatedVideos = async (videoGenre, videoId) => {
-    setLoading(true);
-    const result = await getRelatedVideos(videoGenre, videoId);
-    if (result.success) {
-      setVideos(result.videos);
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getRelatedVideos(videoGenre, videoId);
+      if (result.success) {
+        setVideos(result.videos);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Failed to load related videos');
+      console.error('Error loading related videos:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  return { videos, loading };
+  return { videos, loading, error };
 };
