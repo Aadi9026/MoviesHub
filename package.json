@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -20,5 +21,8 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",
     "vite": "^4.4.0"
-  }
+  },
+  "keywords": ["movies", "streaming", "react", "firebase"],
+  "author": "MoviesHub Team",
+  "license": "MIT"
 }
