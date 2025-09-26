@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { getVideos, deleteVideo } from '../../services/database';
 import LoadingSpinner from '../Common/LoadingSpinner';
+import MovieForm from './MovieForm';
+import Modal from '../UI/Modal';
 
 const MovieList = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editingVideo, setEditingVideo] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     loadVideos();
@@ -22,6 +26,11 @@ const MovieList = () => {
     setLoading(false);
   };
 
+  const handleEdit = (video) => {
+    setEditingVideo(video);
+    setShowEditModal(true);
+  };
+
   const handleDelete = async (id, title) => {
     if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
       const result = await deleteVideo(id);
@@ -31,6 +40,12 @@ const MovieList = () => {
         setError(result.error);
       }
     }
+  };
+
+  const handleEditSuccess = () => {
+    setShowEditModal(false);
+    setEditingVideo(null);
+    loadVideos();
   };
 
   if (loading) return <LoadingSpinner text="Loading videos..." />;
@@ -56,20 +71,29 @@ const MovieList = () => {
             <div key={video.id} className="movie-item">
               <div className="movie-thumb">
                 <img src={video.thumbnail} alt={video.title} />
+                <div className="movie-stats">
+                  <span><i className="fas fa-eye"></i> {video.views || 0}</span>
+                </div>
               </div>
               <div className="movie-info">
                 <h4 className="movie-title">{video.title}</h4>
                 <div className="movie-meta">
                   <span className="genre">{video.genre}</span>
                   <span> • </span>
-                  <span>{video.views || 0} views</span>
+                  <span>{video.duration || 120} min</span>
                 </div>
                 <p className="movie-description">
                   {video.description?.substring(0, 100)}...
                 </p>
+                <div className="movie-date">
+                  Added: {video.createdAt?.toDate().toLocaleDateString()}
+                </div>
               </div>
               <div className="movie-actions">
-                <button className="btn btn-edit">
+                <button 
+                  className="btn btn-edit"
+                  onClick={() => handleEdit(video)}
+                >
                   <i className="fas fa-edit"></i> Edit
                 </button>
                 <button 
@@ -83,6 +107,18 @@ const MovieList = () => {
           ))}
         </div>
       )}
+
+      <Modal 
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Movie"
+      >
+        <MovieForm 
+          editVideo={editingVideo}
+          onSuccess={handleEditSuccess}
+          onCancel={() => setShowEditModal(false)}
+        />
+      </Modal>
     </div>
   );
 };
