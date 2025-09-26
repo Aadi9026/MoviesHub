@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import SearchBar from './SearchBar';
 import AdSlot from './AdSlot';
 
 const Header = () => {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleAdminClick = () => {
@@ -16,6 +17,9 @@ const Header = () => {
       navigate('/admin/login');
     }
   };
+
+  // Don't show search bar on admin pages
+  const isAdminPage = location.pathname.includes('/admin');
 
   return (
     <header className="header">
@@ -30,14 +34,15 @@ const Header = () => {
             </button>
             <Link to="/" className="logo">
               <i className="fas fa-film"></i>
-              <span>MoviesHub</span>
-              {isAdmin && <span className="admin-badge">Admin</span>}
+              <span>MoviesHub{isAdmin && <span className="admin-badge">Admin</span>}</span>
             </Link>
           </div>
 
-          <div className={`header-center ${showMobileMenu ? 'mobile-show' : ''}`}>
-            <SearchBar />
-          </div>
+          {!isAdminPage && (
+            <div className={`header-center ${showMobileMenu ? 'mobile-show' : ''}`}>
+              <SearchBar />
+            </div>
+          )}
 
           <div className="header-right">
             <button 
