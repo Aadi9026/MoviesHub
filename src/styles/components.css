@@ -468,6 +468,78 @@ button {
   margin-top: 20px;
   line-height: 1.6;
 }
+/* Thumbnail Upload Styles */
+.thumbnail-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upload-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.upload-option {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.file-input {
+  padding: 10px;
+  border: 1px dashed #555;
+  border-radius: var(--border-radius);
+  background: var(--dark-lighter);
+}
+
+.image-preview {
+  margin-top: 10px;
+}
+
+.preview-image {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: var(--border-radius);
+  border: 1px solid #363636;
+}
+
+/* Video Player Error State */
+.video-player.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark-lighter);
+  color: var(--text-secondary);
+}
+
+.video-error {
+  text-align: center;
+  padding: 40px;
+}
+
+.video-error i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: var(--warning);
+}
+
+/* Admin Page Specific */
+.admin-page .search-bar {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .upload-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .preview-image {
+    max-width: 100%;
+  }
+}
 
 /* Suggested Videos */
 .suggested-videos {
