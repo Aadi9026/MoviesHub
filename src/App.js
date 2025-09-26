@@ -9,7 +9,7 @@ import LoadingSpinner from './components/Common/LoadingSpinner';
 import './App.css';
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
   if (loading) {
     return <LoadingSpinner />;
@@ -24,9 +24,10 @@ function App() {
           <Route path="/video/:id" element={<VideoPage />} />
           <Route 
             path="/admin" 
-            element={user ? <AdminPage /> : <Navigate to="/admin/login" />} 
+            element={isAdmin ? <AdminPage /> : <Navigate to="/admin/login" />} 
           />
           <Route path="/admin/login" element={<AdminPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
     </div>
