@@ -12,9 +12,9 @@ const AdSlot = ({ position, videoId }) => {
   const loadAdSettings = async () => {
     try {
       const result = await getAdSettings();
-      if (result.success) {
-        const adCode = result.settings[`${position}Ad`] || '';
-        setAdCode(adCode);
+      if (result.success && result.settings) {
+        const code = result.settings[`${position}Ad`] || '';
+        setAdCode(code);
       }
     } catch (error) {
       console.error('Error loading ad settings:', error);
@@ -31,7 +31,7 @@ const AdSlot = ({ position, videoId }) => {
     );
   }
 
-  if (!adCode) {
+  if (!adCode || adCode.trim() === '') {
     return (
       <div className={`ad-slot ad-${position} empty`}>
         <div className="ad-label">Advertisement</div>
