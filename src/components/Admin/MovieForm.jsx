@@ -99,7 +99,6 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     if (result.success) {
       setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
       if (!editVideo) {
-        // Reset form if it's a new movie
         setFormData({
           title: '',
           description: '',
