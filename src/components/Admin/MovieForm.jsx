@@ -9,6 +9,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     description: '',
     genre: '',
     thumbnail: '',
+    thumbnailFile: null,
     embedCode: '',
     duration: 120,
     altSources: ['', '', '', ''],
@@ -20,6 +21,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
 
   useEffect(() => {
     if (editVideo) {
@@ -28,6 +30,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         description: editVideo.description || '',
         genre: editVideo.genre || '',
         thumbnail: editVideo.thumbnail || '',
+        thumbnailFile: null,
         embedCode: editVideo.embedCode || '',
         duration: editVideo.duration || 120,
         altSources: editVideo.altSources || ['', '', '', ''],
@@ -35,6 +38,9 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         downloadLinks: editVideo.downloadLinks || { '480p': '', '720p': '', '1080p': '', '4K': '' },
         adCode: editVideo.adCode || ''
       });
+      if (editVideo.thumbnail) {
+        setImagePreview(editVideo.thumbnail);
+      }
     }
   }, [editVideo]);
 
@@ -44,6 +50,36 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        thumbnailFile: file,
+        thumbnail: '' // Clear URL if file is selected
+      }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAltSourceChange = (index, value) => {
@@ -74,11 +110,36 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }));
   };
 
+  const uploadImage = async (file) => {
+    // For now, we'll use a placeholder service
+    // In production, you'd upload to Firebase Storage or another CDN
+    return new Promise((resolve) => {
+      // Simulate upload delay
+      setTimeout(() => {
+        // Return a placeholder URL - in real app, this would be your CDN URL
+        resolve(URL.createObjectURL(file));
+      }, 1000);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
+
+    // Validation
+    if (!formData.title.trim()) {
+      setError('Please enter a movie title');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.thumbnail.trim() && !formData.thumbnailFile) {
+      setError('Please provide a thumbnail URL or upload an image');
+      setLoading(false);
+      return;
+    }
 
     if (!validateEmbedCode(formData.embedCode)) {
       setError('Please provide a valid embed code with iframe tags');
@@ -86,37 +147,52 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       return;
     }
 
-    if (!formData.thumbnail) {
-      setError('Please provide a thumbnail URL');
-      setLoading(false);
-      return;
-    }
+    try {
+      let thumbnailUrl = formData.thumbnail;
 
-    const result = editVideo 
-      ? await updateVideo(editVideo.id, formData)
-      : await addVideo(formData);
-    
-    if (result.success) {
-      setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
-      if (!editVideo) {
-        setFormData({
-          title: '',
-          description: '',
-          genre: '',
-          thumbnail: '',
-          embedCode: '',
-          duration: 120,
-          altSources: ['', '', '', ''],
-          altSourcesEnabled: [false, false, false, false],
-          downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
-          adCode: ''
-        });
+      // Upload file if selected
+      if (formData.thumbnailFile) {
+        thumbnailUrl = await uploadImage(formData.thumbnailFile);
       }
-      if (onSuccess) {
-        setTimeout(onSuccess, 1000);
+
+      const videoData = {
+        ...formData,
+        thumbnail: thumbnailUrl,
+        // Remove file object from data
+        thumbnailFile: undefined
+      };
+
+      const result = editVideo 
+        ? await updateVideo(editVideo.id, videoData)
+        : await addVideo(videoData);
+      
+      if (result.success) {
+        setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
+        if (!editVideo) {
+          // Reset form if it's a new movie
+          setFormData({
+            title: '',
+            description: '',
+            genre: '',
+            thumbnail: '',
+            thumbnailFile: null,
+            embedCode: '',
+            duration: 120,
+            altSources: ['', '', '', ''],
+            altSourcesEnabled: [false, false, false, false],
+            downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
+            adCode: ''
+          });
+          setImagePreview('');
+        }
+        if (onSuccess) {
+          setTimeout(onSuccess, 1000);
+        }
+      } else {
+        setError(result.error);
       }
-    } else {
-      setError(result.error);
+    } catch (err) {
+      setError('Error uploading image: ' + err.message);
     }
     
     setLoading(false);
@@ -173,18 +249,42 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
               required
             />
           </div>
+        </div>
 
-          <div className="form-group">
-            <label className="form-label">Thumbnail URL *</label>
-            <input
-              type="url"
-              name="thumbnail"
-              className="form-input"
-              value={formData.thumbnail}
-              onChange={handleInputChange}
-              placeholder="https://example.com/thumbnail.jpg"
-              required
-            />
+        <div className="form-group">
+          <label className="form-label">Thumbnail *</label>
+          <div className="thumbnail-upload">
+            <div className="upload-options">
+              <div className="upload-option">
+                <label className="form-label">Upload from system:</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="file-input"
+                />
+                <small>Supported formats: JPG, PNG, WebP (Max 5MB)</small>
+              </div>
+              
+              <div className="upload-option">
+                <label className="form-label">Or enter URL:</label>
+                <input
+                  type="url"
+                  name="thumbnail"
+                  className="form-input"
+                  value={formData.thumbnail}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com/thumbnail.jpg"
+                />
+              </div>
+            </div>
+
+            {imagePreview && (
+              <div className="image-preview">
+                <label className="form-label">Preview:</label>
+                <img src={imagePreview} alt="Thumbnail preview" className="preview-image" />
+              </div>
+            )}
           </div>
         </div>
 
