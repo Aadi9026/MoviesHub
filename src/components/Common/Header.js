@@ -5,12 +5,12 @@ import SearchBar from './SearchBar';
 import AdSlot from './AdSlot';
 
 const Header = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleAdminClick = () => {
-    if (user) {
+    if (isAdmin) {
       navigate('/admin');
     } else {
       navigate('/admin/login');
@@ -31,6 +31,7 @@ const Header = () => {
             <Link to="/" className="logo">
               <i className="fas fa-film"></i>
               <span>MoviesHub</span>
+              {isAdmin && <span className="admin-badge">Admin</span>}
             </Link>
           </div>
 
@@ -43,8 +44,17 @@ const Header = () => {
               className="btn btn-secondary admin-btn"
               onClick={handleAdminClick}
             >
-              <i className="fas fa-user-shield"></i>
-              <span>{user ? 'Admin Panel' : 'Admin Login'}</span>
+              {isAdmin ? (
+                <>
+                  <i className="fas fa-user-shield"></i>
+                  <span>Admin Panel</span>
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-sign-in-alt"></i>
+                  <span>Admin Login</span>
+                </>
+              )}
             </button>
           </div>
         </div>
