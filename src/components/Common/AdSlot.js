@@ -1,26 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAdSettings } from '../../services/database';
 
 const AdSlot = ({ position, videoId }) => {
-  const getAdContent = () => {
-    // In a real app, this would load actual ad code
-    switch (position) {
-      case 'header':
-        return <div className="ad-banner">Header Advertisement</div>;
-      case 'sidebar':
-        return <div className="ad-sidebar">Sidebar Advertisement</div>;
-      case 'footer':
-        return <div className="ad-banner">Footer Advertisement</div>;
-      case 'in_video':
-        return <div className="ad-in-video">Video Advertisement</div>;
-      default:
-        return <div className="ad-default">Advertisement</div>;
+  const [adCode, setAdCode] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAdSettings();
+  }, [position]);
+
+  const loadAdSettings = async () => {
+    try {
+      const result = await getAdSettings();
+      if (result.success) {
+        const adCode = result.settings[`${position}Ad`] || '';
+        setAdCode(adCode);
+      }
+    } catch (error) {
+      console.error('Error loading ad settings:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className={`ad-slot ad-${position} loading`}>
+        <div className="ad-label">Loading Advertisement...</div>
+      </div>
+    );
+  }
+
+  if (!adCode) {
+    return (
+      <div className={`ad-slot ad-${position} empty`}>
+        <div className="ad-label">Advertisement</div>
+        <div className="ad-placeholder">
+          <i className="fas fa-ad"></i>
+          <span>Ad slot available</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`ad-slot ad-${position}`}>
       <div className="ad-label">Advertisement</div>
-      {getAdContent()}
+      <div 
+        className="ad-content"
+        dangerouslySetInnerHTML={{ __html: adCode }}
+      />
     </div>
   );
 };
