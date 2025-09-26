@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useVideo, useRelatedVideos } from '../../hooks/useVideos';
 import VideoPlayer from '../Common/VideoPlayer';
 import VideoCard from '../Common/VideoCard';
 import AdSlot from '../Common/AdSlot';
@@ -7,19 +8,30 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import { QUALITIES } from '../../utils/constants';
 import { formatViews, formatDuration } from '../../utils/helpers';
 
-const VideoDetail = ({ video, relatedVideos, relatedLoading }) => {
+const VideoDetail = () => {
+  const { id } = useParams();
+  const { video, loading, error } = useVideo(id);
+  const { videos: relatedVideos, loading: relatedLoading } = useRelatedVideos(
+    video?.genre, 
+    id
+  );
   const [currentSource, setCurrentSource] = useState(0);
   const [showDownloads, setShowDownloads] = useState(false);
 
+  if (loading) return <LoadingSpinner text="Loading video..." />;
+  if (error) return <div className="error-message">Error: {error}</div>;
+  if (!video) return <div className="error-message">Video not found</div>;
+
   const sources = [
     { code: video.embedCode, label: 'Primary Source' },
-    ...video.altSourcesEnabled.map((enabled, index) => 
-      enabled ? { code: video.altSources[index], label: `Source ${index + 1}` } : null
-    ).filter(Boolean)
+    ...(video.altSourcesEnabled?.map((enabled, index) => 
+      enabled && video.altSources?.[index] ? 
+        { code: video.altSources[index], label: `Source ${index + 1}` } : null
+    ) || []).filter(Boolean)
   ];
 
   const availableDownloads = Object.entries(video.downloadLinks || {})
-    .filter(([_, link]) => link.trim() !== '');
+    .filter(([_, link]) => link && link.trim() !== '');
 
   return (
     <div className="video-detail-page">
@@ -39,7 +51,7 @@ const VideoDetail = ({ video, relatedVideos, relatedLoading }) => {
                 <span> • </span>
                 <span>{formatDuration(video.duration || 120)}</span>
                 <span> • </span>
-                <span>{new Date(video.createdAt?.toDate()).toLocaleDateString()}</span>
+                <span>{video.createdAt?.toDate ? new Date(video.createdAt.toDate()).toLocaleDateString() : 'Recent'}</span>
               </div>
 
               <div className="video-actions">
@@ -96,6 +108,8 @@ const VideoDetail = ({ video, relatedVideos, relatedLoading }) => {
           </div>
 
           <div className="video-sidebar">
+            <AdSlot position="sidebar" />
+            
             <div className="suggested-videos">
               <h3>Related Movies</h3>
               
@@ -103,14 +117,12 @@ const VideoDetail = ({ video, relatedVideos, relatedLoading }) => {
                 <LoadingSpinner size="small" text="Loading related videos..." />
               ) : relatedVideos.length > 0 ? (
                 relatedVideos.map(relatedVideo => (
-                  <VideoCard key={relatedVideo.id} video={relatedVideo} compact />
+                  <VideoCard key={relatedVideo.id} video={relatedVideo} compact={true} />
                 ))
               ) : (
                 <p className="no-related">No related videos found</p>
               )}
             </div>
-
-            <AdSlot position="sidebar" />
           </div>
         </div>
       </div>
