@@ -24,10 +24,10 @@ function App() {
           <Route path="/video/:id" element={<VideoPage />} />
           <Route 
             path="/admin" 
-            element={isAdmin ? <AdminPage /> : <Navigate to="/admin/login" />} 
+            element={isAdmin ? <AdminPage /> : <Navigate to="/admin/login" replace />} 
           />
           <Route path="/admin/login" element={<AdminPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
