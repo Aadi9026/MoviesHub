@@ -3,15 +3,15 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your Firebase configuration
+// Your Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBz12rJWnXLbcmC1NaHvymCZ0i4WowljtQ",
-  authDomain: "movieshub-f7c9d.firebaseapp.com",
-  projectId: "movieshub-f7c9d",
-  storageBucket: "movieshub-f7c9d.firebasestorage.app",
-  messagingSenderId: "234358986405",
-  appId: "1:234358986405:web:0d3aa61caae4a04dd41f4c",
-  measurementId: "G-B5G0G3KVW5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBz12rJWnXLbcmC1NaHvymCZ0i4WowljtQ",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "movieshub-f7c9d.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "movieshub-f7c9d",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "movieshub-f7c9d.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "234358986405",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:234358986405:web:0d3aa61caae4a04dd41f4c",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-B5G0G3KVW5"
 };
 
 // Initialize Firebase
