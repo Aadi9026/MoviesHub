@@ -1,24 +1,42 @@
-import React, { useState } from 'react';
-import { addVideo } from '../../services/database';
+import React, { useState, useEffect } from 'react';
+import { addVideo, updateVideo } from '../../services/database';
 import { GENRES, QUALITIES } from '../../utils/constants';
 import { validateEmbedCode } from '../../utils/helpers';
 
-const MovieForm = ({ editVideo, onSuccess }) => {
+const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: editVideo?.title || '',
-    description: editVideo?.description || '',
-    genre: editVideo?.genre || '',
-    thumbnail: editVideo?.thumbnail || '',
-    embedCode: editVideo?.embedCode || '',
-    altSources: editVideo?.altSources || ['', '', '', ''],
-    altSourcesEnabled: editVideo?.altSourcesEnabled || [false, false, false, false],
-    downloadLinks: editVideo?.downloadLinks || { '480p': '', '720p': '', '1080p': '', '4K': '' },
-    adCode: editVideo?.adCode || ''
+    title: '',
+    description: '',
+    genre: '',
+    thumbnail: '',
+    embedCode: '',
+    duration: 120,
+    altSources: ['', '', '', ''],
+    altSourcesEnabled: [false, false, false, false],
+    downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
+    adCode: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (editVideo) {
+      setFormData({
+        title: editVideo.title || '',
+        description: editVideo.description || '',
+        genre: editVideo.genre || '',
+        thumbnail: editVideo.thumbnail || '',
+        embedCode: editVideo.embedCode || '',
+        duration: editVideo.duration || 120,
+        altSources: editVideo.altSources || ['', '', '', ''],
+        altSourcesEnabled: editVideo.altSourcesEnabled || [false, false, false, false],
+        downloadLinks: editVideo.downloadLinks || { '480p': '', '720p': '', '1080p': '', '4K': '' },
+        adCode: editVideo.adCode || ''
+      });
+    }
+  }, [editVideo]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -63,27 +81,41 @@ const MovieForm = ({ editVideo, onSuccess }) => {
     setSuccess('');
 
     if (!validateEmbedCode(formData.embedCode)) {
-      setError('Please provide a valid embed code');
+      setError('Please provide a valid embed code with iframe tags');
       setLoading(false);
       return;
     }
 
-    const result = await addVideo(formData);
+    if (!formData.thumbnail) {
+      setError('Please provide a thumbnail URL');
+      setLoading(false);
+      return;
+    }
+
+    const result = editVideo 
+      ? await updateVideo(editVideo.id, formData)
+      : await addVideo(formData);
     
     if (result.success) {
-      setSuccess('Movie added successfully!');
-      setFormData({
-        title: '',
-        description: '',
-        genre: '',
-        thumbnail: '',
-        embedCode: '',
-        altSources: ['', '', '', ''],
-        altSourcesEnabled: [false, false, false, false],
-        downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
-        adCode: ''
-      });
-      if (onSuccess) onSuccess();
+      setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
+      if (!editVideo) {
+        // Reset form if it's a new movie
+        setFormData({
+          title: '',
+          description: '',
+          genre: '',
+          thumbnail: '',
+          embedCode: '',
+          duration: 120,
+          altSources: ['', '', '', ''],
+          altSourcesEnabled: [false, false, false, false],
+          downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
+          adCode: ''
+        });
+      }
+      if (onSuccess) {
+        setTimeout(onSuccess, 1000);
+      }
     } else {
       setError(result.error);
     }
@@ -129,6 +161,34 @@ const MovieForm = ({ editVideo, onSuccess }) => {
           </div>
         </div>
 
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">Duration (minutes) *</label>
+            <input
+              type="number"
+              name="duration"
+              className="form-input"
+              value={formData.duration}
+              onChange={handleInputChange}
+              min="1"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Thumbnail URL *</label>
+            <input
+              type="url"
+              name="thumbnail"
+              className="form-input"
+              value={formData.thumbnail}
+              onChange={handleInputChange}
+              placeholder="https://example.com/thumbnail.jpg"
+              required
+            />
+          </div>
+        </div>
+
         <div className="form-group">
           <label className="form-label">Description</label>
           <textarea
@@ -137,18 +197,7 @@ const MovieForm = ({ editVideo, onSuccess }) => {
             value={formData.description}
             onChange={handleInputChange}
             rows="4"
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Thumbnail URL *</label>
-          <input
-            type="url"
-            name="thumbnail"
-            className="form-input"
-            value={formData.thumbnail}
-            onChange={handleInputChange}
-            required
+            placeholder="Enter movie description..."
           />
         </div>
 
@@ -159,13 +208,14 @@ const MovieForm = ({ editVideo, onSuccess }) => {
             className="form-textarea"
             value={formData.embedCode}
             onChange={handleInputChange}
-            placeholder='<iframe src="https://example.com/embed/video-id"></iframe>'
+            placeholder='<iframe src="https://example.com/embed/video-id" frameborder="0" allowfullscreen></iframe>'
+            rows="3"
             required
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Alternative Sources</label>
+          <label className="form-label">Alternative Sources (Optional)</label>
           <div className="iframe-options">
             {[0, 1, 2, 3].map(index => (
               <div key={index} className="iframe-option">
@@ -186,6 +236,7 @@ const MovieForm = ({ editVideo, onSuccess }) => {
                   onChange={(e) => handleAltSourceChange(index, e.target.value)}
                   placeholder="Alternative embed code"
                   disabled={!formData.altSourcesEnabled[index]}
+                  rows="2"
                 />
               </div>
             ))}
@@ -193,7 +244,7 @@ const MovieForm = ({ editVideo, onSuccess }) => {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Download Links</label>
+          <label className="form-label">Download Links (Optional)</label>
           <div className="download-options">
             {QUALITIES.map(quality => (
               <div key={quality} className="download-option">
@@ -217,18 +268,31 @@ const MovieForm = ({ editVideo, onSuccess }) => {
             className="form-textarea"
             value={formData.adCode}
             onChange={handleInputChange}
-            placeholder="Paste your ad code here"
+            placeholder="Paste your ad code here for this specific video"
             rows="3"
           />
         </div>
 
-        <button 
-          type="submit" 
-          className="btn btn-primary"
-          disabled={loading}
-        >
-          {loading ? 'Saving...' : (editVideo ? 'Update Movie' : 'Add Movie')}
-        </button>
+        <div className="form-actions">
+          <button 
+            type="submit" 
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : (editVideo ? 'Update Movie' : 'Add Movie')}
+          </button>
+          
+          {onCancel && (
+            <button 
+              type="button" 
+              className="btn btn-secondary"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
