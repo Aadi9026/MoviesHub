@@ -6,12 +6,18 @@ import TabPanel from '../UI/TabPanel';
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('movies');
+  const [refreshList, setRefreshList] = useState(false);
 
   const tabs = [
     { id: 'movies', label: 'Manage Movies', icon: 'fas fa-film' },
     { id: 'add', label: 'Add New Movie', icon: 'fas fa-plus' },
     { id: 'ads', label: 'Ad Settings', icon: 'fas fa-ad' }
   ];
+
+  const handleMovieAdded = () => {
+    setRefreshList(prev => !prev);
+    setActiveTab('movies');
+  };
 
   return (
     <div className="admin-panel">
@@ -30,8 +36,8 @@ const AdminPanel = () => {
       />
 
       <div className="admin-content">
-        {activeTab === 'movies' && <MovieList />}
-        {activeTab === 'add' && <MovieForm />}
+        {activeTab === 'movies' && <MovieList key={refreshList} />}
+        {activeTab === 'add' && <MovieForm onSuccess={handleMovieAdded} />}
         {activeTab === 'ads' && <AdSettings />}
       </div>
     </div>
