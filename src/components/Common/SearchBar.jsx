@@ -11,17 +11,13 @@ const SearchBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load search results when query changes
-  useEffect(() => {
-    if (query.trim().length > 2) {
-      performSearch(query);
-    } else {
+  const performSearch = debounce(async (searchTerm) => {
+    if (searchTerm.trim().length < 2) {
       setSearchResults([]);
       setSuggestions([]);
+      return;
     }
-  }, [query]);
 
-  const performSearch = debounce(async (searchTerm) => {
     setLoading(true);
     const result = await searchVideos(searchTerm);
     if (result.success) {
@@ -30,20 +26,22 @@ const SearchBar = () => {
       // Generate suggestions from search results
       const newSuggestions = result.videos.slice(0, 5).map(video => video.title);
       setSuggestions(newSuggestions);
+    } else {
+      setSearchResults([]);
+      setSuggestions([]);
     }
     setLoading(false);
-  }, 300);
+  }, 500);
+
+  useEffect(() => {
+    performSearch(query);
+  }, [query]);
 
   const handleSearch = (searchTerm) => {
     if (searchTerm.trim()) {
-      // If we're not on home page, navigate to home with search query
-      if (location.pathname !== '/') {
-        navigate(`/?search=${encodeURIComponent(searchTerm)}`);
-      } else {
-        // Trigger search on current page
-        performSearch(searchTerm);
-      }
+      navigate(`/?search=${encodeURIComponent(searchTerm)}`);
       setSuggestions([]);
+      setSearchResults([]);
     }
   };
 
@@ -57,9 +55,15 @@ const SearchBar = () => {
     handleSearch(suggestion);
   };
 
+  const handleResultClick = (videoId) => {
+    navigate(`/video/${videoId}`);
+    setQuery('');
+    setSuggestions([]);
+    setSearchResults([]);
+  };
+
   const handleInputChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
+    setQuery(e.target.value);
   };
 
   return (
@@ -67,18 +71,23 @@ const SearchBar = () => {
       <form className="search-bar" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Search for movies..."
+          placeholder="Search for movies by title, genre..."
           value={query}
           onChange={handleInputChange}
         />
         <button type="submit" disabled={loading}>
-          {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-search"></i>}
+          {loading ? (
+            <i className="fas fa-spinner fa-spin"></i>
+          ) : (
+            <i className="fas fa-search"></i>
+          )}
         </button>
       </form>
 
       {(suggestions.length > 0 || searchResults.length > 0) && (
         <div className="search-suggestions">
-          {suggestions.map((suggestion, index) => (
+          {/* Search suggestions */}
+          {suggestions.length > 0 && suggestions.map((suggestion, index) => (
             <div
               key={index}
               className="suggestion-item"
@@ -89,21 +98,31 @@ const SearchBar = () => {
             </div>
           ))}
           
+          {/* Search results preview */}
           {searchResults.length > 0 && (
             <div className="search-results-preview">
               <div className="results-header">
-                <span>Search Results ({searchResults.length})</span>
+                <span>Found {searchResults.length} movies</span>
               </div>
-              {searchResults.slice(0, 3).map(video => (
+              {searchResults.slice(0, 5).map(video => (
                 <div
                   key={video.id}
                   className="result-item"
-                  onClick={() => navigate(`/video/${video.id}`)}
+                  onClick={() => handleResultClick(video.id)}
                 >
-                  <img src={video.thumbnail} alt={video.title} className="result-thumb" />
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title} 
+                    className="result-thumb"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/60x40/333333/FFFFFF?text=No+Image';
+                    }}
+                  />
                   <div className="result-info">
                     <div className="result-title">{video.title}</div>
-                    <div className="result-meta">{video.genre} • {video.duration}min</div>
+                    <div className="result-meta">
+                      {video.genre} • {video.duration || '120'}min
+                    </div>
                   </div>
                 </div>
               ))}
