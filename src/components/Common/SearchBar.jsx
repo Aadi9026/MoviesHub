@@ -1,15 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { searchVideos } from '../../services/database';
 import { debounce } from '../../utils/helpers';
 
-const SearchBar = () => {
+const SearchBar = ({ onSearchClose }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const searchContainerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Detect mobile screen size and focus input
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Focus input when component mounts (especially for mobile)
+    if (inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 100);
+    }
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setSuggestions([]);
+        setSearchResults([]);
+        // Don't close search bar on mobile when clicking outside suggestions
+        if (!isMobile || event.target.closest('.mobile-search-btn')) {
+          return;
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMobile]);
 
   const performSearch = debounce(async (searchTerm) => {
     if (searchTerm.trim().length < 2) {
@@ -42,6 +81,10 @@ const SearchBar = () => {
       navigate(`/?search=${encodeURIComponent(searchTerm)}`);
       setSuggestions([]);
       setSearchResults([]);
+      // Close mobile search after searching
+      if (isMobile && onSearchClose) {
+        onSearchClose();
+      }
     }
   };
 
@@ -60,22 +103,67 @@ const SearchBar = () => {
     setQuery('');
     setSuggestions([]);
     setSearchResults([]);
+    if (isMobile && onSearchClose) {
+      onSearchClose();
+    }
   };
 
   const handleInputChange = (e) => {
     setQuery(e.target.value);
   };
 
+  const handleClearSearch = () => {
+    setQuery('');
+    setSuggestions([]);
+    setSearchResults([]);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const handleCloseMobileSearch = () => {
+    if (onSearchClose) {
+      onSearchClose();
+    }
+  };
+
+  const showSuggestions = suggestions.length > 0 || searchResults.length > 0;
+
   return (
-    <div className="search-container">
+    <div className="search-container" ref={searchContainerRef}>
       <form className="search-bar" onSubmit={handleSubmit}>
+        {isMobile && (
+          <button 
+            type="button" 
+            className="search-back-btn"
+            onClick={handleCloseMobileSearch}
+            aria-label="Close search"
+          >
+            <i className="fas fa-arrow-left"></i>
+          </button>
+        )}
+        
         <input
+          ref={inputRef}
           type="text"
-          placeholder="Search for movies by title, genre..."
+          placeholder={isMobile ? "Search movies..." : "Search for movies by title, genre..."}
           value={query}
           onChange={handleInputChange}
+          autoComplete="off"
         />
-        <button type="submit" disabled={loading}>
+        
+        {query && (
+          <button 
+            type="button" 
+            className="search-clear-btn"
+            onClick={handleClearSearch}
+            aria-label="Clear search"
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        )}
+        
+        <button type="submit" disabled={loading} aria-label="Search">
           {loading ? (
             <i className="fas fa-spinner fa-spin"></i>
           ) : (
@@ -84,8 +172,8 @@ const SearchBar = () => {
         </button>
       </form>
 
-      {(suggestions.length > 0 || searchResults.length > 0) && (
-        <div className="search-suggestions">
+      {showSuggestions && (
+        <div className={`search-suggestions ${isMobile ? 'mobile' : ''}`}>
           {/* Search suggestions */}
           {suggestions.length > 0 && suggestions.map((suggestion, index) => (
             <div
@@ -104,7 +192,7 @@ const SearchBar = () => {
               <div className="results-header">
                 <span>Found {searchResults.length} movies</span>
               </div>
-              {searchResults.slice(0, 5).map(video => (
+              {searchResults.slice(0, isMobile ? 3 : 5).map(video => (
                 <div
                   key={video.id}
                   className="result-item"
