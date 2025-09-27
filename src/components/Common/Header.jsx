@@ -18,8 +18,8 @@ const Header = () => {
     }
   };
 
-  // Don't show search bar on admin pages
-  const isAdminPage = location.pathname.includes('/admin');
+  // Show search bar only on home page and video pages (not admin pages)
+  const showSearchBar = !location.pathname.includes('/admin');
 
   return (
     <header className="header">
@@ -34,11 +34,12 @@ const Header = () => {
             </button>
             <Link to="/" className="logo">
               <i className="fas fa-film"></i>
-              <span>MoviesHub{isAdmin && <span className="admin-badge">Admin</span>}</span>
+              <span>MoviesHub</span>
+              {isAdmin && <span className="admin-badge">Admin</span>}
             </Link>
           </div>
 
-          {!isAdminPage && (
+          {showSearchBar && (
             <div className={`header-center ${showMobileMenu ? 'mobile-show' : ''}`}>
               <SearchBar />
             </div>
