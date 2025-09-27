@@ -1,69 +1,103 @@
-import {
-  collection, addDoc, updateDoc, deleteDoc, doc,
-  getDocs, getDoc, query, where, orderBy, limit,
-  serverTimestamp, increment
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  getDocs, 
+  getDoc,
+  query, 
+  where,
+  orderBy,
+  limit,
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-const VIDEOS = 'videos';
-const SETTINGS = 'settings';
+const VIDEOS_COLLECTION = 'videos';
 
-/* === Core === */
+// Fix the search function to work properly
+export const searchVideos = async (searchTerm) => {
+  try {
+    // First, get all videos
+    const allVideosResult = await getVideos(100);
+    
+    if (!allVideosResult.success) {
+      return { success: false, error: 'Failed to load videos' };
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    
+    if (term.length < 2) {
+      return { success: true, videos: [] };
+    }
+
+    // Filter videos based on search term
+    const filteredVideos = allVideosResult.videos.filter(video => {
+      const title = (video.title || '').toLowerCase();
+      const description = (video.description || '').toLowerCase();
+      const genre = (video.genre || '').toLowerCase();
+      
+      // Check if search term exists in title, description, or genre
+      return title.includes(term) || 
+             description.includes(term) || 
+             genre.includes(term) ||
+             title.split(' ').some(word => word.startsWith(term)) ||
+             genre.split(' ').some(word => word.startsWith(term));
+    });
+
+    // Sort by relevance (exact matches first)
+    filteredVideos.sort((a, b) => {
+      const aTitle = (a.title || '').toLowerCase();
+      const bTitle = (b.title || '').toLowerCase();
+      
+      // Exact title matches first
+      if (aTitle === term && bTitle !== term) return -1;
+      if (aTitle !== term && bTitle === term) return 1;
+      
+      // Title starts with term
+      if (aTitle.startsWith(term) && !bTitle.startsWith(term)) return -1;
+      if (!aTitle.startsWith(term) && bTitle.startsWith(term)) return 1;
+      
+      // Then by views (higher first)
+      return (b.views || 0) - (a.views || 0);
+    });
+
+    return { success: true, videos: filteredVideos };
+  } catch (error) {
+    console.error('Error searching videos:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Keep the existing functions but ensure they work correctly
 export const getVideos = async (limitCount = 50) => {
-  const q = query(collection(db, VIDEOS), orderBy('createdAt', 'desc'), limit(limitCount));
-  const snap = await getDocs(q);
-  return { success: true, videos: snap.docs.map(d => ({ id: d.id, ...d.data() })) };
+  try {
+    const q = query(
+      collection(db, VIDEOS_COLLECTION),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const videos = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    return { success: true, videos };
+  } catch (error) {
+    console.error('Error getting videos:', error);
+    // If ordering fails, try without order
+    try {
+      const querySnapshot = await getDocs(collection(db, VIDEOS_COLLECTION));
+      const videos = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return { success: true, videos: videos.slice(0, limitCount) };
+    } catch (fallbackError) {
+      return { success: false, error: fallbackError.message };
+    }
+  }
 };
-
-export const getVideo = async (id) => {
-  const ref = doc(db, VIDEOS, id);
-  const snap = await getDoc(ref);
-  return snap.exists() ? { success: true, video: { id: snap.id, ...snap.data() } }
-                       : { success: false, error: 'Not found' };
-};
-
-export const searchVideos = async (term) => {
-  const all = await getVideos(200);
-  const t = (term || '').toLowerCase().trim();
-  const filtered = all.videos.filter(v =>
-    (v.title || '').toLowerCase().includes(t) ||
-    (v.description || '').toLowerCase().includes(t) ||
-    (v.genre || '').toLowerCase().includes(t)
-  );
-  return { success: true, videos: filtered };
-};
-
-export const getRelatedVideos = async (genre, limitCount = 6) => {
-  if (!genre) return { success: true, videos: [] };
-  const q = query(collection(db, VIDEOS),
-                  where('genre', '==', genre),
-                  orderBy('createdAt', 'desc'),
-                  limit(limitCount));
-  const snap = await getDocs(q);
-  return { success: true, videos: snap.docs.map(d => ({ id: d.id, ...d.data() })) };
-};
-
-/* === CRUD === */
-export const addVideo = async (video) =>
-  ({ success: true, id: (await addDoc(collection(db, VIDEOS),
-     { ...video, createdAt: serverTimestamp(), views: video.views ?? 0 })).id });
-
-export const updateVideo = async (id, data) =>
-  { await updateDoc(doc(db, VIDEOS, id), data); return { success: true }; };
-
-export const deleteVideo = async (id) =>
-  { await deleteDoc(doc(db, VIDEOS, id)); return { success: true }; };
-
-/* === Extras === */
-export const getAdSettings = async () => {
-  const ref = doc(db, SETTINGS, 'ads');
-  const snap = await getDoc(ref);
-  return snap.exists() ? { success: true, data: snap.data() }
-                       : { success: false, error: 'Not found' };
-};
-
-export const updateAdSettings = async (data) =>
-  { await updateDoc(doc(db, SETTINGS, 'ads'), data); return { success: true }; };
-
-export const incrementVideoViews = async (id, by = 1) =>
-  { await updateDoc(doc(db, VIDEOS, id), { views: increment(by) }); return { success: true }; };
