@@ -18,8 +18,11 @@ const Header = () => {
     }
   };
 
-  // Show search bar only on home page (not admin pages, not video pages)
-  const showSearchBar = location.pathname === '/';
+  // Show search bar on all pages EXCEPT admin pages
+  const showSearchBar = !location.pathname.startsWith('/admin');
+
+  console.log('Current path:', location.pathname);
+  console.log('Show search bar:', showSearchBar);
 
   return (
     <header className="header">
