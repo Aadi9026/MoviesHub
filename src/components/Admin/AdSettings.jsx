@@ -41,7 +41,12 @@ const AdSettings = () => {
     setSaving(true);
     setMessage({ type: '', text: '' });
 
-    const result = await updateAdSettings(adSettings);
+    // Clean empty values
+    const cleanedSettings = Object.fromEntries(
+      Object.entries(adSettings).map(([key, value]) => [key, value.trim()])
+    );
+
+    const result = await updateAdSettings(cleanedSettings);
     
     if (result.success) {
       setMessage({ type: 'success', text: 'Ad settings saved successfully!' });
@@ -57,10 +62,11 @@ const AdSettings = () => {
   return (
     <div className="ad-settings">
       <h3>Ad Settings</h3>
-      <p>Configure your ad codes for different positions on the website.</p>
+      <p>Configure your ad codes for different positions on the website. Leave empty to hide ad slots.</p>
 
       {message.text && (
         <div className={`message ${message.type}`}>
+          <i className={`fas fa-${message.type === 'success' ? 'check' : 'exclamation'}-circle`}></i>
           {message.text}
         </div>
       )}
@@ -76,7 +82,7 @@ const AdSettings = () => {
             placeholder="Paste your header ad code here"
             rows="4"
           />
-          <small>This ad will appear in the website header</small>
+          <small>This ad will appear in the website header. Leave empty to hide.</small>
         </div>
 
         <div className="form-group">
@@ -89,7 +95,7 @@ const AdSettings = () => {
             placeholder="Paste your sidebar ad code here"
             rows="4"
           />
-          <small>This ad will appear in the video sidebar</small>
+          <small>This ad will appear in the video sidebar. Leave empty to hide.</small>
         </div>
 
         <div className="form-group">
@@ -102,7 +108,7 @@ const AdSettings = () => {
             placeholder="Paste your footer ad code here"
             rows="4"
           />
-          <small>This ad will appear in the website footer</small>
+          <small>This ad will appear in the website footer. Leave empty to hide.</small>
         </div>
 
         <div className="form-group">
@@ -115,7 +121,7 @@ const AdSettings = () => {
             placeholder="Paste your in-video ad code here"
             rows="4"
           />
-          <small>This ad will appear below video player</small>
+          <small>This ad will appear below video player. Leave empty to hide.</small>
         </div>
 
         <button 
@@ -123,7 +129,14 @@ const AdSettings = () => {
           className="btn btn-primary"
           disabled={saving}
         >
-          {saving ? 'Saving...' : 'Save Ad Settings'}
+          {saving ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              Saving...
+            </>
+          ) : (
+            'Save Ad Settings'
+          )}
         </button>
 
         <button 
@@ -131,32 +144,35 @@ const AdSettings = () => {
           className="btn btn-secondary"
           onClick={loadAdSettings}
           style={{ marginLeft: '10px' }}
+          disabled={saving}
         >
+          <i className="fas fa-sync-alt"></i>
           Reload Settings
         </button>
       </form>
 
       <div className="ad-preview">
         <h4>Ad Preview</h4>
+        <p><small>Ad slots will only appear when code is provided.</small></p>
         <div className="preview-grid">
           <div className="preview-item">
-            <h5>Header Ad</h5>
+            <h5>Header Ad {adSettings.headerAd.trim() ? '(Active)' : '(Hidden)'}</h5>
             <div className="preview-content">
-              {adSettings.headerAd ? (
+              {adSettings.headerAd.trim() ? (
                 <div dangerouslySetInnerHTML={{ __html: adSettings.headerAd }} />
               ) : (
-                <span className="preview-placeholder">No ad code set</span>
+                <span className="preview-placeholder">No ad code - Slot hidden</span>
               )}
             </div>
           </div>
 
           <div className="preview-item">
-            <h5>Sidebar Ad</h5>
+            <h5>Sidebar Ad {adSettings.sidebarAd.trim() ? '(Active)' : '(Hidden)'}</h5>
             <div className="preview-content">
-              {adSettings.sidebarAd ? (
+              {adSettings.sidebarAd.trim() ? (
                 <div dangerouslySetInnerHTML={{ __html: adSettings.sidebarAd }} />
               ) : (
-                <span className="preview-placeholder">No ad code set</span>
+                <span className="preview-placeholder">No ad code - Slot hidden</span>
               )}
             </div>
           </div>
