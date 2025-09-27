@@ -10,14 +10,20 @@ const HomePage = () => {
   const searchTerm = searchParams.get('search');
   const { videos, loading, error, search } = useVideos();
   const [filteredVideos, setFilteredVideos] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     if (searchTerm) {
-      search(searchTerm);
+      setSearchLoading(true);
+      search(searchTerm).finally(() => setSearchLoading(false));
     } else {
       setFilteredVideos(videos);
     }
-  }, [searchTerm, videos, search]);
+  }, [searchTerm, videos]);
+
+  useEffect(() => {
+    setFilteredVideos(videos);
+  }, [videos]);
 
   if (loading) return <LoadingSpinner text="Loading movies..." />;
   if (error) return <div className="error-message">Error: {error}</div>;
@@ -29,7 +35,14 @@ const HomePage = () => {
         
         <div className="page-header">
           <h1>
-            {searchTerm ? `Search Results for "${searchTerm}"` : 'Featured Movies'}
+            {searchTerm ? (
+              <>
+                Search Results for "{searchTerm}"
+                {searchLoading && <i className="fas fa-spinner fa-spin"></i>}
+              </>
+            ) : (
+              'Featured Movies'
+            )}
           </h1>
           {searchTerm && (
             <p className="results-count">
