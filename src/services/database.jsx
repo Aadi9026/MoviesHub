@@ -16,18 +16,19 @@ import {
 import { db } from './firebase';
 
 const VIDEOS_COLLECTION = 'videos';
-const SETTINGS_COLLECTION = 'settings'; // you can rename if your collection differs
 
-/* -------------------  SEARCH & LISTING  ------------------- */
+/* -------------------- SEARCH -------------------- */
 export const searchVideos = async (searchTerm) => {
   try {
     const allVideosResult = await getVideos(100);
-    if (!allVideosResult.success) return { success: false, error: 'Failed to load videos' };
+    if (!allVideosResult.success) {
+      return { success: false, error: 'Failed to load videos' };
+    }
 
     const term = searchTerm.toLowerCase().trim();
     if (term.length < 2) return { success: true, videos: [] };
 
-    const filteredVideos = allVideosResult.videos.filter(video => {
+    const filteredVideos = allVideosResult.videos.filter((video) => {
       const title = (video.title || '').toLowerCase();
       const description = (video.description || '').toLowerCase();
       const genre = (video.genre || '').toLowerCase();
@@ -35,8 +36,8 @@ export const searchVideos = async (searchTerm) => {
         title.includes(term) ||
         description.includes(term) ||
         genre.includes(term) ||
-        title.split(' ').some(word => word.startsWith(term)) ||
-        genre.split(' ').some(word => word.startsWith(term))
+        title.split(' ').some((word) => word.startsWith(term)) ||
+        genre.split(' ').some((word) => word.startsWith(term))
       );
     });
 
@@ -57,6 +58,7 @@ export const searchVideos = async (searchTerm) => {
   }
 };
 
+/* -------------------- GET MULTIPLE -------------------- */
 export const getVideos = async (limitCount = 50) => {
   try {
     const q = query(
@@ -64,15 +66,22 @@ export const getVideos = async (limitCount = 50) => {
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
+
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const videos = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
     return { success: true, videos };
   } catch (error) {
     console.error('Error getting videos:', error);
-    // Fallback without order
+    // fallback without ordering
     try {
       const querySnapshot = await getDocs(collection(db, VIDEOS_COLLECTION));
-      const videos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const videos = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       return { success: true, videos: videos.slice(0, limitCount) };
     } catch (fallbackError) {
       return { success: false, error: fallbackError.message };
@@ -80,10 +89,13 @@ export const getVideos = async (limitCount = 50) => {
   }
 };
 
+/* -------------------- TRENDING & LATEST -------------------- */
 export const getTrendingVideos = async (limitCount = 12) => {
   try {
     const allVideosResult = await getVideos(50);
-    if (!allVideosResult.success) return { success: false, error: 'Failed to load videos' };
+    if (!allVideosResult.success) {
+      return { success: false, error: 'Failed to load videos' };
+    }
 
     const trendingVideos = [...allVideosResult.videos]
       .sort((a, b) => (b.views || 0) - (a.views || 0))
@@ -103,66 +115,71 @@ export const getLatestVideos = async (limitCount = 12) => {
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
+
     const querySnapshot = await getDocs(q);
-    const videos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const videos = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
     return { success: true, videos };
   } catch (error) {
     console.error('Error getting latest videos:', error);
-    // Fallback
-    const allVideosResult = await getVideos(limitCount);
-    if (allVideosResult.success) {
-      return { success: true, videos: allVideosResult.videos.reverse() };
+    try {
+      const allVideosResult = await getVideos(limitCount);
+      if (allVideosResult.success) {
+        return { success: true, videos: allVideosResult.videos.reverse() };
+      }
+      throw new Error('Fallback failed');
+    } catch (fallbackError) {
+      return { success: false, error: fallbackError.message };
     }
+  }
+};
+
+/* -------------------- NEWLY ADDED FUNCTIONS -------------------- */
+
+// Get a single video by its Firestore document ID
+export const getVideo = async (id) => {
+  try {
+    const docRef = doc(db, VIDEOS_COLLECTION, id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) throw new Error('Video not found');
+    return { success: true, video: { id: snap.id, ...snap.data() } };
+  } catch (error) {
+    console.error('Error getting video:', error);
     return { success: false, error: error.message };
   }
 };
 
-/* -------------------  ADMIN HELPERS  ------------------- */
-// Ad settings
-export const getAdSettings = async () => {
+// Delete a video document by ID
+export const deleteVideo = async (id) => {
   try {
-    const docRef = doc(db, SETTINGS_COLLECTION, 'ads');
-    const snap = await getDoc(docRef);
-    return snap.exists() ? { success: true, data: snap.data() } : { success: false, error: 'Not found' };
-  } catch (e) {
-    console.error('Error getting ad settings:', e);
-    return { success: false, error: e.message };
-  }
-};
-
-export const updateAdSettings = async (data) => {
-  try {
-    const docRef = doc(db, SETTINGS_COLLECTION, 'ads');
-    await updateDoc(docRef, data);
+    await deleteDoc(doc(db, VIDEOS_COLLECTION, id));
     return { success: true };
-  } catch (e) {
-    console.error('Error updating ad settings:', e);
-    return { success: false, error: e.message };
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    return { success: false, error: error.message };
   }
 };
 
-// Videos
-export const addVideo = async (video) => {
+// Get related videos by matching genre
+export const getRelatedVideos = async (genre, limitCount = 6) => {
   try {
-    const docRef = await addDoc(collection(db, VIDEOS_COLLECTION), {
-      ...video,
-      createdAt: serverTimestamp(),
-      views: 0
-    });
-    return { success: true, id: docRef.id };
-  } catch (e) {
-    console.error('Error adding video:', e);
-    return { success: false, error: e.message };
-  }
-};
-
-export const updateVideo = async (id, data) => {
-  try {
-    const docRef = doc(db, VIDEOS_COLLECTION, id);
-    await updateDoc(docRef, data);
-    return { success: true };
-  } catch (e) {
-    console.error('Error updating video:', e);
-    return { success: false, error: e.message };
+    const q = query(
+      collection(db, VIDEOS_COLLECTION),
+      where('genre', '==', genre),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const querySnapshot = await getDocs(q);
+    const videos = querySnapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    return { success: true, videos };
+  } catch (error) {
+    console.error('Error getting related videos:', error);
+    return { success: false, error: error.message };
   }
 };
