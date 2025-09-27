@@ -110,15 +110,18 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }));
   };
 
-  const uploadImage = async (file) => {
-    // For now, we'll use a placeholder service
-    // In production, you'd upload to Firebase Storage or another CDN
+  const uploadImageToFirebase = async (file) => {
+    // For now, we'll use a placeholder service since Firebase Storage requires additional setup
+    // In production, implement Firebase Storage upload here
     return new Promise((resolve) => {
-      // Simulate upload delay
-      setTimeout(() => {
-        // Return a placeholder URL - in real app, this would be your CDN URL
-        resolve(URL.createObjectURL(file));
-      }, 1000);
+      // Create a temporary URL for the file
+      const temporaryUrl = URL.createObjectURL(file);
+      resolve(temporaryUrl);
+      
+      // Note: For production, you should:
+      // 1. Import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+      // 2. Upload the file to Firebase Storage
+      // 3. Get the download URL
     });
   };
 
@@ -131,6 +134,12 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     // Validation
     if (!formData.title.trim()) {
       setError('Please enter a movie title');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.genre) {
+      setError('Please select a genre');
       setLoading(false);
       return;
     }
@@ -152,15 +161,31 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
 
       // Upload file if selected
       if (formData.thumbnailFile) {
-        thumbnailUrl = await uploadImage(formData.thumbnailFile);
+        thumbnailUrl = await uploadImageToFirebase(formData.thumbnailFile);
       }
 
+      // Prepare data for Firebase (remove undefined fields and file object)
       const videoData = {
-        ...formData,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        genre: formData.genre,
         thumbnail: thumbnailUrl,
-        // Remove file object from data
+        embedCode: formData.embedCode,
+        duration: parseInt(formData.duration) || 120,
+        altSources: formData.altSources,
+        altSourcesEnabled: formData.altSourcesEnabled,
+        downloadLinks: formData.downloadLinks,
+        adCode: formData.adCode.trim(),
+        // Remove file object and any undefined values
         thumbnailFile: undefined
       };
+
+      // Clean up undefined values
+      Object.keys(videoData).forEach(key => {
+        if (videoData[key] === undefined) {
+          delete videoData[key];
+        }
+      });
 
       const result = editVideo 
         ? await updateVideo(editVideo.id, videoData)
@@ -192,18 +217,38 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         setError(result.error);
       }
     } catch (err) {
-      setError('Error uploading image: ' + err.message);
+      setError('Error: ' + (err.message || 'Something went wrong'));
+      console.error('Submission error:', err);
     }
     
     setLoading(false);
+  };
+
+  const clearImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      thumbnail: '',
+      thumbnailFile: null
+    }));
+    setImagePreview('');
   };
 
   return (
     <div className="movie-form">
       <h3>{editVideo ? 'Edit Movie' : 'Add New Movie'}</h3>
       
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
+      {error && (
+        <div className="error-message">
+          <i className="fas fa-exclamation-triangle"></i>
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="success-message">
+          <i className="fas fa-check-circle"></i>
+          {success}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -215,6 +260,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
               className="form-input"
               value={formData.title}
               onChange={handleInputChange}
+              placeholder="Enter movie title"
               required
             />
           </div>
@@ -281,7 +327,12 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
 
             {imagePreview && (
               <div className="image-preview">
-                <label className="form-label">Preview:</label>
+                <div className="preview-header">
+                  <label className="form-label">Preview:</label>
+                  <button type="button" className="btn btn-small" onClick={clearImage}>
+                    <i className="fas fa-times"></i> Remove
+                  </button>
+                </div>
                 <img src={imagePreview} alt="Thumbnail preview" className="preview-image" />
               </div>
             )}
@@ -378,7 +429,14 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
             className="btn btn-primary"
             disabled={loading}
           >
-            {loading ? 'Saving...' : (editVideo ? 'Update Movie' : 'Add Movie')}
+            {loading ? (
+              <>
+                <i className="fas fa-spinner fa-spin"></i>
+                Saving...
+              </>
+            ) : (
+              editVideo ? 'Update Movie' : 'Add Movie'
+            )}
           </button>
           
           {onCancel && (
