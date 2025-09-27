@@ -1,3 +1,10 @@
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --primary: #e50914;
   --primary-dark: #b20710;
@@ -13,17 +20,12 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--dark);
   color: var(--text);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .container {
@@ -42,6 +44,7 @@ button {
   border: none;
   outline: none;
   transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .btn {
@@ -159,4 +162,15 @@ button {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Ensure header is always on top */
+.header {
+  z-index: 1000 !important;
+}
+
+/* Main content should not be hidden behind header */
+.main-content {
+  position: relative;
+  z-index: 1;
 }
