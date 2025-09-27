@@ -23,6 +23,13 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [success, setSuccess] = useState('');
   const [imagePreview, setImagePreview] = useState('');
 
+  // Sample embed codes for testing
+  const sampleEmbedCodes = [
+    '<iframe src="https://www.example.com/embed/video-id" frameborder="0" allowfullscreen></iframe>',
+    '<iframe src="https://multiembed.com/e/a598j0w1n0ms" width="100%" height="100%" frameborder="0"></iframe>',
+    '<IFRAME SRC="https://multimoviesshg.com/e/a598j0w1n0ms" frameborder="0"></IFRAME>'
+  ];
+
   useEffect(() => {
     if (editVideo) {
       setFormData({
@@ -55,13 +62,11 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         setError('Please select an image file');
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError('Image size should be less than 5MB');
         return;
@@ -70,16 +75,22 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       setFormData(prev => ({
         ...prev,
         thumbnailFile: file,
-        thumbnail: '' // Clear URL if file is selected
+        thumbnail: ''
       }));
 
-      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleSampleEmbed = (sampleCode) => {
+    setFormData(prev => ({
+      ...prev,
+      embedCode: sampleCode
+    }));
   };
 
   const handleAltSourceChange = (index, value) => {
@@ -110,36 +121,14 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }));
   };
 
-  const uploadImageToFirebase = async (file) => {
-    // For now, we'll use a placeholder service since Firebase Storage requires additional setup
-    // In production, implement Firebase Storage upload here
-    return new Promise((resolve) => {
-      // Create a temporary URL for the file
-      const temporaryUrl = URL.createObjectURL(file);
-      resolve(temporaryUrl);
-      
-      // Note: For production, you should:
-      // 1. Import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-      // 2. Upload the file to Firebase Storage
-      // 3. Get the download URL
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
 
-    // Validation
     if (!formData.title.trim()) {
       setError('Please enter a movie title');
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.genre) {
-      setError('Please select a genre');
       setLoading(false);
       return;
     }
@@ -150,8 +139,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       return;
     }
 
-    if (!validateEmbedCode(formData.embedCode)) {
-      setError('Please provide a valid embed code with iframe tags');
+    if (!formData.embedCode.trim()) {
+      setError('Please provide an embed code');
       setLoading(false);
       return;
     }
@@ -159,33 +148,23 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     try {
       let thumbnailUrl = formData.thumbnail;
 
-      // Upload file if selected
       if (formData.thumbnailFile) {
-        thumbnailUrl = await uploadImageToFirebase(formData.thumbnailFile);
+        // Simulate upload - in production, upload to Firebase Storage
+        thumbnailUrl = URL.createObjectURL(formData.thumbnailFile);
       }
 
-      // Prepare data for Firebase (remove undefined fields and file object)
       const videoData = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
+        title: formData.title,
+        description: formData.description,
         genre: formData.genre,
         thumbnail: thumbnailUrl,
         embedCode: formData.embedCode,
-        duration: parseInt(formData.duration) || 120,
+        duration: parseInt(formData.duration),
         altSources: formData.altSources,
         altSourcesEnabled: formData.altSourcesEnabled,
         downloadLinks: formData.downloadLinks,
-        adCode: formData.adCode.trim(),
-        // Remove file object and any undefined values
-        thumbnailFile: undefined
+        adCode: formData.adCode
       };
-
-      // Clean up undefined values
-      Object.keys(videoData).forEach(key => {
-        if (videoData[key] === undefined) {
-          delete videoData[key];
-        }
-      });
 
       const result = editVideo 
         ? await updateVideo(editVideo.id, videoData)
@@ -194,7 +173,6 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       if (result.success) {
         setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
         if (!editVideo) {
-          // Reset form if it's a new movie
           setFormData({
             title: '',
             description: '',
@@ -211,44 +189,24 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
           setImagePreview('');
         }
         if (onSuccess) {
-          setTimeout(onSuccess, 1000);
+          setTimeout(onSuccess, 1500);
         }
       } else {
         setError(result.error);
       }
     } catch (err) {
-      setError('Error: ' + (err.message || 'Something went wrong'));
-      console.error('Submission error:', err);
+      setError('Error: ' + err.message);
     }
     
     setLoading(false);
-  };
-
-  const clearImage = () => {
-    setFormData(prev => ({
-      ...prev,
-      thumbnail: '',
-      thumbnailFile: null
-    }));
-    setImagePreview('');
   };
 
   return (
     <div className="movie-form">
       <h3>{editVideo ? 'Edit Movie' : 'Add New Movie'}</h3>
       
-      {error && (
-        <div className="error-message">
-          <i className="fas fa-exclamation-triangle"></i>
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="success-message">
-          <i className="fas fa-check-circle"></i>
-          {success}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -260,8 +218,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
               className="form-input"
               value={formData.title}
               onChange={handleInputChange}
-              placeholder="Enter movie title"
               required
+              placeholder="Enter movie title"
             />
           </div>
 
@@ -282,19 +240,17 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Duration (minutes) *</label>
-            <input
-              type="number"
-              name="duration"
-              className="form-input"
-              value={formData.duration}
-              onChange={handleInputChange}
-              min="1"
-              required
-            />
-          </div>
+        <div className="form-group">
+          <label className="form-label">Duration (minutes) *</label>
+          <input
+            type="number"
+            name="duration"
+            className="form-input"
+            value={formData.duration}
+            onChange={handleInputChange}
+            min="1"
+            required
+          />
         </div>
 
         <div className="form-group">
@@ -309,7 +265,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
                   onChange={handleFileChange}
                   className="file-input"
                 />
-                <small>Supported formats: JPG, PNG, WebP (Max 5MB)</small>
+                <small>Max 5MB - JPG, PNG, WebP</small>
               </div>
               
               <div className="upload-option">
@@ -327,12 +283,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
 
             {imagePreview && (
               <div className="image-preview">
-                <div className="preview-header">
-                  <label className="form-label">Preview:</label>
-                  <button type="button" className="btn btn-small" onClick={clearImage}>
-                    <i className="fas fa-times"></i> Remove
-                  </button>
-                </div>
+                <label className="form-label">Preview:</label>
                 <img src={imagePreview} alt="Thumbnail preview" className="preview-image" />
               </div>
             )}
@@ -346,22 +297,45 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
             className="form-textarea"
             value={formData.description}
             onChange={handleInputChange}
-            rows="4"
+            rows="3"
             placeholder="Enter movie description..."
           />
         </div>
 
         <div className="form-group">
           <label className="form-label">Embed Code (Primary) *</label>
+          
+          <div className="embed-help">
+            <small>
+              <strong>Supported formats:</strong> iframe tags, direct URLs, MultiMovies codes
+            </small>
+          </div>
+          
           <textarea
             name="embedCode"
             className="form-textarea"
             value={formData.embedCode}
             onChange={handleInputChange}
-            placeholder='<iframe src="https://example.com/embed/video-id" frameborder="0" allowfullscreen></iframe>'
+            placeholder='Example: <iframe src="https://example.com/embed/video-id" frameborder="0" allowfullscreen></iframe>'
             rows="3"
             required
           />
+          
+          <div className="sample-codes">
+            <label className="form-label">Quick Samples:</label>
+            <div className="sample-buttons">
+              {sampleEmbedCodes.map((code, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => handleSampleEmbed(code)}
+                >
+                  Sample {index + 1}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="form-group">
@@ -418,8 +392,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
             className="form-textarea"
             value={formData.adCode}
             onChange={handleInputChange}
-            placeholder="Paste your ad code here for this specific video"
-            rows="3"
+            placeholder="Paste your ad code here"
+            rows="2"
           />
         </div>
 
