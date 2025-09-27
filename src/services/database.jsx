@@ -101,3 +101,55 @@ export const getVideos = async (limitCount = 50) => {
     }
   }
 };
+// Add these functions to your existing database.js
+
+export const getTrendingVideos = async (limitCount = 12) => {
+  try {
+    const allVideosResult = await getVideos(50); // Get more videos to sort
+    
+    if (!allVideosResult.success) {
+      return { success: false, error: 'Failed to load videos' };
+    }
+
+    // Sort by views (trending = most viewed)
+    const trendingVideos = [...allVideosResult.videos]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, limitCount);
+
+    return { success: true, videos: trendingVideos };
+  } catch (error) {
+    console.error('Error getting trending videos:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getLatestVideos = async (limitCount = 12) => {
+  try {
+    const q = query(
+      collection(db, VIDEOS_COLLECTION),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const videos = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    return { success: true, videos };
+  } catch (error) {
+    console.error('Error getting latest videos:', error);
+    // Fallback: try without ordering
+    try {
+      const allVideosResult = await getVideos(limitCount);
+      if (allVideosResult.success) {
+        // Reverse to show newest first (approximation)
+        return { success: true, videos: allVideosResult.videos.reverse() };
+      }
+      throw new Error('Fallback failed');
+    } catch (fallbackError) {
+      return { success: false, error: error.message };
+    }
+  }
+};
