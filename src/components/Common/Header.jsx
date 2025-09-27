@@ -18,8 +18,8 @@ const Header = () => {
     }
   };
 
-  // Show search bar only on home page and video pages (not admin pages)
-  const showSearchBar = !location.pathname.includes('/admin');
+  // Show search bar only on home page (not admin pages, not video pages)
+  const showSearchBar = location.pathname === '/';
 
   return (
     <header className="header">
@@ -35,7 +35,6 @@ const Header = () => {
             <Link to="/" className="logo">
               <i className="fas fa-film"></i>
               <span>MoviesHub</span>
-              {isAdmin && <span className="admin-badge">Admin</span>}
             </Link>
           </div>
 
