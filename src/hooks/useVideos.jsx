@@ -18,7 +18,7 @@ export const useVideos = () => {
       if (result.success) {
         setVideos(result.videos);
       } else {
-        setError(result.error);
+        setError(result.error || 'Failed to load videos');
       }
     } catch (err) {
       setError('Failed to load videos');
@@ -29,6 +29,12 @@ export const useVideos = () => {
   };
 
   const search = async (term) => {
+    if (!term || term.trim().length < 2) {
+      // If search term is too short, show all videos
+      loadVideos();
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -36,11 +42,15 @@ export const useVideos = () => {
       if (result.success) {
         setVideos(result.videos);
       } else {
-        setError(result.error);
+        setError(result.error || 'Search failed');
+        // Fallback to showing all videos if search fails
+        await loadVideos();
       }
     } catch (err) {
       setError('Search failed');
       console.error('Error searching videos:', err);
+      // Fallback to showing all videos
+      await loadVideos();
     } finally {
       setLoading(false);
     }
@@ -74,7 +84,7 @@ export const useVideo = (id) => {
       if (result.success) {
         setVideo(result.video);
       } else {
-        setError(result.error);
+        setError(result.error || 'Video not found');
       }
     } catch (err) {
       setError('Failed to load video');
