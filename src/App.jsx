@@ -2,10 +2,10 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import Header from './components/Common/Header';
-import Footer from './components/Common/Footer'; // Add this import
 import HomePage from './pages/HomePage';
 import VideoPage from './pages/VideoPage';
 import AdminPage from './pages/AdminPage';
+import FooterSwitcher from './components/Common/FooterSwitcher';
 import LoadingSpinner from './components/Common/LoadingSpinner';
 import './App.css';
 
@@ -31,7 +31,9 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer /> {/* Add Footer here */}
+      
+      {/* Footer Switcher - Always visible at bottom */}
+      <FooterSwitcher />
     </div>
   );
 }
