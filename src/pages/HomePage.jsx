@@ -9,24 +9,50 @@ const HomePage = () => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('search');
   const { videos, loading, error, search } = useVideos();
-  const [filteredVideos, setFilteredVideos] = useState([]);
+  const [displayVideos, setDisplayVideos] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [lastSearchTerm, setLastSearchTerm] = useState('');
 
   useEffect(() => {
-    if (searchTerm) {
+    if (searchTerm && searchTerm !== lastSearchTerm) {
+      // New search term
       setSearchLoading(true);
-      search(searchTerm).finally(() => setSearchLoading(false));
+      setLastSearchTerm(searchTerm);
+      search(searchTerm).finally(() => {
+        setSearchLoading(false);
+      });
+    } else if (!searchTerm && lastSearchTerm) {
+      // Clear search
+      setLastSearchTerm('');
+      setDisplayVideos(videos);
     } else {
-      setFilteredVideos(videos);
+      // Normal load or videos updated
+      setDisplayVideos(videos);
     }
-  }, [searchTerm, videos]);
+  }, [searchTerm, videos, search, lastSearchTerm]);
 
+  // Update display videos when videos change
   useEffect(() => {
-    setFilteredVideos(videos);
+    setDisplayVideos(videos);
   }, [videos]);
 
-  if (loading) return <LoadingSpinner text="Loading movies..." />;
-  if (error) return <div className="error-message">Error: {error}</div>;
+  if (loading && !searchLoading) {
+    return <LoadingSpinner text="Loading movies..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-message">
+          <i className="fas fa-exclamation-triangle"></i>
+          <p>Error: {error}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home-page">
@@ -38,20 +64,37 @@ const HomePage = () => {
             {searchTerm ? (
               <>
                 Search Results for "{searchTerm}"
-                {searchLoading && <i className="fas fa-spinner fa-spin"></i>}
+                {(searchLoading || loading) && (
+                  <i className="fas fa-spinner fa-spin" style={{marginLeft: '10px'}}></i>
+                )}
               </>
             ) : (
               'Featured Movies'
             )}
           </h1>
+          
           {searchTerm && (
-            <p className="results-count">
-              Found {filteredVideos.length} movies
-            </p>
+            <div className="search-results-info">
+              <p className="results-count">
+                Found {displayVideos.length} {displayVideos.length === 1 ? 'movie' : 'movies'}
+                {searchLoading && '...'}
+              </p>
+              {displayVideos.length === 0 && !searchLoading && (
+                <p className="no-results-help">
+                  Try different keywords or browse all movies
+                </p>
+              )}
+            </div>
           )}
         </div>
 
-        <VideoList videos={filteredVideos} />
+        {searchLoading ? (
+          <div className="search-loading">
+            <LoadingSpinner text="Searching movies..." />
+          </div>
+        ) : (
+          <VideoList videos={displayVideos} />
+        )}
 
         <AdSlot position="footer" />
       </div>
