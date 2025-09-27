@@ -3,14 +3,35 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { searchVideos } from '../../services/database';
 import { debounce } from '../../utils/helpers';
 
-const SearchBar = () => {
+const SearchBar = ({ onSearchClose }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const searchContainerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Detect mobile screen size and focus input
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Auto-focus on mobile when search opens
+    if (isMobile && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 300);
+    }
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [isMobile]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -36,8 +57,6 @@ const SearchBar = () => {
     const result = await searchVideos(searchTerm);
     if (result.success) {
       setSearchResults(result.videos);
-      
-      // Generate suggestions from search results
       const newSuggestions = result.videos.slice(0, 5).map(video => video.title);
       setSuggestions(newSuggestions);
     } else {
@@ -56,6 +75,9 @@ const SearchBar = () => {
       navigate(`/?search=${encodeURIComponent(searchTerm)}`);
       setSuggestions([]);
       setSearchResults([]);
+      if (isMobile && onSearchClose) {
+        setTimeout(onSearchClose, 100);
+      }
     }
   };
 
@@ -74,6 +96,9 @@ const SearchBar = () => {
     setQuery('');
     setSuggestions([]);
     setSearchResults([]);
+    if (isMobile && onSearchClose) {
+      setTimeout(onSearchClose, 100);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -84,6 +109,9 @@ const SearchBar = () => {
     setQuery('');
     setSuggestions([]);
     setSearchResults([]);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   const showSuggestions = suggestions.length > 0 || searchResults.length > 0;
@@ -92,11 +120,13 @@ const SearchBar = () => {
     <div className="search-container" ref={searchContainerRef}>
       <form className="search-bar" onSubmit={handleSubmit}>
         <input
+          ref={inputRef}
           type="text"
-          placeholder="Search for movies by title, genre..."
+          placeholder={isMobile ? "Search movies..." : "Search for movies by title, genre..."}
           value={query}
           onChange={handleInputChange}
           autoComplete="off"
+          enterKeyHint="search"
         />
         
         {query && (
@@ -110,7 +140,12 @@ const SearchBar = () => {
           </button>
         )}
         
-        <button type="submit" disabled={loading} aria-label="Search">
+        <button 
+          type="submit" 
+          disabled={loading} 
+          aria-label="Search"
+          className="search-submit-btn"
+        >
           {loading ? (
             <i className="fas fa-spinner fa-spin"></i>
           ) : (
@@ -120,8 +155,7 @@ const SearchBar = () => {
       </form>
 
       {showSuggestions && (
-        <div className="search-suggestions">
-          {/* Search suggestions */}
+        <div className={`search-suggestions ${isMobile ? 'mobile' : ''}`}>
           {suggestions.length > 0 && suggestions.map((suggestion, index) => (
             <div
               key={index}
@@ -133,13 +167,12 @@ const SearchBar = () => {
             </div>
           ))}
           
-          {/* Search results preview */}
           {searchResults.length > 0 && (
             <div className="search-results-preview">
               <div className="results-header">
                 <span>Found {searchResults.length} movies</span>
               </div>
-              {searchResults.slice(0, 5).map(video => (
+              {searchResults.slice(0, isMobile ? 3 : 5).map(video => (
                 <div
                   key={video.id}
                   className="result-item"
