@@ -5,7 +5,6 @@ import Header from './components/Common/Header';
 import HomePage from './pages/HomePage';
 import VideoPage from './pages/VideoPage';
 import AdminPage from './pages/AdminPage';
-import FooterSwitcher from './components/Common/FooterSwitcher';
 import LoadingSpinner from './components/Common/LoadingSpinner';
 import './App.css';
 
@@ -31,9 +30,6 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      
-      {/* Footer Switcher - Always visible at bottom */}
-      <FooterSwitcher />
     </div>
   );
 }
