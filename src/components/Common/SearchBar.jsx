@@ -1,32 +1,48 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { searchVideos } from '../../services/database';
 import { debounce } from '../../utils/helpers';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load search results when query changes
+  useEffect(() => {
+    if (query.trim().length > 2) {
+      performSearch(query);
+    } else {
+      setSearchResults([]);
+      setSuggestions([]);
+    }
+  }, [query]);
+
+  const performSearch = debounce(async (searchTerm) => {
+    setLoading(true);
+    const result = await searchVideos(searchTerm);
+    if (result.success) {
+      setSearchResults(result.videos);
+      
+      // Generate suggestions from search results
+      const newSuggestions = result.videos.slice(0, 5).map(video => video.title);
+      setSuggestions(newSuggestions);
+    }
+    setLoading(false);
+  }, 300);
 
   const handleSearch = (searchTerm) => {
     if (searchTerm.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchTerm)}`);
-    }
-  };
-
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    
-    // In a real app, you would fetch suggestions from API
-    if (value.length > 2) {
-      const mockSuggestions = [
-        `${value} movie`,
-        `${value} full movie`,
-        `${value} trailer`,
-        `${value} 2023`
-      ];
-      setSuggestions(mockSuggestions);
-    } else {
+      // If we're not on home page, navigate to home with search query
+      if (location.pathname !== '/') {
+        navigate(`/?search=${encodeURIComponent(searchTerm)}`);
+      } else {
+        // Trigger search on current page
+        performSearch(searchTerm);
+      }
       setSuggestions([]);
     }
   };
@@ -39,7 +55,11 @@ const SearchBar = () => {
   const handleSuggestionClick = (suggestion) => {
     setQuery(suggestion);
     handleSearch(suggestion);
-    setSuggestions([]);
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
   };
 
   return (
@@ -49,14 +69,14 @@ const SearchBar = () => {
           type="text"
           placeholder="Search for movies..."
           value={query}
-          onChange={handleChange}
+          onChange={handleInputChange}
         />
-        <button type="submit">
-          <i className="fas fa-search"></i>
+        <button type="submit" disabled={loading}>
+          {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-search"></i>}
         </button>
       </form>
 
-      {suggestions.length > 0 && (
+      {(suggestions.length > 0 || searchResults.length > 0) && (
         <div className="search-suggestions">
           {suggestions.map((suggestion, index) => (
             <div
@@ -68,6 +88,27 @@ const SearchBar = () => {
               <span>{suggestion}</span>
             </div>
           ))}
+          
+          {searchResults.length > 0 && (
+            <div className="search-results-preview">
+              <div className="results-header">
+                <span>Search Results ({searchResults.length})</span>
+              </div>
+              {searchResults.slice(0, 3).map(video => (
+                <div
+                  key={video.id}
+                  className="result-item"
+                  onClick={() => navigate(`/video/${video.id}`)}
+                >
+                  <img src={video.thumbnail} alt={video.title} className="result-thumb" />
+                  <div className="result-info">
+                    <div className="result-title">{video.title}</div>
+                    <div className="result-meta">{video.genre} • {video.duration}min</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
