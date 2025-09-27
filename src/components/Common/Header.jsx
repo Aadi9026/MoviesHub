@@ -9,6 +9,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile screen size
@@ -30,18 +31,31 @@ const Header = () => {
       navigate('/admin/login');
     }
     setShowMobileMenu(false);
+    setShowMobileSearch(false);
   };
 
   const handleLogoClick = () => {
     setShowMobileMenu(false);
+    setShowMobileSearch(false);
+  };
+
+  const toggleMobileSearch = () => {
+    setShowMobileSearch(!showMobileSearch);
+    setShowMobileMenu(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setShowMobileMenu(!showMobileMenu);
+    setShowMobileSearch(false);
   };
 
   // Show search bar on all pages EXCEPT admin pages
   const showSearchBar = !location.pathname.startsWith('/admin');
 
-  // Close mobile menu when route changes
+  // Close mobile elements when route changes
   useEffect(() => {
     setShowMobileMenu(false);
+    setShowMobileSearch(false);
   }, [location.pathname]);
 
   return (
@@ -51,7 +65,7 @@ const Header = () => {
           <div className="header-left">
             <button 
               className="mobile-menu-btn"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              onClick={toggleMobileMenu}
               aria-label="Toggle menu"
             >
               <i className={`fas ${showMobileMenu ? 'fa-times' : 'fa-bars'}`}></i>
@@ -62,7 +76,7 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Search Bar */}
+          {/* Desktop Search Bar - Always visible on desktop */}
           {showSearchBar && !isMobile && (
             <div className="header-center">
               <SearchBar />
@@ -70,6 +84,17 @@ const Header = () => {
           )}
 
           <div className="header-right">
+            {/* Mobile Search Icon - Only on mobile */}
+            {showSearchBar && isMobile && (
+              <button 
+                className="mobile-search-btn"
+                onClick={toggleMobileSearch}
+                aria-label="Search"
+              >
+                <i className={`fas ${showMobileSearch ? 'fa-times' : 'fa-search'}`}></i>
+              </button>
+            )}
+
             <button 
               className="btn btn-secondary admin-btn"
               onClick={handleAdminClick}
@@ -89,10 +114,10 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar - Shows in mobile menu */}
-        {showSearchBar && isMobile && showMobileMenu && (
-          <div className="mobile-search-container">
-            <SearchBar />
+        {/* Mobile Search Bar - Expands when search icon is clicked */}
+        {showSearchBar && isMobile && showMobileSearch && (
+          <div className="mobile-search-expanded">
+            <SearchBar onSearchClose={() => setShowMobileSearch(false)} />
           </div>
         )}
         
