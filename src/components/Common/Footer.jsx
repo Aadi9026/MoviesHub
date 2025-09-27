@@ -1,160 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { getVideos, getTrendingVideos, getLatestVideos } from '../../services/database';
-import VideoCard from './VideoCard';
-import LoadingSpinner from './LoadingSpinner';
+import React from 'react';
+import { useVideos } from '../../hooks/useVideos';
 
-const Footer = () => {
-  const [activeSection, setActiveSection] = useState('home');
-  const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const location = useLocation();
+const Footer = ({ activeSection, onSectionChange }) => {
+  const { videos } = useVideos();
 
-  // Don't show footer on admin pages
-  if (location.pathname.startsWith('/admin')) {
-    return null;
-  }
+  const getTrendingVideos = () => {
+    // Sort by views (highest first) and take top 10
+    return [...videos]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10);
+  };
 
-  const loadSectionVideos = async (section) => {
-    setLoading(true);
-    setActiveSection(section);
-    
-    try {
-      let result;
-      switch (section) {
-        case 'trending':
-          result = await getTrendingVideos();
-          break;
-        case 'latest':
-          result = await getLatestVideos();
-          break;
-        case 'home':
-        default:
-          result = await getVideos(12);
-          break;
-      }
-      
-      if (result.success) {
-        setVideos(result.videos);
-      } else {
-        console.error('Error loading videos:', result.error);
-        setVideos([]);
-      }
-    } catch (error) {
-      console.error('Error loading section videos:', error);
-      setVideos([]);
-    } finally {
-      setLoading(false);
+  const getLatestVideos = () => {
+    // Sort by creation date (newest first)
+    return [...videos]
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+        return dateB - dateA;
+      })
+      .slice(0, 10);
+  };
+
+  const getRandomVideos = () => {
+    // Shuffle array and take first 10
+    return [...videos]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 10);
+  };
+
+  const getDisplayVideos = () => {
+    switch (activeSection) {
+      case 'trending':
+        return getTrendingVideos();
+      case 'latest':
+        return getLatestVideos();
+      case 'home':
+      default:
+        return getRandomVideos();
     }
   };
 
-  // Load home videos by default
-  useEffect(() => {
-    loadSectionVideos('home');
-  }, []);
+  const displayVideos = getDisplayVideos();
 
   return (
     <footer className="footer">
       <div className="container">
-        {/* Footer Navigation */}
-        <div className="footer-navigation">
+        {/* Section Switcher */}
+        <div className="footer-sections">
           <button 
-            className={`footer-nav-btn ${activeSection === 'home' ? 'active' : ''}`}
-            onClick={() => loadSectionVideos('home')}
+            className={`section-btn ${activeSection === 'home' ? 'active' : ''}`}
+            onClick={() => onSectionChange('home')}
           >
             <i className="fas fa-home"></i>
             <span>Home</span>
           </button>
           
           <button 
-            className={`footer-nav-btn ${activeSection === 'trending' ? 'active' : ''}`}
-            onClick={() => loadSectionVideos('trending')}
+            className={`section-btn ${activeSection === 'trending' ? 'active' : ''}`}
+            onClick={() => onSectionChange('trending')}
           >
             <i className="fas fa-fire"></i>
             <span>Trending</span>
           </button>
           
           <button 
-            className={`footer-nav-btn ${activeSection === 'latest' ? 'active' : ''}`}
-            onClick={() => loadSectionVideos('latest')}
+            className={`section-btn ${activeSection === 'latest' ? 'active' : ''}`}
+            onClick={() => onSectionChange('latest')}
           >
             <i className="fas fa-clock"></i>
             <span>Latest</span>
           </button>
         </div>
 
-        {/* Section Content */}
-        <div className="footer-content">
-          <div className="section-header">
-            <h3>
-              {activeSection === 'home' && 'Featured Movies'}
-              {activeSection === 'trending' && 'Trending Now'}
-              {activeSection === 'latest' && 'Latest Uploads'}
-            </h3>
-            <p>
-              {activeSection === 'home' && 'Discover amazing movies from our collection'}
-              {activeSection === 'trending' && 'Most popular movies right now'}
-              {activeSection === 'latest' && 'Recently added movies'}
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="section-loading">
-              <LoadingSpinner text={`Loading ${activeSection} movies...`} />
-            </div>
-          ) : (
-            <div className="footer-videos-grid">
-              {videos.length > 0 ? (
-                videos.map(video => (
-                  <VideoCard key={video.id} video={video} compact={true} />
-                ))
-              ) : (
-                <div className="no-videos">
-                  <i className="fas fa-film"></i>
-                  <p>No movies found in this section</p>
+        {/* Videos Grid */}
+        <div className="footer-videos">
+          <div className="videos-grid">
+            {displayVideos.map(video => (
+              <div key={video.id} className="video-card">
+                <div className="thumbnail">
+                  <img src={video.thumbnail} alt={video.title} />
+                  <div className="video-duration">120m</div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer Links */}
-        <div className="footer-links">
-          <div className="footer-section">
-            <h4>MoviesHub</h4>
-            <p>Your ultimate destination for streaming movies and TV shows in high quality.</p>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><Link to="/">Home</Link></li>
-              <li><a href="#trending" onClick={() => loadSectionVideos('trending')}>Trending</a></li>
-              <li><a href="#latest" onClick={() => loadSectionVideos('latest')}>Latest</a></li>
-            </ul>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Genres</h4>
-            <ul>
-              <li><a href="#action">Action</a></li>
-              <li><a href="#comedy">Comedy</a></li>
-              <li><a href="#drama">Drama</a></li>
-              <li><a href="#horror">Horror</a></li>
-            </ul>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Support</h4>
-            <ul>
-              <li><a href="#help">Help Center</a></li>
-              <li><a href="#contact">Contact Us</a></li>
-              <li><a href="#privacy">Privacy Policy</a></li>
-              <li><a href="#terms">Terms of Service</a></li>
-            </ul>
+                <div className="video-info">
+                  <h3 className="video-title">{video.title}</h3>
+                  <div className="video-meta">
+                    <span>{video.views || 0} views</span>
+                    <span className="genre">{video.genre}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* Copyright */}
         <div className="footer-bottom">
           <p>&copy; 2023 MoviesHub. All rights reserved.</p>
         </div>
