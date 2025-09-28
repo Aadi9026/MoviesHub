@@ -1,3 +1,27 @@
+[file name]: Screenshot_2025-09-28-18-13-18-93_40deb401b9ffe8e1df2f1cc5ba480b12.jpg
+[file content begin]
+# Канпарра 2025 Full Hindi Dubbed Movie 720p - 480p - 1080p
+
+- [ ] 244 views  
+- [x] 3h 3m  
+- [ ] Action  
+- [ ] 27/09/2025  
+
+---
+
+## Primary Source ▼
+
+[Download (4)]  
+
+---
+
+## Related Movies
+
+Home    Latest    Trending
+
+
+[file content end]
+
 /* ===== CSS VARIABLES ===== */
 :root {
   --dark-light: #1a1a1a;
@@ -412,6 +436,8 @@ body {
   font-size: 11px;
   color: var(--text-secondary);
 }
+
+
 
 /* ===== YOUTUBE-LIKE VIDEO CARDS ===== */
 .video-grid {
@@ -949,7 +975,7 @@ body {
   font-size: 16px;
 }
 
-/* ===== PRIMARY SOURCE SECTION STYLES ===== */
+/* NEW: Primary Source Section Styles */
 .primary-source-section {
   background: linear-gradient(135deg, var(--dark-lighter), var(--dark-light));
   border-radius: 12px;
@@ -999,7 +1025,6 @@ body {
   gap: 8px;
   color: var(--text-secondary);
   font-size: 14px;
-  font-weight: 600;
 }
 
 .source-count {
@@ -1009,120 +1034,6 @@ body {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-}
-
-.source-download-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.source-download-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
-  background: linear-gradient(135deg, var(--primary-dark), #8b0000);
-}
-
-.source-download-btn i {
-  font-size: 16px;
-}
-
-/* ===== DESCRIPTION SECTION STYLES ===== */
-.description-section {
-  background: rgba(255, 255, 255, 0.02);
-  padding: 25px;
-  border-radius: 12px;
-  margin: 25px 0;
-  line-height: 1.7;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-}
-
-.description-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.description-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.description-header i {
-  font-size: 24px;
-  color: var(--primary);
-}
-
-.description-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text);
-}
-
-.description-content {
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.description-text {
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-.description-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.description-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-}
-
-.description-list li:hover {
-  background: rgba(255, 255, 255, 0.02);
-  padding-left: 10px;
-}
-
-.description-list li:last-child {
-  border-bottom: none;
-}
-
-.description-list i {
-  color: var(--primary);
-  font-size: 14px;
-  width: 16px;
-}
-
-.description-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.3s ease;
-  font-size: 14px;
-}
-
-.description-link:hover {
-  color: var(--primary);
 }
 
 /* Enhanced download section */
@@ -1237,6 +1148,35 @@ body {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
+}
+
+/* Video description improvements */
+.video-description {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 25px;
+  line-height: 1.7;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.video-description h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.video-description h4 i {
+  color: var(--primary);
+}
+
+.video-description p {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
 }
 
 /* Enhanced sidebar for suggested videos */
@@ -1960,7 +1900,372 @@ input:focus {
   outline-offset: 1px;
 }
 
+
+/* ===== PRIMARY SOURCE SECTION ENHANCEMENT ===== */
+.primary-source-dropdown {
+  position: relative;
+  margin: 20px 0;
+}
+
+.primary-source-selector {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, var(--dark-lighter), var(--dark-light));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-source-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(229, 9, 20, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.primary-source-selector:hover {
+  background: linear-gradient(135deg, var(--dark-light), var(--dark-lighter));
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.primary-source-selector:hover::before {
+  opacity: 1;
+}
+
+.primary-source-text {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.primary-source-text i {
+  font-size: 18px;
+  color: var(--primary);
+}
+
+.dropdown-arrow {
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: transform 0.3s ease;
+}
+
+.primary-source-selector.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.primary-source-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--dark-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-top: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.primary-source-selector.active + .primary-source-options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.source-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.source-option:hover {
+  background: rgba(229, 9, 20, 0.1);
+  color: var(--primary);
+}
+
+.source-option:last-child {
+  border-bottom: none;
+}
+
+.source-option i {
+  font-size: 16px;
+  color: var(--text-secondary);
+  width: 20px;
+  text-align: center;
+}
+
+.source-option:hover i {
+  color: var(--primary);
+}
+
+.source-option-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.source-quality {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.source-option:hover .source-quality {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary);
+  border-color: rgba(229, 9, 20, 0.3);
+}
+
+/* ===== DESCRIPTION SECTION ENHANCEMENT ===== */
+.description-section {
+  background: linear-gradient(135deg, var(--dark-lighter), var(--dark-light));
+  border-radius: 12px;
+  padding: 25px;
+  margin: 25px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.description-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(229, 9, 20, 0.02));
+  pointer-events: none;
+}
+
+.description-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.description-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.description-header i {
+  font-size: 24px;
+  color: var(--primary);
+}
+
+.description-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.description-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.description-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary);
+}
+
+.description-toggle.expanded {
+  transform: rotate(180deg);
+}
+
+.description-content {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.description-text {
+  margin-bottom: 15px;
+}
+
+.description-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description-text.expanded {
+  display: block;
+}
+
+.description-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.meta-tag {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.meta-tag:hover {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary);
+  border-color: rgba(229, 9, 20, 0.3);
+}
+
+.meta-tag.genre {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary);
+  border-color: rgba(229, 9, 20, 0.3);
+}
+
+.read-more-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 5px 0;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  text-decoration: underline;
+}
+
+.read-more-btn:hover {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+
 /* ===== RESPONSIVE STYLES ===== */
+/* Mobile Responsiveness for Primary Source and Description */
+@media (max-width: 768px) {
+  .primary-source-selector {
+    padding: 12px 15px;
+  }
+
+  .primary-source-text {
+    font-size: 15px;
+  }
+
+  .source-option {
+    padding: 12px 15px;
+  }
+
+  .description-section {
+    padding: 20px 15px;
+    margin: 20px 0;
+  }
+
+  .description-header h3 {
+    font-size: 16px;
+  }
+
+  .description-content {
+    font-size: 14px;
+  }
+
+  .description-meta {
+    gap: 8px;
+  }
+
+  .meta-tag {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .primary-source-selector {
+    padding: 10px 12px;
+  }
+
+  .primary-source-text {
+    font-size: 14px;
+  }
+
+  .source-option {
+    padding: 10px 12px;
+  }
+
+  .description-section {
+    padding: 15px 10px;
+  }
+
+  .description-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .description-toggle {
+    align-self: flex-end;
+  }
+
+  .description-content {
+    font-size: 13px;
+  }
+
+  .meta-tag {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+}
+
+
 
 /* Tablet adjustments */
 @media (max-width: 1200px) {
@@ -2219,38 +2524,10 @@ input:focus {
   .primary-source-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
   }
   
   .source-info {
-    font-size: 13px;
-  }
-  
-  .source-download-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 20px;
-  }
-  
-  /* NEW: Mobile Description Section */
-  .description-section {
-    padding: 20px 15px;
-    margin: 20px 0;
-  }
-  
-  .description-header h3 {
-    font-size: 16px;
-  }
-  
-  .description-text {
-    font-size: 13px;
-  }
-  
-  .description-list li {
-    padding: 6px 0;
-  }
-  
-  .description-link {
     font-size: 13px;
   }
   
@@ -2471,7 +2748,7 @@ input:focus {
   
   /* NEW: Small Mobile Primary Source */
   .primary-source-section {
-    padding: 15px 12px;
+    padding: 15px 10px;
   }
   
   .primary-source-header {
@@ -2482,28 +2759,6 @@ input:focus {
   
   .primary-source-header h3 {
     font-size: 15px;
-  }
-  
-  /* NEW: Small Mobile Description */
-  .description-section {
-    padding: 15px 12px;
-  }
-  
-  .description-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .description-header h3 {
-    font-size: 15px;
-  }
-  
-  .description-list li {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 8px 0;
   }
   
   /* Video Cards Small Mobile */
@@ -2687,3 +2942,5 @@ input:focus {
     border: 1px solid var(--text);
   }
 }
+
+I send css + See the screenshot primary source and description both have no any css  fix them and give new code only add css in these area and not do anything else and give updated code
