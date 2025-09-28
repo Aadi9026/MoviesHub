@@ -411,7 +411,191 @@ body {
 .result-meta {
   font-size: 11px;
   color: var(--text-secondary);
+}/* ===== VIDEO ACTIONS ROW - SINGLE HORIZONTAL LINE ===== */
+.video-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: nowrap; /* Prevent wrapping */
+  overflow-x: auto; /* Allow horizontal scroll if needed */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--dark-lighter);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 40px;
+  white-space: nowrap; /* Prevent text wrapping */
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.action-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.action-btn i {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.action-btn .count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.like-btn.active {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.dislike-btn.active {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.share-btn:hover {
+  background: #1da1f2;
+  border-color: #1da1f2;
+}
+
+.action-select {
+  background: var(--dark-lighter);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 40px;
+  outline: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 140px; /* Minimum width for dropdown */
+}
+
+.action-select:focus,
+.action-select:hover {
+  border-color: var(--primary);
+  background: var(--dark);
+}
+
+/* ===== MOBILE OPTIMIZATIONS FOR SINGLE LINE ===== */
+@media (max-width: 768px) {
+  .video-actions-row {
+    gap: 6px;
+    padding: 12px 0;
+  }
+  
+  .action-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+    gap: 4px;
+  }
+  
+  .action-btn i {
+    font-size: 13px;
+  }
+  
+  .action-btn .count {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  .action-select {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+    min-width: 120px;
+  }
+  
+  /* Hide button text on very small screens but keep icons */
+  .action-btn span:not(.count) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-actions-row {
+    gap: 4px;
+    padding: 10px 0;
+  }
+  
+  .action-btn {
+    padding: 6px 8px;
+    min-height: 32px;
+    border-radius: 16px;
+  }
+  
+  .action-btn i {
+    font-size: 12px;
+  }
+  
+  .action-select {
+    padding: 6px 8px;
+    min-height: 32px;
+    min-width: 100px;
+    font-size: 11px;
+  }
+  
+  /* Show only icons and counts on very small screens */
+  .action-btn span:not(.count) {
+    display: none;
+  }
+  
+  .action-btn .count {
+    display: inline;
+  }
+}
+
+/* ===== SCROLLBAR STYLING FOR HORIZONTAL SCROLL ===== */
+.video-actions-row::-webkit-scrollbar {
+  height: 2px;
+}
+
+.video-actions-row::-webkit-scrollbar-track {
+  background: var(--dark-lighter);
+  border-radius: 2px;
+}
+
+.video-actions-row::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.video-actions-row::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+    }
+
 
 /* ===== YOUTUBE-LIKE VIDEO CARDS ===== */
 .video-grid {
