@@ -34,26 +34,19 @@ const VideoCard = ({ video }) => {
         </div>
         
         <div className="video-info-container">
-          <div className="channel-avatar" title="MoviesHub">
-            {/* Logo will be shown via CSS */}
-          </div>
-          
           <div className="video-details">
             <h3 className="video-title" title={title}>
               {title}
             </h3>
             
-            {/* Channel name removed - using logo instead */}
-            
-            <div className="video-stats">
+            <div className="video-meta">
               <span>{formatViews(views || 0)} views</span>
               <span className="separator">•</span>
               <span>{formatDate(createdAt)}</span>
+              {genre && (
+                <span className="genre-tag">{genre}</span>
+              )}
             </div>
-            
-            {genre && (
-              <span className="genre-tag">{genre}</span>
-            )}
           </div>
         </div>
       </Link>
