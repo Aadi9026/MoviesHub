@@ -13,28 +13,28 @@ const HomePage = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [lastSearchTerm, setLastSearchTerm] = useState('');
 
+  // Ensure videos is always an array
+  const safeVideos = Array.isArray(videos) ? videos : [];
+
   useEffect(() => {
     if (searchTerm && searchTerm !== lastSearchTerm) {
-      // New search term
       setSearchLoading(true);
-      setLastSearchTerm(searchTerm);
-      search(searchTerm).finally(() => {
+      setLastSearchTerm(searchTerm || '');
+      search(searchTerm || '').finally(() => {
         setSearchLoading(false);
       });
     } else if (!searchTerm && lastSearchTerm) {
-      // Clear search
       setLastSearchTerm('');
-      setDisplayVideos(videos);
+      setDisplayVideos(safeVideos);
     } else {
-      // Normal load or videos updated
-      setDisplayVideos(videos);
+      setDisplayVideos(safeVideos);
     }
-  }, [searchTerm, videos, search, lastSearchTerm]);
+  }, [searchTerm, safeVideos, search, lastSearchTerm]);
 
   // Update display videos when videos change
   useEffect(() => {
-    setDisplayVideos(videos);
-  }, [videos]);
+    setDisplayVideos(safeVideos);
+  }, [safeVideos]);
 
   if (loading && !searchLoading) {
     return <LoadingSpinner text="Loading movies..." />;
@@ -53,6 +53,8 @@ const HomePage = () => {
       </div>
     );
   }
+
+  const safeDisplayVideos = Array.isArray(displayVideos) ? displayVideos : [];
 
   return (
     <div className="home-page">
@@ -76,10 +78,10 @@ const HomePage = () => {
           {searchTerm && (
             <div className="search-results-info">
               <p className="results-count">
-                Found {displayVideos.length} {displayVideos.length === 1 ? 'movie' : 'movies'}
+                Found {safeDisplayVideos.length} {safeDisplayVideos.length === 1 ? 'movie' : 'movies'}
                 {searchLoading && '...'}
               </p>
-              {displayVideos.length === 0 && !searchLoading && (
+              {safeDisplayVideos.length === 0 && !searchLoading && (
                 <p className="no-results-help">
                   Try different keywords or browse all movies
                 </p>
@@ -93,7 +95,7 @@ const HomePage = () => {
             <LoadingSpinner text="Searching movies..." />
           </div>
         ) : (
-          <VideoList videos={displayVideos} />
+          <VideoList videos={safeDisplayVideos} />
         )}
 
         <AdSlot position="footer" />
