@@ -270,3 +270,67 @@ export const updateAdSettings = async (adSettings) => {
     return { success: false, error: error.message };
   }
 };
+// Add these functions to your existing database.js file
+
+// Get random videos (for Home page)
+export const getRandomVideos = async (limit = 50) => {
+  try {
+    const result = await getVideos(100); // Get more videos for better randomization
+    if (result.success) {
+      const shuffled = [...result.videos].sort(() => Math.random() - 0.5);
+      return { success: true, videos: shuffled.slice(0, limit) };
+    }
+    return result;
+  } catch (error) {
+    console.error('Error getting random videos:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Get latest videos (sorted by creation date)
+export const getLatestVideos = async (limit = 50) => {
+  try {
+    const result = await getVideos(limit);
+    if (result.success) {
+      const sorted = [...result.videos].sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+        return dateB - dateA;
+      });
+      return { success: true, videos: sorted };
+    }
+    return result;
+  } catch (error) {
+    console.error('Error getting latest videos:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Get trending videos (based on views and daily rotation)
+export const getTrendingVideos = async (limit = 50) => {
+  try {
+    const result = await getVideos(100);
+    if (result.success) {
+      // Sort by views (highest first)
+      const sortedByViews = [...result.videos].sort((a, b) => {
+        return (b.views || 0) - (a.views || 0);
+      });
+
+      // Apply daily rotation
+      const today = new Date();
+      const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      const rotationIndex = seed % Math.max(1, sortedByViews.length);
+      
+      const rotatedVideos = [
+        ...sortedByViews.slice(rotationIndex),
+        ...sortedByViews.slice(0, rotationIndex)
+      ];
+
+      return { success: true, videos: rotatedVideos.slice(0, limit) };
+    }
+    return result;
+  } catch (error) {
+    console.error('Error getting trending videos:', error);
+    return { success: false, error: error.message };
+  }
+};
