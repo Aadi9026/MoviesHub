@@ -5,10 +5,7 @@ import { formatViews, formatDuration } from '../../utils/helpers';
 const VideoCard = ({ video }) => {
   const { id, title, thumbnail, duration, views, genre, createdAt } = video;
 
-  // Get channel initial for avatar (using first letter of title)
-  const channelInitial = title ? title.charAt(0).toUpperCase() : 'M';
-
-  // Format date (simplified)
+  // Format date function
   const formatDate = (date) => {
     if (!date) return 'Recently';
     
@@ -36,9 +33,9 @@ const VideoCard = ({ video }) => {
           <div className="video-duration">{formatDuration(duration || 120)}</div>
         </div>
         
-        <div className="video-info">
-          <div className="channel-avatar">
-            {channelInitial}
+        <div className="video-info-container">
+          <div className="channel-avatar" title="MoviesHub">
+            {/* Logo will be shown via CSS */}
           </div>
           
           <div className="video-details">
@@ -46,9 +43,7 @@ const VideoCard = ({ video }) => {
               {title}
             </h3>
             
-            <div className="channel-name">
-              MoviesHub
-            </div>
+            {/* Channel name removed - using logo instead */}
             
             <div className="video-stats">
               <span>{formatViews(views || 0)} views</span>
