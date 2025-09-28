@@ -9,52 +9,37 @@ const HomePage = () => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('search');
   const { videos, loading, error, search } = useVideos();
-  const [displayVideos, setDisplayVideos] = useState([]);
+  const [filteredVideos, setFilteredVideos] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [lastSearchTerm, setLastSearchTerm] = useState('');
 
-  // Ensure videos is always an array
-  const safeVideos = Array.isArray(videos) ? videos : [];
-
-  useEffect(() => {
-    if (searchTerm && searchTerm !== lastSearchTerm) {
-      setSearchLoading(true);
-      setLastSearchTerm(searchTerm || '');
-      search(searchTerm || '').finally(() => {
-        setSearchLoading(false);
-      });
-    } else if (!searchTerm && lastSearchTerm) {
-      setLastSearchTerm('');
-      setDisplayVideos(safeVideos);
-    } else {
-      setDisplayVideos(safeVideos);
+  // Shuffle videos for random display (like YouTube)
+  const shuffleVideos = (videosArray) => {
+    if (!videosArray || videosArray.length === 0) return [];
+    
+    const shuffled = [...videosArray];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-  }, [searchTerm, safeVideos, search, lastSearchTerm]);
+    return shuffled;
+  };
 
-  // Update display videos when videos change
   useEffect(() => {
-    setDisplayVideos(safeVideos);
-  }, [safeVideos]);
+    if (searchTerm) {
+      setSearchLoading(true);
+      search(searchTerm).finally(() => setSearchLoading(false));
+    } else {
+      // Show random videos when no search term
+      setFilteredVideos(shuffleVideos(videos));
+    }
+  }, [searchTerm, videos]);
 
-  if (loading && !searchLoading) {
-    return <LoadingSpinner text="Loading movies..." />;
-  }
+  useEffect(() => {
+    setFilteredVideos(videos);
+  }, [videos]);
 
-  if (error) {
-    return (
-      <div className="error-container">
-        <div className="error-message">
-          <i className="fas fa-exclamation-triangle"></i>
-          <p>Error: {error}</p>
-          <button onClick={() => window.location.reload()} className="btn btn-primary">
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const safeDisplayVideos = Array.isArray(displayVideos) ? displayVideos : [];
+  if (loading) return <LoadingSpinner text="Loading movies..." />;
+  if (error) return <div className="error-message">Error: {error}</div>;
 
   return (
     <div className="home-page">
@@ -66,37 +51,20 @@ const HomePage = () => {
             {searchTerm ? (
               <>
                 Search Results for "{searchTerm}"
-                {(searchLoading || loading) && (
-                  <i className="fas fa-spinner fa-spin" style={{marginLeft: '10px'}}></i>
-                )}
+                {searchLoading && <i className="fas fa-spinner fa-spin"></i>}
               </>
             ) : (
-              'Featured Movies'
+              '' // REMOVED "Featured Movies" TEXT
             )}
           </h1>
-          
           {searchTerm && (
-            <div className="search-results-info">
-              <p className="results-count">
-                Found {safeDisplayVideos.length} {safeDisplayVideos.length === 1 ? 'movie' : 'movies'}
-                {searchLoading && '...'}
-              </p>
-              {safeDisplayVideos.length === 0 && !searchLoading && (
-                <p className="no-results-help">
-                  Try different keywords or browse all movies
-                </p>
-              )}
-            </div>
+            <p className="results-count">
+              Found {filteredVideos.length} movies
+            </p>
           )}
         </div>
 
-        {searchLoading ? (
-          <div className="search-loading">
-            <LoadingSpinner text="Searching movies..." />
-          </div>
-        ) : (
-          <VideoList videos={safeDisplayVideos} />
-        )}
+        <VideoList videos={filteredVideos} />
 
         <AdSlot position="footer" />
       </div>
