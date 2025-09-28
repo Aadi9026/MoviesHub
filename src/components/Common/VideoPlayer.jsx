@@ -2,84 +2,91 @@ import React, { useState, useEffect } from 'react';
 
 const VideoPlayer = ({ embedCode, title }) => {
   const [error, setError] = useState(false);
-  const [iframeSrc, setIframeSrc] = useState('');
+  const [iframeHtml, setIframeHtml] = useState('');
 
   useEffect(() => {
     if (embedCode) {
-      const src = extractIframeSrc(embedCode);
-      setIframeSrc(src);
-      setError(!src);
+      const processedHtml = processEmbedCode(embedCode);
+      setIframeHtml(processedHtml);
+      setError(!processedHtml);
+    } else {
+      setError(true);
+      setIframeHtml('');
     }
   }, [embedCode]);
 
-  const extractIframeSrc = (code) => {
-    if (!code) return '';
-    
+  const processEmbedCode = (code) => {
+    if (!code || typeof code !== 'string') {
+      return null;
+    }
+
     try {
-      // Handle different embed code formats
-      let src = '';
+      // Clean the code
+      let cleanCode = code.trim();
       
-      // Method 1: Direct iframe src extraction
-      const iframeMatch = code.match(/src=(["'])(.*?)\1/);
-      if (iframeMatch) {
-        src = iframeMatch[2];
-      }
-      
-      // Method 2: Handle encoded URLs
-      if (!src) {
-        const urlMatch = code.match(/https?:\/\/[^"'\s]+/);
-        if (urlMatch) {
-          src = urlMatch[0];
+      // Ensure it's a proper iframe
+      if (!cleanCode.includes('<iframe')) {
+        // If it's just a URL, wrap it in iframe
+        if (cleanCode.startsWith('http')) {
+          cleanCode = `<iframe src="${cleanCode}" frameborder="0" allowfullscreen></iframe>`;
+        } else if (cleanCode.includes('multimoviesshg.com')) {
+          // Handle MultiMovies format
+          const srcMatch = cleanCode.match(/src=(["'])(.*?)\1/) || cleanCode.match(/(https:\/\/multimoviesshg\.com\/[^\s"']+)/);
+          if (srcMatch) {
+            const src = srcMatch[2] || srcMatch[1];
+            cleanCode = `<iframe src="${src}" frameborder="0" allowfullscreen></iframe>`;
+          }
         }
       }
-      
-      // Method 3: Handle MultiMovies format
-      if (!src && code.includes('multimoviesshg.com')) {
-        const multiMatch = code.match(/https:\/\/multimoviesshg\.com\/[^"'\s]+/);
-        if (multiMatch) {
-          src = multiMatch[0];
+
+      // Ensure iframe has proper attributes
+      if (cleanCode.includes('<iframe')) {
+        // Add required attributes if missing
+        if (!cleanCode.includes(' width=')) {
+          cleanCode = cleanCode.replace('<iframe', '<iframe width="100%"');
         }
+        if (!cleanCode.includes(' height=')) {
+          cleanCode = cleanCode.replace('<iframe', '<iframe height="100%"');
+        }
+        if (!cleanCode.includes(' frameborder=')) {
+          cleanCode = cleanCode.replace('<iframe', '<iframe frameborder="0"');
+        }
+        if (!cleanCode.includes(' allowfullscreen')) {
+          cleanCode = cleanCode.replace('<iframe', '<iframe allowfullscreen');
+        }
+        
+        // Add security attributes
+        cleanCode = cleanCode.replace('<iframe', 
+          '<iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"'
+        );
       }
-      
-      // Ensure the URL is properly formatted
-      if (src && !src.startsWith('http')) {
-        src = 'https:' + src;
-      }
-      
-      return src;
+
+      return cleanCode;
     } catch (err) {
-      console.error('Error parsing embed code:', err);
-      return '';
+      console.error('Error processing embed code:', err);
+      return null;
     }
   };
 
-  const createIframeHtml = (src) => {
+  const createFallbackPlayer = () => {
     return `
-      <iframe 
-        src="${src}" 
-        width="100%" 
-        height="100%" 
-        frameborder="0" 
-        allowfullscreen 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      ></iframe>
+      <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #000; color: white; flex-direction: column; padding: 20px; text-align: center;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px; color: #f59e0b;"></i>
+        <h3>Unable to Load Video</h3>
+        <p>The video cannot be played due to an issue with the embed code.</p>
+        <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Please try another source or contact support.</p>
+      </div>
     `;
   };
 
-  if (error || !iframeSrc) {
+  if (error || !iframeHtml) {
     return (
       <div className="video-player-container">
         <div className="video-player error">
-          <div className="video-error">
-            <i className="fas fa-exclamation-triangle"></i>
-            <h3>Unable to load video</h3>
-            <p>Please check the embed code or try an alternative source.</p>
-            <div className="debug-info">
-              <p><strong>Debug Info:</strong></p>
-              <p>Embed Code: {embedCode ? 'Provided' : 'Missing'}</p>
-              <p>Extracted Source: {iframeSrc || 'None'}</p>
-            </div>
-          </div>
+          <div 
+            className="video-error"
+            dangerouslySetInnerHTML={{ __html: createFallbackPlayer() }}
+          />
         </div>
       </div>
     );
@@ -88,17 +95,10 @@ const VideoPlayer = ({ embedCode, title }) => {
   return (
     <div className="video-player-container">
       <div className="video-player">
-        <iframe
-          src={iframeSrc}
-          title={title}
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          allowFullScreen
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        <div 
+          dangerouslySetInnerHTML={{ __html: iframeHtml }}
           onError={() => setError(true)}
-          onLoad={() => setError(false)}
-        ></iframe>
+        />
       </div>
     </div>
   );
