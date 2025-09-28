@@ -1568,6 +1568,7 @@ input:checked + .slider:before {
     grid-template-columns: 1fr;
   }
 }
+
 /* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
 @media (hover: none) and (pointer: coarse) {
   .header-icon {
@@ -1624,4 +1625,3 @@ input:checked + .slider:before {
     border-color: var(--primary);
   }
 }
-
