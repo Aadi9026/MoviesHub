@@ -5,6 +5,7 @@ export const useVideos = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentType, setCurrentType] = useState('all'); // 'all', 'random', 'latest', 'trending'
 
   useEffect(() => {
     loadVideos();
@@ -14,6 +15,7 @@ export const useVideos = () => {
     try {
       setLoading(true);
       setError(null);
+      setCurrentType('all');
       const result = await getVideos();
       if (result.success) {
         // Ensure videos is always an array
@@ -31,6 +33,92 @@ export const useVideos = () => {
     }
   };
 
+  // Load random videos for home page
+  const loadRandomVideos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCurrentType('random');
+      const result = await getVideos();
+      if (result.success) {
+        const allVideos = Array.isArray(result.videos) ? result.videos : [];
+        // Shuffle the videos for random experience
+        const shuffledVideos = [...allVideos].sort(() => Math.random() - 0.5);
+        setVideos(shuffledVideos);
+      } else {
+        setError(result.error || 'Failed to load videos');
+        setVideos([]);
+      }
+    } catch (err) {
+      setError('Failed to load videos');
+      setVideos([]);
+      console.error('Error loading random videos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load latest videos sorted by date
+  const loadLatestVideos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCurrentType('latest');
+      const result = await getVideos();
+      if (result.success) {
+        const allVideos = Array.isArray(result.videos) ? result.videos : [];
+        // Sort by creation date (newest first)
+        const latestVideos = [...allVideos].sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.uploadDate || a.created_at || 0);
+          const dateB = new Date(b.createdAt || b.uploadDate || b.created_at || 0);
+          return dateB - dateA;
+        });
+        setVideos(latestVideos);
+      } else {
+        setError(result.error || 'Failed to load latest videos');
+        setVideos([]);
+      }
+    } catch (err) {
+      setError('Failed to load latest videos');
+      setVideos([]);
+      console.error('Error loading latest videos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load trending videos sorted by views/popularity
+  const loadTrendingVideos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCurrentType('trending');
+      const result = await getVideos();
+      if (result.success) {
+        const allVideos = Array.isArray(result.videos) ? result.videos : [];
+        // Sort by views (highest first) for trending
+        const trendingVideos = [...allVideos].sort((a, b) => {
+          const viewsA = parseInt(a.views || 0);
+          const viewsB = parseInt(b.views || 0);
+          return viewsB - viewsA;
+        }).map(video => ({
+          ...video,
+          trending: true // Add trending flag
+        }));
+        setVideos(trendingVideos);
+      } else {
+        setError(result.error || 'Failed to load trending videos');
+        setVideos([]);
+      }
+    } catch (err) {
+      setError('Failed to load trending videos');
+      setVideos([]);
+      console.error('Error loading trending videos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const search = async (term) => {
     if (!term || typeof term !== 'string' || term.trim().length < 2) {
       // If search term is too short, show all videos
@@ -41,6 +129,7 @@ export const useVideos = () => {
     try {
       setLoading(true);
       setError(null);
+      setCurrentType('search');
       const result = await searchVideos(term);
       if (result.success) {
         // Ensure videos is always an array
@@ -64,8 +153,12 @@ export const useVideos = () => {
     videos: Array.isArray(videos) ? videos : [],
     loading,
     error,
+    currentType,
     search,
-    refresh: loadVideos
+    refresh: loadVideos,
+    loadRandomVideos,
+    loadLatestVideos,
+    loadTrendingVideos
   };
 };
 
