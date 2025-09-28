@@ -16,12 +16,15 @@ export const useVideos = () => {
       setError(null);
       const result = await getVideos();
       if (result.success) {
-        setVideos(result.videos);
+        // Ensure videos is always an array
+        setVideos(Array.isArray(result.videos) ? result.videos : []);
       } else {
         setError(result.error || 'Failed to load videos');
+        setVideos([]); // Set empty array on error
       }
     } catch (err) {
       setError('Failed to load videos');
+      setVideos([]); // Set empty array on error
       console.error('Error loading videos:', err);
     } finally {
       setLoading(false);
@@ -29,7 +32,7 @@ export const useVideos = () => {
   };
 
   const search = async (term) => {
-    if (!term || term.trim().length < 2) {
+    if (!term || typeof term !== 'string' || term.trim().length < 2) {
       // If search term is too short, show all videos
       loadVideos();
       return;
@@ -40,7 +43,8 @@ export const useVideos = () => {
       setError(null);
       const result = await searchVideos(term);
       if (result.success) {
-        setVideos(result.videos);
+        // Ensure videos is always an array
+        setVideos(Array.isArray(result.videos) ? result.videos : []);
       } else {
         setError(result.error || 'Search failed');
         // Fallback to showing all videos if search fails
@@ -57,7 +61,7 @@ export const useVideos = () => {
   };
 
   return {
-    videos,
+    videos: Array.isArray(videos) ? videos : [],
     loading,
     error,
     search,
@@ -73,6 +77,9 @@ export const useVideo = (id) => {
   useEffect(() => {
     if (id) {
       loadVideo(id);
+    } else {
+      setLoading(false);
+      setError('Video ID is required');
     }
   }, [id]);
 
@@ -85,9 +92,11 @@ export const useVideo = (id) => {
         setVideo(result.video);
       } else {
         setError(result.error || 'Video not found');
+        setVideo(null);
       }
     } catch (err) {
       setError('Failed to load video');
+      setVideo(null);
       console.error('Error loading video:', err);
     } finally {
       setLoading(false);
@@ -107,6 +116,7 @@ export const useRelatedVideos = (genre, excludeId) => {
       loadRelatedVideos(genre, excludeId);
     } else {
       setLoading(false);
+      setVideos([]);
     }
   }, [genre, excludeId]);
 
@@ -116,17 +126,24 @@ export const useRelatedVideos = (genre, excludeId) => {
       setError(null);
       const result = await getRelatedVideos(videoGenre, videoId);
       if (result.success) {
-        setVideos(result.videos);
+        // Ensure videos is always an array
+        setVideos(Array.isArray(result.videos) ? result.videos : []);
       } else {
         setError(result.error);
+        setVideos([]);
       }
     } catch (err) {
       setError('Failed to load related videos');
+      setVideos([]);
       console.error('Error loading related videos:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  return { videos, loading, error };
+  return { 
+    videos: Array.isArray(videos) ? videos : [], 
+    loading, 
+    error 
+  };
 };
