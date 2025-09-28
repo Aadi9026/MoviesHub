@@ -82,7 +82,8 @@ const HomePage = () => {
       <div className="container">
         <AdSlot position="header" />
         
-        {searchTerm ? (
+        {/* ONLY SHOW HEADER FOR SEARCH RESULTS */}
+        {searchTerm && (
           <div className="page-header">
             <h1>
               Search Results for "{searchTerm}"
@@ -101,16 +102,6 @@ const HomePage = () => {
                   Try different keywords or browse all movies
                 </p>
               )}
-            </div>
-          </div>
-        ) : (
-          <div className="section-header">
-            <div>
-              <h1 className="section-title">
-                <i className="fas fa-home"></i>
-                Discover Movies
-              </h1>
-              <p className="section-subtitle">Fresh recommendations just for you</p>
             </div>
           </div>
         )}
