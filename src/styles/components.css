@@ -398,7 +398,7 @@
   color: var(--text-secondary);
 }
 
-/* ===== IMPROVED YOUTUBE-LIKE VIDEO CARDS ===== */
+/* ===== YOUTUBE-LIKE VIDEO CARDS ===== */
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -492,17 +492,15 @@
 /* Video Title - Improved spacing and truncation */
 .video-title {
   font-size: 16px;
-  font-weight: 600; /* Increased weight for better readability */
+  font-weight: 600;
   line-height: 1.4;
   color: var(--text);
-  margin-bottom: 8px; /* Increased spacing */
+  margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  
-  /* Modern font rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -530,7 +528,7 @@
 
 /* Remove channel name text since we have logo */
 .channel-name {
-  display: none; /* Hide the "MoviesHub" text */
+  display: none;
 }
 
 .video-stats {
@@ -554,73 +552,6 @@
   display: inline-block;
   border: 1px solid rgba(229, 9, 20, 0.3);
 }
-
-/* ===== MOBILE RESPONSIVE IMPROVEMENTS ===== */
-@media (max-width: 768px) {
-  .video-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    padding: 0 4px;
-  }
-  
-  .video-title {
-    font-size: 15px;
-    line-height: 1.3;
-    -webkit-line-clamp: 2;
-    margin-bottom: 6px;
-  }
-  
-  .video-meta {
-    font-size: 13px;
-    gap: 4px;
-  }
-  
-  .video-stats {
-    font-size: 13px;
-    gap: 4px;
-  }
-  
-  .channel-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-  
-  .genre-tag {
-    font-size: 11px;
-    padding: 3px 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .video-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 0;
-  }
-  
-  .video-card {
-    margin: 0 8px;
-  }
-  
-  .thumbnail-container {
-    border-radius: 8px;
-  }
-  
-  .video-info-container {
-    padding: 0 8px;
-  }
-  
-  .video-title {
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-  
-  .video-meta {
-    font-size: 12px;
-  }
-  }
-  
 
 /* ===== MAIN CONTENT SPACING ===== */
 .main-content {
@@ -1460,23 +1391,37 @@ input:checked + .slider:before {
   
   /* Video Cards Mobile Responsive */
   .video-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
     padding: 0 4px;
   }
   
   .video-title {
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.3;
     -webkit-line-clamp: 2;
+    margin-bottom: 6px;
   }
   
   .video-meta {
-    font-size: 12px;
+    font-size: 13px;
+    gap: 4px;
   }
   
-  .channel-name {
-    font-size: 12px;
+  .video-stats {
+    font-size: 13px;
+    gap: 4px;
+  }
+  
+  .channel-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .genre-tag {
+    font-size: 11px;
+    padding: 3px 6px;
   }
   
   /* Existing mobile styles */
@@ -1587,6 +1532,15 @@ input:checked + .slider:before {
   
   .video-info-container {
     padding: 0 8px;
+  }
+  
+  .video-title {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .video-meta {
+    font-size: 12px;
   }
   
   /* Existing small mobile styles */
