@@ -1,3 +1,6 @@
+
+
+
 /* ===== CSS VARIABLES ===== */
 :root {
   --dark-light: #1a1a1a;
@@ -413,6 +416,8 @@ body {
   color: var(--text-secondary);
 }
 
+
+
 /* ===== YOUTUBE-LIKE VIDEO CARDS ===== */
 .video-grid {
   display: grid;
@@ -516,7 +521,7 @@ body {
   opacity: 0.7;
 }
 
-/* Genre tag integrated in the same line - FIXED: Consistent styling for all genres */
+/* Genre tag integrated in the same line */
 .genre-tag {
   background: rgba(229, 9, 20, 0.15);
   color: var(--primary);
@@ -526,66 +531,6 @@ body {
   font-weight: 600;
   border: 1px solid rgba(229, 9, 20, 0.3);
   margin-left: auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 80px;
-  text-align: center;
-}
-
-/* Specific genre colors for better visual distinction */
-.genre-tag.action {
-  background: rgba(229, 9, 20, 0.15);
-  color: var(--primary);
-  border-color: rgba(229, 9, 20, 0.3);
-}
-
-.genre-tag.comedy {
-  background: rgba(255, 193, 7, 0.15);
-  color: var(--warning);
-  border-color: rgba(255, 193, 7, 0.3);
-}
-
-.genre-tag.drama {
-  background: rgba(40, 167, 69, 0.15);
-  color: var(--success);
-  border-color: rgba(40, 167, 69, 0.3);
-}
-
-.genre-tag.horror {
-  background: rgba(108, 117, 125, 0.15);
-  color: #6c757d;
-  border-color: rgba(108, 117, 125, 0.3);
-}
-
-.genre-tag.romance {
-  background: rgba(232, 62, 140, 0.15);
-  color: #e83e8c;
-  border-color: rgba(232, 62, 140, 0.3);
-}
-
-.genre-tag.sci-fi {
-  background: rgba(0, 123, 255, 0.15);
-  color: #007bff;
-  border-color: rgba(0, 123, 255, 0.3);
-}
-
-.genre-tag.thriller {
-  background: rgba(111, 66, 193, 0.15);
-  color: #6f42c1;
-  border-color: rgba(111, 66, 193, 0.3);
-}
-
-.genre-tag.fantasy {
-  background: rgba(253, 126, 20, 0.15);
-  color: #fd7e14;
-  border-color: rgba(253, 126, 20, 0.3);
-}
-
-.genre-tag.adventure {
-  background: rgba(32, 201, 151, 0.15);
-  color: #20c997;
-  border-color: rgba(32, 201, 151, 0.3);
 }
 
 /* ===== MAIN CONTENT SPACING ===== */
@@ -937,7 +882,7 @@ body {
 }
 
 .meta-item i {
-  font-size: 12px;
+  font-size: 9px;
   color: var(--primary);
 }
 
@@ -949,16 +894,11 @@ body {
   color: var(--warning);
 }
 
-/* FIXED: Genre meta item styling for consistency */
 .meta-item.genre {
   background: rgba(229, 9, 20, 0.15);
   color: var(--primary);
   border-color: rgba(229, 9, 20, 0.3);
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
 }
 
 .meta-item.date {
@@ -1939,6 +1879,7 @@ input:focus {
   outline-offset: 1px;
 }
 
+
 /* ===== PRIMARY SOURCE SECTION ENHANCEMENT ===== */
 .primary-source-dropdown {
   position: relative;
@@ -2227,7 +2168,84 @@ input:focus {
   text-decoration: none;
 }
 
+
 /* ===== RESPONSIVE STYLES ===== */
+/* Mobile Responsiveness for Primary Source and Description */
+@media (max-width: 768px) {
+  .primary-source-selector {
+    padding: 12px 15px;
+  }
+
+  .primary-source-text {
+    font-size: 15px;
+  }
+
+  .source-option {
+    padding: 12px 15px;
+  }
+
+  .description-section {
+    padding: 20px 15px;
+    margin: 20px 0;
+  }
+
+  .description-header h3 {
+    font-size: 16px;
+  }
+
+  .description-content {
+    font-size: 14px;
+  }
+
+  .description-meta {
+    gap: 8px;
+  }
+
+  .meta-tag {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .primary-source-selector {
+    padding: 10px 12px;
+  }
+
+  .primary-source-text {
+    font-size: 14px;
+  }
+
+  .source-option {
+    padding: 10px 12px;
+  }
+
+  .description-section {
+    padding: 15px 10px;
+  }
+
+  .description-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .description-toggle {
+    align-self: flex-end;
+  }
+
+  .description-content {
+    font-size: 13px;
+  }
+
+  .meta-tag {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+}
+
+
+
 /* Tablet adjustments */
 @media (max-width: 1200px) {
   .video-grid {
@@ -2459,12 +2477,6 @@ input:focus {
     white-space: nowrap;
   }
   
-  /* FIXED: Mobile genre meta item size consistency */
-  .meta-item.genre {
-    max-width: 100px;
-    font-size: 11px;
-  }
-  
   .video-actions {
     gap: 8px;
     margin: 15px 0;
@@ -2551,7 +2563,7 @@ input:focus {
     font-size: 11px;
   }
   
-  /* Video Cards Mobile Responsive - FIXED: Genre tag size consistency */
+  /* Video Cards Mobile Responsive */
   .video-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
@@ -2573,7 +2585,6 @@ input:focus {
   .genre-tag {
     font-size: 10px;
     padding: 2px 6px;
-    max-width: 70px;
   }
   
   /* Existing mobile styles */
@@ -2705,12 +2716,6 @@ input:focus {
     padding: 4px 8px;
   }
   
-  /* FIXED: Small mobile genre meta item */
-  .meta-item.genre {
-    max-width: 80px;
-    font-size: 10px;
-  }
-  
   .quality-buttons {
     grid-template-columns: 1fr;
   }
@@ -2735,7 +2740,7 @@ input:focus {
     font-size: 15px;
   }
   
-  /* Video Cards Small Mobile - FIXED: Genre tag size consistency */
+  /* Video Cards Small Mobile */
   .video-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -2767,7 +2772,6 @@ input:focus {
   .genre-tag {
     font-size: 9px;
     padding: 1px 5px;
-    max-width: 60px;
   }
   
   /* Existing small mobile styles */
@@ -2807,17 +2811,6 @@ input:focus {
       padding: 5px 8px;
       min-height: 30px;
       min-width: 30px;
-    }
-    
-    /* FIXED: Extra small mobile genre tag */
-    .genre-tag {
-      max-width: 50px;
-      font-size: 8px;
-    }
-    
-    .meta-item.genre {
-      max-width: 70px;
-      font-size: 9px;
     }
   }
 }
@@ -2928,3 +2921,4 @@ input:focus {
     border: 1px solid var(--text);
   }
 }
+
