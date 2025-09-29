@@ -871,11 +871,11 @@ body {
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 5px;
+  font-size: 10px;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.05);
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   white-space: nowrap;
