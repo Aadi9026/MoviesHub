@@ -871,8 +871,8 @@ body {
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 4px;
+  font-size: 10px;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.05);
   padding: 6px 12px;
@@ -882,7 +882,7 @@ body {
 }
 
 .meta-item i {
-  font-size: 12px;
+  font-size: 10px;
   color: var(--primary);
 }
 
