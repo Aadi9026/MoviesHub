@@ -2688,18 +2688,25 @@ input:focus {
   .footer-nav-btn {
     border: 1px solid var(--text);
 
-    /* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER ===== */
+    /* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER - FULL PAGE SCROLL ===== */
 
-/* Sticky Video Container */
+/* Video Detail Page Layout */
+.video-detail-page {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Sticky Video Container - FULL PAGE SCROLL */
 .video-player-sticky-container {
   position: relative;
   width: 100%;
   background: #000;
   margin-top: 80px; /* Account for fixed header */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9997;
 }
 
-/* When sticky is active - YouTube-like behavior */
+/* When sticky is active - YouTube-like behavior for FULL PAGE */
 .video-player-sticky-container.sticky-active {
   position: fixed;
   top: 0;
@@ -2724,23 +2731,33 @@ input:focus {
   }
 }
 
+/* Content Area - Scrolls under sticky video */
+.video-content-area {
+  position: relative;
+  z-index: 9996;
+  transition: margin-top 0.3s ease;
+}
+
+/* When video is sticky, push content down */
+.video-content-area.content-with-sticky-video {
+  margin-top: 70vh; /* Match the sticky video height */
+}
+
 /* Sticky video player adjustments */
 .video-player-sticky-container.sticky-active .video-player-fullwidth {
   height: 100%;
   max-height: 100%;
+  width: 100%;
 }
 
 .video-player-sticky-container.sticky-active .video-player {
   height: 100%;
+  width: 100%;
 }
 
 .video-player-sticky-container.sticky-active iframe {
   height: 100%;
-}
-
-/* Adjust content when video is sticky */
-.content-with-sticky-video {
-  margin-top: 70vh; /* Push content down by sticky video height */
+  width: 100%;
 }
 
 /* Ensure smooth transitions */
@@ -2752,7 +2769,7 @@ input:focus {
   border-radius: 0;
 }
 
-/* Mobile responsive for sticky video */
+/* Mobile responsive for sticky video - FULL PAGE */
 @media (max-width: 768px) {
   .video-player-sticky-container {
     margin-top: 70px;
@@ -2763,7 +2780,7 @@ input:focus {
     max-height: 40vh;
   }
   
-  .content-with-sticky-video {
+  .video-content-area.content-with-sticky-video {
     margin-top: 40vh;
   }
 }
@@ -2778,7 +2795,7 @@ input:focus {
     max-height: 35vh;
   }
   
-  .content-with-sticky-video {
+  .video-content-area.content-with-sticky-video {
     margin-top: 35vh;
   }
 }
@@ -2790,7 +2807,7 @@ input:focus {
     max-height: 60vh;
   }
   
-  .content-with-sticky-video {
+  .video-content-area.content-with-sticky-video {
     margin-top: 60vh;
   }
 }
@@ -2798,6 +2815,7 @@ input:focus {
 /* Ensure video maintains aspect ratio in sticky mode */
 .video-player-sticky-container.sticky-active .video-player-container {
   height: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2811,14 +2829,14 @@ input:focus {
   justify-content: center;
 }
 
-/* Prevent layout shifts */
-.video-detail-page {
-  min-height: 100vh;
-}
-
-/* Smooth scrolling behavior */
+/* Smooth scrolling behavior for entire page */
 html {
   scroll-behavior: smooth;
+}
+
+/* Prevent any overflow issues */
+body {
+  overflow-x: hidden;
 }
 
 /* Touch device optimizations */
@@ -2827,10 +2845,31 @@ html {
     height: 45vh; /* Slightly larger for touch devices */
   }
   
-  .content-with-sticky-video {
+  .video-content-area.content-with-sticky-video {
     margin-top: 45vh;
   }
 }
+
+/* Ensure content area has proper spacing */
+.video-content-area .container {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+/* Fix for any potential z-index conflicts */
+.header {
+  z-index: 1000;
+}
+
+.footer-nav {
+  z-index: 999;
+}
+ 
+
+
+  
+
+  
     
   }
 }
