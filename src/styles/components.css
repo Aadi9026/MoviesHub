@@ -2948,121 +2948,88 @@ body {
 }
 
 
-/* ===== FIXED VIDEO WITH SCROLLABLE CONTENT UNDERNEATH ===== */
-
-/* Video Detail Page Layout */
+/* === FIXED FULL WIDTH VIDEO, ALL CONTENT SCROLLS UNDERNEATH === */
 .video-detail-page {
-  position: relative;
-  min-height: 100vh;
-  padding-top: 80px; /* Account for header */
+  position: relative !important;
+  min-height: 100vh !important;
+  background: var(--dark);
+  padding-top: 80px; /* Adjust for header */
 }
 
-/* Fixed Video Player Container - Stays at top */
 .video-player-fullwidth {
   position: fixed;
-  top: 80px; /* Below header */
+  top: 80px; /* below header */
   left: 0;
   right: 0;
-  width: 100%;
-  height: 60vh; /* Adjust video height as needed */
-  max-height: 60vh;
+  width: 100vw;
+  height: 60vh;
+  z-index: 900;
   background: #000;
-  z-index: 900; /* Below header (1000) but above content */
-  /* Performance optimization */
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Video Player inside fixed container */
-.video-player-fullwidth .video-player {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
 }
 
-/* Video Player Wrapper */
-.video-player-fullwidth .video-player-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding-bottom: 0; /* Remove aspect ratio padding */
-}
-
-/* Ensure iframe/video fills the container */
+.video-player-fullwidth .video-player,
+.video-player-fullwidth .video-player-wrapper,
 .video-player-fullwidth iframe,
 .video-player-fullwidth video {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   border: none;
   background: #000;
+  display: block;
+  position: relative;
   object-fit: contain;
 }
 
-/* Content area that scrolls underneath */
-.video-detail-page .container {
-  position: relative;
-  z-index: 800; /* Below video player */
-  margin-top: 60vh; /* Push content below fixed video */
-  background: var(--dark); /* Solid background */
-  min-height: 100vh;
-  padding-top: 20px;
-}
-
-/* Video Info section */
-.video-info {
+.container {
+  position: relative !important;
+  z-index: 10;
+  margin-top: 60vh !important; /* Push content below video */
   background: var(--dark);
-  position: relative;
-  z-index: 800;
+  min-height: 100vh;
 }
 
-/* Ensure fullscreen works properly */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .video-player-fullwidth {
+    height: 40vh;
+    top: 70px;
+  }
+  .container {
+    margin-top: 40vh !important;
+  }
+}
+@media (max-width: 480px) {
+  .video-player-fullwidth {
+    height: 35vh;
+    top: 60px;
+  }
+  .container {
+    margin-top: 35vh !important;
+  }
+}
+
+/* Fullscreen override */
 .video-player-fullwidth:fullscreen,
 .video-player-fullwidth:-webkit-full-screen,
 .video-player-fullwidth:-moz-full-screen {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
+  width: 100vw !important;
+  height: 100vh !important;
   z-index: 9999;
+  background: #000;
 }
+.video-player-fullwidth:fullscreen video,
+.video-player-fullwidth:-webkit-full-screen video {
+  width: 100vw !important;
+  height: 100vh !important;
 
-.video-player-fullwidth:fullscreen iframe,
-.video-player-fullwidth:-webkit-full-screen iframe,
-.video-player-fullwidth:-moz-full-screen iframe {
-  width: 100%;
-  height: 100%;
-}
 
-/* ===== MOBILE RESPONSIVE FOR FIXED VIDEO ===== */
-@media (max-width: 768px) {
-  .video-player-fullwidth {
-    top: 70px; /* Adjust for mobile header */
-    height: 40vh; /* Smaller on mobile */
-    max-height: 40vh;
-  }
 
-  .video-detail-page .container {
-    margin-top: 40vh; /* Match mobile video height */
-  }
-}
 
-@media (max-width: 480px) {
-  .video-player-fullwidth {
-    top: 60px;
-    height: 35vh;
-    max-height: 35vh;
-  }
-
-  .video-detail-page .container {
-    margin-top: 35vh;
   }
 }
