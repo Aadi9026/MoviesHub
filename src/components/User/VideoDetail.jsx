@@ -52,20 +52,11 @@ const VideoDetail = () => {
     const handleScroll = () => {
       const videoPlayer = videoPlayerRef.current;
       if (videoPlayer) {
-        // Optional: Add scroll-based effects or analytics here
         const scrollPosition = window.scrollY;
-        
-        // Example: Track if user scrolled past video
-        if (scrollPosition > videoPlayer.offsetHeight) {
-          // User has scrolled past the video area
-          // You can add analytics or other logic here
-        }
+        // Optional: Add scroll-based logic here if desired
       }
     };
-
-    // Add passive scroll listener for better performance
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -81,7 +72,6 @@ const VideoDetail = () => {
         setDislikeCount(prev => Math.max(0, prev - 1));
       }
     }
-    // Add your like API call here
   };
 
   const handleDislike = () => {
@@ -96,7 +86,6 @@ const VideoDetail = () => {
         setLikeCount(prev => Math.max(0, prev - 1));
       }
     }
-    // Add your dislike API call here
   };
 
   const handleShare = async () => {
@@ -153,8 +142,6 @@ const VideoDetail = () => {
 
   // Prepare video sources
   const sources = [];
-  
-  // Add primary source if available
   if (video.embedCode && video.embedCode.trim() !== '') {
     sources.push({ 
       code: video.embedCode, 
@@ -162,8 +149,6 @@ const VideoDetail = () => {
       valid: true
     });
   }
-  
-  // Add alternative sources if available and enabled
   if (video.altSources && video.altSourcesEnabled) {
     video.altSources.forEach((source, index) => {
       if (video.altSourcesEnabled[index] && source && source.trim() !== '') {
@@ -175,8 +160,6 @@ const VideoDetail = () => {
       }
     });
   }
-
-  // If no valid sources, show error
   if (sources.length === 0) {
     return (
       <div className="video-detail-page">
@@ -195,35 +178,28 @@ const VideoDetail = () => {
       </div>
     );
   }
-
   const availableDownloads = video.downloadLinks ? 
     Object.entries(video.downloadLinks).filter(([_, link]) => link && link.trim() !== '') : [];
 
   return (
     <div className="video-detail-page">
-      {/* Fixed Video Player at Top - Stays visible while scrolling */}
       <div className="video-player-fullwidth" ref={videoPlayerRef}>
         <VideoPlayer 
           embedCode={sources[currentSource]?.code}
           title={video.title}
         />
       </div>
-
-      {/* Scrollable Content Area - Scrolls underneath the video */}
       <div className="container">
         <div className="video-layout">
           <div className="video-main">
             <div className="video-info">
               <h1 className="video-detail-title">{video.title}</h1>
-              
-              {/* Enhanced Premium Horizontal Action Bar */}
               <div className="horizontal-action-bar">
                 <div 
                   className="action-bar-scroll" 
                   ref={actionBarRef}
                   id="actionBarScroll"
                 >
-                  {/* Like Button */}
                   <button 
                     className={`action-bar-btn like-btn ${liked ? 'active' : ''}`}
                     onClick={handleLike}
@@ -233,8 +209,7 @@ const VideoDetail = () => {
                     <span>Like</span>
                     {likeCount > 0 && <span className="btn-counter">{likeCount}</span>}
                   </button>
-                  
-                  {/* Dislike Button */}
+
                   <button 
                     className={`action-bar-btn dislike-btn ${disliked ? 'active' : ''}`}
                     onClick={handleDislike}
@@ -244,8 +219,7 @@ const VideoDetail = () => {
                     <span>Dislike</span>
                     {dislikeCount > 0 && <span className="btn-counter">{dislikeCount}</span>}
                   </button>
-                  
-                  {/* Share Button with Tooltip */}
+
                   <div className="share-button-container">
                     <button 
                       className="action-bar-btn share-btn"
@@ -262,8 +236,7 @@ const VideoDetail = () => {
                       </div>
                     )}
                   </div>
-                  
-                  {/* Download Button */}
+
                   {availableDownloads.length > 0 && (
                     <button 
                       className="action-bar-btn download-btn"
@@ -275,8 +248,7 @@ const VideoDetail = () => {
                       <span className="btn-counter">({availableDownloads.length})</span>
                     </button>
                   )}
-                  
-                  {/* Video Information Button */}
+
                   <button 
                     className="action-bar-btn info-btn"
                     onClick={() => setMetadataExpanded(!metadataExpanded)}
@@ -287,8 +259,7 @@ const VideoDetail = () => {
                     <span>Info</span>
                     <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
                   </button>
-                  
-                  {/* Primary Source Dropdown */}
+
                   {sources.length > 0 && (
                     <div className="action-bar-dropdown">
                       <select 
@@ -309,7 +280,6 @@ const VideoDetail = () => {
                 </div>
               </div>
 
-              {/* Download options (appears when download button clicked) */}
               {showDownloads && availableDownloads.length > 0 && (
                 <div className="download-section">
                   <div className="download-header">
@@ -342,7 +312,6 @@ const VideoDetail = () => {
                 </div>
               )}
 
-              {/* Enhanced Collapsible Metadata Section */}
               <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
                 <button 
                   className="metadata-header"
@@ -361,7 +330,6 @@ const VideoDetail = () => {
                 </button>
                 
                 <div className="metadata-content">
-                  {/* Enhanced Metadata Grid */}
                   <div className="metadata-grid">
                     <div className="metadata-item highlight">
                       <div className="metadata-label">
@@ -412,7 +380,6 @@ const VideoDetail = () => {
                       </div>
                     )}
 
-                    {/* Engagement Stats */}
                     <div className="metadata-item engagement-stats">
                       <div className="metadata-label">
                         <i className="fas fa-chart-bar"></i>
@@ -431,7 +398,6 @@ const VideoDetail = () => {
                     </div>
                   </div>
 
-                  {/* Enhanced Description */}
                   {video.description && (
                     <div className="metadata-description">
                       <div className="description-header">
