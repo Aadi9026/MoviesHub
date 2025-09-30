@@ -2687,69 +2687,7 @@ input:focus {
   
   .footer-nav-btn {
     border: 1px solid var(--text);
-    /* ===== FULL WIDTH VIDEO PLAYER ===== */
-.video-player-fullwidth {
-  width: 100%;
-  background: #000;
-  margin-top: 80px; /* Account for fixed header */
-  position: relative;
-}
 
-.video-player-fullwidth .video-player-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.video-player-fullwidth .video-player {
-  width: 100%;
-  max-width: 100%;
-}
-
-.video-player-fullwidth .video-player-wrapper {
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-}
-
-.video-player-fullwidth iframe,
-.video-player-fullwidth video {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-/* Adjust main content spacing */
-.video-detail-page {
-  padding-top: 0;
-}
-
-/* Remove top margin from container content */
-.video-detail-page .container {
-  margin-top: 20px;
-}
-
-/* Mobile responsive for full width video */
-@media (max-width: 768px) {
-  .video-player-fullwidth {
-    margin-top: 70px; /* Adjust for smaller header on mobile */
-  }
-  
-  .video-detail-page .container {
-    margin-top: 15px;
-    padding: 0 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .video-player-fullwidth {
-    margin-top: 60px;
-  }
-  
-  .video-detail-page .container {
-    margin-top: 10px;
-    padding: 0 8px;
-  }
-}
+    
   }
 }
