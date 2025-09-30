@@ -780,6 +780,78 @@ body {
   display: none !important;
 }
 
+/* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER ===== */
+
+/* Video Detail Page Layout */
+.video-detail-page {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Sticky Video Container */
+.video-player-sticky-container {
+  position: relative;
+  width: 100%;
+  background: #000;
+  margin-top: 80px; /* Account for fixed header */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9997;
+}
+
+/* When sticky is active - YouTube-like behavior */
+.video-player-sticky-container.sticky-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9998;
+  margin-top: 0;
+  height: 70vh;
+  max-height: 70vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideDownSticky 0.3s ease-out;
+}
+
+@keyframes slideDownSticky {
+  from {
+    transform: translateY(-10px);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Main Content Area */
+.video-content-main {
+  position: relative;
+  z-index: 9996;
+  transition: margin-top 0.3s ease;
+}
+
+/* When video is sticky, push ALL content down */
+.video-content-main.sticky-video-active {
+  margin-top: 70vh;
+}
+
+/* Sticky video player adjustments */
+.video-player-sticky-container.sticky-active .video-player-fullwidth {
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+}
+
+.video-player-sticky-container.sticky-active .video-player {
+  height: 100%;
+  width: 100%;
+}
+
+.video-player-sticky-container.sticky-active iframe {
+  height: 100%;
+  width: 100%;
+}
+
 /* ===== ENHANCED VIDEO WATCH PAGE STYLES ===== */
 
 /* Main video layout - YouTube-like responsiveness */
@@ -792,7 +864,7 @@ body {
   max-width: 100%;
 }
 
-/* YouTube-like video player container - REMOVED BOX STYLING */
+/* YouTube-like video player container */
 .video-player-container {
   background: transparent;
   border-radius: 0;
@@ -1489,30 +1561,25 @@ body {
   margin: 5px 0;
 }
 
-/* ===== YOUTUBE-LIKE SCROLLING FOR SIDEBAR ===== */
+/* REMOVE SCROLLING FROM RELATED MOVIES AREA */
 .video-sidebar {
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) var(--dark-lighter);
+  max-height: none !important;
+  overflow-y: visible !important;
 }
 
+.suggested-videos {
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+/* Remove any existing scrollbar styles from sidebar */
 .video-sidebar::-webkit-scrollbar {
-  width: 6px;
+  display: none !important;
 }
 
-.video-sidebar::-webkit-scrollbar-track {
-  background: var(--dark-lighter);
-  border-radius: 3px;
-}
-
-.video-sidebar::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 3px;
-}
-
-.video-sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
+.video-sidebar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* ===== ENHANCED VIDEO PLAYER CONTROLS ===== */
@@ -2231,6 +2298,20 @@ input:focus {
     padding-bottom: 85px;
   }
   
+  /* Sticky Video Mobile */
+  .video-player-sticky-container {
+    margin-top: 70px;
+  }
+  
+  .video-player-sticky-container.sticky-active {
+    height: 40vh;
+    max-height: 40vh;
+  }
+  
+  .video-content-main.sticky-video-active {
+    margin-top: 40vh;
+  }
+  
   /* Footer Navigation Mobile */
   .footer-nav {
     padding: 8px 0 max(12px, env(safe-area-inset-bottom));
@@ -2451,6 +2532,20 @@ input:focus {
     margin: 0;
   }
   
+  /* Sticky Video Small Mobile */
+  .video-player-sticky-container {
+    margin-top: 60px;
+  }
+  
+  .video-player-sticky-container.sticky-active {
+    height: 35vh;
+    max-height: 35vh;
+  }
+  
+  .video-content-main.sticky-video-active {
+    margin-top: 35vh;
+  }
+  
   /* Footer Navigation Small Mobile */
   .footer-nav-btn {
     padding: 8px 6px;
@@ -2619,6 +2714,15 @@ input:focus {
     min-height: 44px;
     min-width: 44px;
   }
+  
+  /* Touch device sticky video */
+  .video-player-sticky-container.sticky-active {
+    height: 45vh;
+  }
+  
+  .video-content-main.sticky-video-active {
+    margin-top: 45vh;
+  }
 }
 
 /* ===== ACCESSIBILITY ===== */
@@ -2631,7 +2735,8 @@ input:focus {
   .thumbnail,
   .action-bar-btn,
   .quality-btn,
-  .footer-nav-btn {
+  .footer-nav-btn,
+  .video-player-sticky-container {
     transition: none;
   }
   
@@ -2650,6 +2755,10 @@ input:focus {
   }
   
   .pulse {
+    animation: none;
+  }
+  
+  .slideDownSticky {
     animation: none;
   }
 }
@@ -2687,127 +2796,17 @@ input:focus {
   
   .footer-nav-btn {
     border: 1px solid var(--text);
-
-    /* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER - FULL PAGE SCROLL ===== */
-
-/* Video Detail Page Layout */
-.video-detail-page {
-  position: relative;
-  min-height: 100vh;
-}
-
-/* Sticky Video Container - FULL PAGE SCROLL */
-.video-player-sticky-container {
-  position: relative;
-  width: 100%;
-  background: #000;
-  margin-top: 80px; /* Account for fixed header */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 9997;
-}
-
-/* When sticky is active - YouTube-like behavior for FULL PAGE */
-.video-player-sticky-container.sticky-active {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9998;
-  margin-top: 0;
-  height: 70vh; /* Reduced height when sticky */
-  max-height: 70vh;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  animation: slideDownSticky 0.3s ease-out;
-}
-
-@keyframes slideDownSticky {
-  from {
-    transform: translateY(-10px);
-    opacity: 0.9;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
   }
 }
 
-/* Content Area - Scrolls under sticky video */
-.video-content-area {
-  position: relative;
-  z-index: 9996;
-  transition: margin-top 0.3s ease;
-}
-
-/* When video is sticky, push content down */
-.video-content-area.content-with-sticky-video {
-  margin-top: 70vh; /* Match the sticky video height */
-}
-
-/* Sticky video player adjustments */
-.video-player-sticky-container.sticky-active .video-player-fullwidth {
-  height: 100%;
-  max-height: 100%;
-  width: 100%;
-}
-
-.video-player-sticky-container.sticky-active .video-player {
-  height: 100%;
-  width: 100%;
-}
-
-.video-player-sticky-container.sticky-active iframe {
-  height: 100%;
-  width: 100%;
-}
-
-/* Ensure smooth transitions */
-.video-player-fullwidth {
-  transition: all 0.3s ease;
-}
-
-.video-player-sticky-container.sticky-active .video-player-fullwidth {
-  border-radius: 0;
-}
-
-/* Mobile responsive for sticky video - FULL PAGE */
-@media (max-width: 768px) {
-  .video-player-sticky-container {
-    margin-top: 70px;
-  }
-  
-  .video-player-sticky-container.sticky-active {
-    height: 40vh; /* Smaller sticky height on mobile */
-    max-height: 40vh;
-  }
-  
-  .video-content-area.content-with-sticky-video {
-    margin-top: 40vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .video-player-sticky-container {
-    margin-top: 60px;
-  }
-  
-  .video-player-sticky-container.sticky-active {
-    height: 35vh; /* Even smaller on very small screens */
-    max-height: 35vh;
-  }
-  
-  .video-content-area.content-with-sticky-video {
-    margin-top: 35vh;
-  }
-}
-
-/* Desktop large screens optimization */
+/* Desktop large screens optimization for sticky video */
 @media (min-width: 1400px) {
   .video-player-sticky-container.sticky-active {
     height: 60vh;
     max-height: 60vh;
   }
   
-  .video-content-area.content-with-sticky-video {
+  .video-content-main.sticky-video-active {
     margin-top: 60vh;
   }
 }
@@ -2839,19 +2838,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .video-player-sticky-container.sticky-active {
-    height: 45vh; /* Slightly larger for touch devices */
-  }
-  
-  .video-content-area.content-with-sticky-video {
-    margin-top: 45vh;
-  }
-}
-
 /* Ensure content area has proper spacing */
-.video-content-area .container {
+.video-content-main .container {
   padding-top: 20px;
   padding-bottom: 40px;
 }
@@ -2863,13 +2851,4 @@ body {
 
 .footer-nav {
   z-index: 999;
-}
- 
-
-
-  
-
-  
-    
-  }
 }
