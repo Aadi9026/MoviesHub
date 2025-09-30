@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
+import { VideoProvider, useVideoContext } from './contexts/VideoContext';
+import MiniPlayer from './components/Common/MiniPlayer';
 import Header from './components/Common/Header';
 import BottomNavigation from './components/Common/BottomNavigation';
 import HomePage from './pages/HomePage';
@@ -9,15 +10,22 @@ import TrendingMovies from './pages/TrendingMovies';
 import VideoPage from './pages/VideoPage';
 import AdminPage from './pages/AdminPage';
 import LoadingSpinner from './components/Common/LoadingSpinner';
+import { useAuth } from './hooks/useAuth';
 import './App.css';
 
-function App() {
-  const { user, isAdmin, loading } = useAuth();
+const AppContent = () => {
   const location = useLocation();
+  const { currentVideo, isMiniPlayerVisible, showMiniPlayer } = useVideoContext();
+  const { user, isAdmin, loading } = useAuth();
   
-  // Don't show bottom navigation on admin pages
   const showBottomNav = !location.pathname.includes('/admin');
   
+  useEffect(() => {
+    if (!location.pathname.startsWith('/video/') && currentVideo) {
+      showMiniPlayer();
+    }
+  }, [location, currentVideo, showMiniPlayer]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -40,7 +48,16 @@ function App() {
         </Routes>
       </main>
       {showBottomNav && <BottomNavigation />}
+      {isMiniPlayerVisible && <MiniPlayer />}
     </div>
+  );
+};
+
+function App() {
+  return (
+    <VideoProvider>
+      <AppContent />
+    </VideoProvider>
   );
 }
 
