@@ -27,6 +27,10 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  /* Improve scroll performance */
+  -webkit-overflow-scrolling: touch;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ===== HEADER & MOBILE FIRST STYLES ===== */
@@ -41,6 +45,9 @@ body {
   box-shadow: var(--shadow);
   width: 100%;
   backdrop-filter: blur(10px);
+  /* Performance optimization */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .container {
@@ -549,6 +556,8 @@ body {
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   z-index: 999;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  /* Performance optimization */
+  transform: translateZ(0);
 }
 
 .footer-nav-container {
@@ -780,25 +789,35 @@ body {
   display: none !important;
 }
 
-/* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER ===== */
+/* ===== YOUTUBE-LIKE STICKY VIDEO PLAYER - OPTIMIZED ===== */
 
 /* Video Detail Page Layout */
 .video-detail-page {
   position: relative;
   min-height: 100vh;
+  /* Performance optimization */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
 }
 
-/* Sticky Video Container */
+/* Sticky Video Container - PERFORMANCE OPTIMIZED */
 .video-player-sticky-container {
   position: relative;
   width: 100%;
   background: #000;
   margin-top: 80px; /* Account for fixed header */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 9997;
+  /* Remove transitions to reduce lag */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  /* Performance isolation */
+  contain: layout style paint;
 }
 
-/* When sticky is active - YouTube-like behavior */
+/* When sticky is active - OPTIMIZED FOR PERFORMANCE */
 .video-player-sticky-container.sticky-active {
   position: fixed;
   top: 0;
@@ -809,47 +828,95 @@ body {
   height: 70vh;
   max-height: 70vh;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  animation: slideDownSticky 0.3s ease-out;
+  /* Simplified animation for better performance */
+  animation: stickySlideDown 0.2s ease-out;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Ensure video is fully visible */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes slideDownSticky {
+@keyframes stickySlideDown {
   from {
-    transform: translateY(-10px);
-    opacity: 0.9;
+    transform: translateY(-100%);
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
-/* Main Content Area */
+/* Main Content Area - OPTIMIZED */
 .video-content-main {
   position: relative;
   z-index: 9996;
-  transition: margin-top 0.3s ease;
+  /* Remove transition to reduce lag */
+  will-change: margin-top;
+  /* Performance isolation */
+  contain: layout style paint;
 }
 
-/* When video is sticky, push ALL content down */
+/* When video is sticky, push content down */
 .video-content-main.sticky-video-active {
-  margin-top: 70vh;
+  margin-top: 70vh; /* Match the sticky video height */
 }
 
-/* Sticky video player adjustments */
+/* Sticky video player adjustments - FIXED VISIBILITY */
 .video-player-sticky-container.sticky-active .video-player-fullwidth {
   height: 100%;
   max-height: 100%;
   width: 100%;
+  /* Ensure video is fully visible */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
 }
 
 .video-player-sticky-container.sticky-active .video-player {
   height: 100%;
   width: 100%;
+  /* Center the video content */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
 }
 
-.video-player-sticky-container.sticky-active iframe {
+.video-player-sticky-container.sticky-active iframe,
+.video-player-sticky-container.sticky-active video {
   height: 100%;
   width: 100%;
+  /* Ensure video maintains aspect ratio */
+  object-fit: contain;
+  border: none !important;
+  display: block !important;
+  background: #000;
+}
+
+/* Video Player Wrapper for Sticky Mode */
+.video-player-sticky-container.sticky-active .video-player-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure video container is properly sized */
+.video-player-fullwidth {
+  width: 100%;
+  background: #000;
+}
+
+/* Remove any transitions that cause lag */
+.video-player-fullwidth,
+.video-player-sticky-container,
+.video-content-main {
+  transition: none;
 }
 
 /* ===== ENHANCED VIDEO WATCH PAGE STYLES ===== */
@@ -2306,10 +2373,20 @@ input:focus {
   .video-player-sticky-container.sticky-active {
     height: 40vh;
     max-height: 40vh;
+    animation: stickySlideDownMobile 0.2s ease-out;
   }
   
   .video-content-main.sticky-video-active {
     margin-top: 40vh;
+  }
+  
+  @keyframes stickySlideDownMobile {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
   
   /* Footer Navigation Mobile */
@@ -2758,7 +2835,8 @@ input:focus {
     animation: none;
   }
   
-  .slideDownSticky {
+  .slideDownSticky,
+  .stickySlideDownMobile {
     animation: none;
   }
 }
@@ -2815,27 +2893,43 @@ input:focus {
 .video-player-sticky-container.sticky-active .video-player-container {
   height: 100%;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
 }
 
 .video-player-sticky-container.sticky-active .video-player {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
+}
+
+/* Force iframe to be fully visible */
+.video-player-sticky-container.sticky-active iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  display: block !important;
+  background: #000;
 }
 
 /* Smooth scrolling behavior for entire page */
 html {
   scroll-behavior: smooth;
+  /* Improve scroll performance */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Prevent any overflow issues */
 body {
   overflow-x: hidden;
+  /* Better scroll performance */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Ensure content area has proper spacing */
