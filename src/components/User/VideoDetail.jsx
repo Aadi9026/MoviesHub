@@ -115,18 +115,22 @@ const VideoDetail = () => {
 
   return (
     <div className="video-detail-page">
+      {/* Video Player at Top - Full Width */}
+      <div className="video-player-fullwidth">
+        <VideoPlayer 
+          embedCode={sources[currentSource]?.code}
+          title={video.title}
+        />
+      </div>
+
+      {/* Content Below Video - In Container */}
       <div className="container">
         <div className="video-layout">
           <div className="video-main">
-            <VideoPlayer 
-              embedCode={sources[currentSource]?.code}
-              title={video.title}
-            />
-
             <div className="video-info">
               <h1 className="video-detail-title">{video.title}</h1>
               
-              {/* NEW: Horizontal Scrolling Action Bar */}
+              {/* Horizontal Scrolling Action Bar */}
               <div className="horizontal-action-bar">
                 <div className="action-bar-scroll">
                   {/* Like Button */}
