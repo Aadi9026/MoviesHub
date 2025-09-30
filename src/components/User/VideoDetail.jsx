@@ -19,6 +19,8 @@ const VideoDetail = () => {
   
   // Refs
   const actionBarRef = useRef(null);
+  const videoPlayerRef = useRef(null);
+  const contentRef = useRef(null);
   
   // State management
   const [currentSource, setCurrentSource] = useState(0);
@@ -30,6 +32,7 @@ const VideoDetail = () => {
   const [likeCount, setLikeCount] = useState(video?.likes || 0);
   const [dislikeCount, setDislikeCount] = useState(video?.dislikes || 0);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
 
   // Reset states when video changes
   useEffect(() => {
@@ -41,7 +44,28 @@ const VideoDetail = () => {
     setDisliked(false);
     setLikeCount(video?.likes || 0);
     setDislikeCount(video?.dislikes || 0);
+    setIsSticky(false);
   }, [id, video]);
+
+  // Handle scroll for sticky video player (YouTube-like behavior)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!videoPlayerRef.current) return;
+      
+      const videoRect = videoPlayerRef.current.getBoundingClientRect();
+      const scrollY = window.scrollY;
+      
+      // Make video player sticky when it reaches top of viewport
+      if (scrollY > videoRect.height) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLike = () => {
     if (liked) {
@@ -55,7 +79,6 @@ const VideoDetail = () => {
         setDislikeCount(prev => Math.max(0, prev - 1));
       }
     }
-    // Add your like API call here
   };
 
   const handleDislike = () => {
@@ -70,7 +93,6 @@ const VideoDetail = () => {
         setLikeCount(prev => Math.max(0, prev - 1));
       }
     }
-    // Add your dislike API call here
   };
 
   const handleShare = async () => {
@@ -128,7 +150,6 @@ const VideoDetail = () => {
   // Prepare video sources
   const sources = [];
   
-  // Add primary source if available
   if (video.embedCode && video.embedCode.trim() !== '') {
     sources.push({ 
       code: video.embedCode, 
@@ -137,7 +158,6 @@ const VideoDetail = () => {
     });
   }
   
-  // Add alternative sources if available and enabled
   if (video.altSources && video.altSourcesEnabled) {
     video.altSources.forEach((source, index) => {
       if (video.altSourcesEnabled[index] && source && source.trim() !== '') {
@@ -150,7 +170,6 @@ const VideoDetail = () => {
     });
   }
 
-  // If no valid sources, show error
   if (sources.length === 0) {
     return (
       <div className="video-detail-page">
@@ -174,17 +193,22 @@ const VideoDetail = () => {
     Object.entries(video.downloadLinks).filter(([_, link]) => link && link.trim() !== '') : [];
 
   return (
-    <div className="video-detail-page">
-      {/* Video Player at Top - Full Width */}
-      <div className="video-player-fullwidth">
-        <VideoPlayer 
-          embedCode={sources[currentSource]?.code}
-          title={video.title}
-        />
+    <div className="video-detail-page" ref={contentRef}>
+      {/* YouTube-like Sticky Video Player */}
+      <div 
+        className={`video-player-sticky-container ${isSticky ? 'sticky-active' : ''}`}
+        ref={videoPlayerRef}
+      >
+        <div className="video-player-fullwidth">
+          <VideoPlayer 
+            embedCode={sources[currentSource]?.code}
+            title={video.title}
+          />
+        </div>
       </div>
 
-      {/* Content Below Video - In Container */}
-      <div className="container">
+      {/* Content Below Video */}
+      <div className={`container ${isSticky ? 'content-with-sticky-video' : ''}`}>
         <div className="video-layout">
           <div className="video-main">
             <div className="video-info">
@@ -283,7 +307,7 @@ const VideoDetail = () => {
                 </div>
               </div>
 
-              {/* Download options (appears when download button clicked) */}
+              {/* Download options */}
               {showDownloads && availableDownloads.length > 0 && (
                 <div className="download-section">
                   <div className="download-header">
@@ -335,7 +359,6 @@ const VideoDetail = () => {
                 </button>
                 
                 <div className="metadata-content">
-                  {/* Enhanced Metadata Grid */}
                   <div className="metadata-grid">
                     <div className="metadata-item highlight">
                       <div className="metadata-label">
@@ -386,7 +409,6 @@ const VideoDetail = () => {
                       </div>
                     )}
 
-                    {/* Engagement Stats */}
                     <div className="metadata-item engagement-stats">
                       <div className="metadata-label">
                         <i className="fas fa-chart-bar"></i>
@@ -405,7 +427,6 @@ const VideoDetail = () => {
                     </div>
                   </div>
 
-                  {/* Enhanced Description */}
                   {video.description && (
                     <div className="metadata-description">
                       <div className="description-header">
