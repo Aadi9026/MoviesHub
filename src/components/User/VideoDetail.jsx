@@ -20,7 +20,7 @@ const VideoDetail = () => {
   // Refs
   const actionBarRef = useRef(null);
   const videoPlayerRef = useRef(null);
-  const contentRef = useRef(null);
+  const pageRef = useRef(null);
   
   // State management
   const [currentSource, setCurrentSource] = useState(0);
@@ -47,23 +47,28 @@ const VideoDetail = () => {
     setIsSticky(false);
   }, [id, video]);
 
-  // Handle scroll for sticky video player (YouTube-like behavior)
+  // Handle scroll for sticky video player - FULL PAGE SCROLL
   useEffect(() => {
     const handleScroll = () => {
       if (!videoPlayerRef.current) return;
       
       const videoRect = videoPlayerRef.current.getBoundingClientRect();
-      const scrollY = window.scrollY;
       
       // Make video player sticky when it reaches top of viewport
-      if (scrollY > videoRect.height) {
+      // This works for ANY scrolling on the page
+      if (videoRect.top <= 0) {
         setIsSticky(true);
       } else {
         setIsSticky(false);
       }
     };
 
+    // Listen to scroll on the entire window
     window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Also check on initial load
+    handleScroll();
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -193,8 +198,8 @@ const VideoDetail = () => {
     Object.entries(video.downloadLinks).filter(([_, link]) => link && link.trim() !== '') : [];
 
   return (
-    <div className="video-detail-page" ref={contentRef}>
-      {/* YouTube-like Sticky Video Player */}
+    <div className="video-detail-page" ref={pageRef}>
+      {/* YouTube-like Sticky Video Player - FULL PAGE SCROLL */}
       <div 
         className={`video-player-sticky-container ${isSticky ? 'sticky-active' : ''}`}
         ref={videoPlayerRef}
@@ -207,284 +212,286 @@ const VideoDetail = () => {
         </div>
       </div>
 
-      {/* Content Below Video */}
-      <div className={`container ${isSticky ? 'content-with-sticky-video' : ''}`}>
-        <div className="video-layout">
-          <div className="video-main">
-            <div className="video-info">
-              <h1 className="video-detail-title">{video.title}</h1>
-              
-              {/* Enhanced Premium Horizontal Action Bar */}
-              <div className="horizontal-action-bar">
-                <div 
-                  className="action-bar-scroll" 
-                  ref={actionBarRef}
-                  id="actionBarScroll"
-                >
-                  {/* Like Button */}
-                  <button 
-                    className={`action-bar-btn like-btn ${liked ? 'active' : ''}`}
-                    onClick={handleLike}
-                    aria-label={liked ? 'Unlike this video' : 'Like this video'}
-                  >
-                    <i className={`fas fa-thumbs-up ${liked ? 'fas' : 'far'}`}></i>
-                    <span>Like</span>
-                    {likeCount > 0 && <span className="btn-counter">{likeCount}</span>}
-                  </button>
-                  
-                  {/* Dislike Button */}
-                  <button 
-                    className={`action-bar-btn dislike-btn ${disliked ? 'active' : ''}`}
-                    onClick={handleDislike}
-                    aria-label={disliked ? 'Remove dislike' : 'Dislike this video'}
-                  >
-                    <i className={`fas fa-thumbs-down ${disliked ? 'fas' : 'far'}`}></i>
-                    <span>Dislike</span>
-                    {dislikeCount > 0 && <span className="btn-counter">{dislikeCount}</span>}
-                  </button>
-                  
-                  {/* Share Button with Tooltip */}
-                  <div className="share-button-container">
-                    <button 
-                      className="action-bar-btn share-btn"
-                      onClick={handleShare}
-                      aria-label="Share this video"
-                    >
-                      <i className="fas fa-share-alt"></i>
-                      <span>Share</span>
-                    </button>
-                    {showShareTooltip && (
-                      <div className="share-tooltip">
-                        <i className="fas fa-check"></i>
-                        Link copied to clipboard!
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Download Button */}
-                  {availableDownloads.length > 0 && (
-                    <button 
-                      className="action-bar-btn download-btn"
-                      onClick={() => setShowDownloads(!showDownloads)}
-                      aria-label={`Download options (${availableDownloads.length} available)`}
-                    >
-                      <i className="fas fa-download"></i>
-                      <span>Download</span>
-                      <span className="btn-counter">({availableDownloads.length})</span>
-                    </button>
-                  )}
-                  
-                  {/* Video Information Button */}
-                  <button 
-                    className="action-bar-btn info-btn"
-                    onClick={() => setMetadataExpanded(!metadataExpanded)}
-                    aria-expanded={metadataExpanded}
-                    aria-label="Show video information"
-                  >
-                    <i className="fas fa-info-circle"></i>
-                    <span>Info</span>
-                    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
-                  </button>
-                  
-                  {/* Primary Source Dropdown */}
-                  {sources.length > 0 && (
-                    <div className="action-bar-dropdown">
-                      <select 
-                        className="action-bar-select"
-                        value={currentSource} 
-                        onChange={(e) => setCurrentSource(parseInt(e.target.value))}
-                        aria-label="Select video source"
-                      >
-                        <option value="" disabled>Source</option>
-                        {sources.map((source, index) => (
-                          <option key={index} value={index}>
-                            {source.label} {index === 0 && '★'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Download options */}
-              {showDownloads && availableDownloads.length > 0 && (
-                <div className="download-section">
-                  <div className="download-header">
-                    <i className="fas fa-download"></i>
-                    <h3>Download Options</h3>
-                    <button 
-                      className="download-close-btn"
-                      onClick={() => setShowDownloads(false)}
-                      aria-label="Close download options"
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <div className="quality-buttons">
-                    {availableDownloads.map(([quality, link]) => (
-                      <a 
-                        key={quality} 
-                        href={link} 
-                        className="quality-btn"
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        download
-                      >
-                        <i className="fas fa-download"></i>
-                        {quality}
-                        <span className="quality-badge">HD</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Enhanced Collapsible Metadata Section */}
-              <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                <button 
-                  className="metadata-header"
-                  onClick={() => setMetadataExpanded(!metadataExpanded)}
-                  aria-expanded={metadataExpanded}
-                >
-                  <div className="metadata-title">
-                    <i className="fas fa-info-circle"></i>
-                    <span>Video Information</span>
-                    <div className="metadata-badge">
-                      <i className="fas fa-film"></i>
-                      Details
-                    </div>
-                  </div>
-                  <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
-                </button>
+      {/* Main Content Area - Scrolls under the sticky video */}
+      <div className={`video-content-area ${isSticky ? 'content-with-sticky-video' : ''}`}>
+        <div className="container">
+          <div className="video-layout">
+            <div className="video-main">
+              <div className="video-info">
+                <h1 className="video-detail-title">{video.title}</h1>
                 
-                <div className="metadata-content">
-                  <div className="metadata-grid">
-                    <div className="metadata-item highlight">
-                      <div className="metadata-label">
-                        <i className="fas fa-eye"></i>
-                        Views
-                      </div>
-                      <div className="metadata-value">
-                        {formatViews(video.views || 0)}
-                      </div>
-                    </div>
+                {/* Enhanced Premium Horizontal Action Bar */}
+                <div className="horizontal-action-bar">
+                  <div 
+                    className="action-bar-scroll" 
+                    ref={actionBarRef}
+                    id="actionBarScroll"
+                  >
+                    {/* Like Button */}
+                    <button 
+                      className={`action-bar-btn like-btn ${liked ? 'active' : ''}`}
+                      onClick={handleLike}
+                      aria-label={liked ? 'Unlike this video' : 'Like this video'}
+                    >
+                      <i className={`fas fa-thumbs-up ${liked ? 'fas' : 'far'}`}></i>
+                      <span>Like</span>
+                      {likeCount > 0 && <span className="btn-counter">{likeCount}</span>}
+                    </button>
                     
-                    <div className="metadata-item">
-                      <div className="metadata-label">
-                        <i className="fas fa-clock"></i>
-                        Duration
-                      </div>
-                      <div className="metadata-value">
-                        {formatDuration(video.duration || 120)}
-                      </div>
-                    </div>
+                    {/* Dislike Button */}
+                    <button 
+                      className={`action-bar-btn dislike-btn ${disliked ? 'active' : ''}`}
+                      onClick={handleDislike}
+                      aria-label={disliked ? 'Remove dislike' : 'Dislike this video'}
+                    >
+                      <i className={`fas fa-thumbs-down ${disliked ? 'fas' : 'far'}`}></i>
+                      <span>Dislike</span>
+                      {dislikeCount > 0 && <span className="btn-counter">{dislikeCount}</span>}
+                    </button>
                     
-                    <div className="metadata-item highlight">
-                      <div className="metadata-label">
-                        <i className="fas fa-tags"></i>
-                        Genre
-                      </div>
-                      <div className="metadata-value">
-                        <span className="genre-badge">{video.genre}</span>
-                      </div>
-                    </div>
-                    
-                    {video.createdAt && (
-                      <div className="metadata-item">
-                        <div className="metadata-label">
-                          <i className="fas fa-calendar"></i>
-                          Date Added
+                    {/* Share Button with Tooltip */}
+                    <div className="share-button-container">
+                      <button 
+                        className="action-bar-btn share-btn"
+                        onClick={handleShare}
+                        aria-label="Share this video"
+                      >
+                        <i className="fas fa-share-alt"></i>
+                        <span>Share</span>
+                      </button>
+                      {showShareTooltip && (
+                        <div className="share-tooltip">
+                          <i className="fas fa-check"></i>
+                          Link copied to clipboard!
                         </div>
-                        <div className="metadata-value">
-                          {video.createdAt.toDate ? 
-                            new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            }) : 
-                            'Recently added'
-                          }
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="metadata-item engagement-stats">
-                      <div className="metadata-label">
-                        <i className="fas fa-chart-bar"></i>
-                        Engagement
-                      </div>
-                      <div className="engagement-metrics">
-                        <div className="engagement-item">
-                          <i className="fas fa-thumbs-up"></i>
-                          <span>{likeCount} likes</span>
-                        </div>
-                        <div className="engagement-item">
-                          <i className="fas fa-thumbs-down"></i>
-                          <span>{dislikeCount} dislikes</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {video.description && (
-                    <div className="metadata-description">
-                      <div className="description-header">
-                        <i className="fas fa-align-left"></i>
-                        <h4>Description</h4>
-                        <div className="description-badge">
-                          {video.description.length > 200 ? 'Detailed' : 'Brief'}
-                        </div>
-                      </div>
-                      <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
-                        {video.description}
-                      </div>
-                      {video.description.length > 150 && (
-                        <button 
-                          className="read-more-btn"
-                          onClick={() => setDescriptionExpanded(!descriptionExpanded)}
-                        >
-                          <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
-                          {descriptionExpanded ? 'Show Less' : 'Read More'}
-                        </button>
                       )}
                     </div>
-                  )}
+                    
+                    {/* Download Button */}
+                    {availableDownloads.length > 0 && (
+                      <button 
+                        className="action-bar-btn download-btn"
+                        onClick={() => setShowDownloads(!showDownloads)}
+                        aria-label={`Download options (${availableDownloads.length} available)`}
+                      >
+                        <i className="fas fa-download"></i>
+                        <span>Download</span>
+                        <span className="btn-counter">({availableDownloads.length})</span>
+                      </button>
+                    )}
+                    
+                    {/* Video Information Button */}
+                    <button 
+                      className="action-bar-btn info-btn"
+                      onClick={() => setMetadataExpanded(!metadataExpanded)}
+                      aria-expanded={metadataExpanded}
+                      aria-label="Show video information"
+                    >
+                      <i className="fas fa-info-circle"></i>
+                      <span>Info</span>
+                      <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
+                    </button>
+                    
+                    {/* Primary Source Dropdown */}
+                    {sources.length > 0 && (
+                      <div className="action-bar-dropdown">
+                        <select 
+                          className="action-bar-select"
+                          value={currentSource} 
+                          onChange={(e) => setCurrentSource(parseInt(e.target.value))}
+                          aria-label="Select video source"
+                        >
+                          <option value="" disabled>Source</option>
+                          {sources.map((source, index) => (
+                            <option key={index} value={index}>
+                              {source.label} {index === 0 && '★'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <AdSlot position="in_video" videoId={video.id} />
-            </div>
-          </div>
+                {/* Download options */}
+                {showDownloads && availableDownloads.length > 0 && (
+                  <div className="download-section">
+                    <div className="download-header">
+                      <i className="fas fa-download"></i>
+                      <h3>Download Options</h3>
+                      <button 
+                        className="download-close-btn"
+                        onClick={() => setShowDownloads(false)}
+                        aria-label="Close download options"
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <div className="quality-buttons">
+                      {availableDownloads.map(([quality, link]) => (
+                        <a 
+                          key={quality} 
+                          href={link} 
+                          className="quality-btn"
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          <i className="fas fa-download"></i>
+                          {quality}
+                          <span className="quality-badge">HD</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          <div className="video-sidebar">
-            <AdSlot position="sidebar" />
-            
-            <div className="suggested-videos">
-              <div className="sidebar-header">
-                <i className="fas fa-film"></i>
-                <h3>Related Movies</h3>
-                <span className="sidebar-badge">{relatedVideos.length}</span>
-              </div>
-              
-              {relatedLoading ? (
-                <LoadingSpinner size="small" text="Loading related videos..." />
-              ) : relatedVideos.length > 0 ? (
-                relatedVideos.map(relatedVideo => (
-                  <VideoCard key={relatedVideo.id} video={relatedVideo} />
-                ))
-              ) : (
-                <div className="no-related">
-                  <i className="fas fa-search"></i>
-                  <p>No related videos found</p>
+                {/* Enhanced Collapsible Metadata Section */}
+                <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
                   <button 
-                    className="btn-secondary"
-                    onClick={() => navigate('/')}
+                    className="metadata-header"
+                    onClick={() => setMetadataExpanded(!metadataExpanded)}
+                    aria-expanded={metadataExpanded}
                   >
-                    Browse All Movies
+                    <div className="metadata-title">
+                      <i className="fas fa-info-circle"></i>
+                      <span>Video Information</span>
+                      <div className="metadata-badge">
+                        <i className="fas fa-film"></i>
+                        Details
+                      </div>
+                    </div>
+                    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
                   </button>
+                  
+                  <div className="metadata-content">
+                    <div className="metadata-grid">
+                      <div className="metadata-item highlight">
+                        <div className="metadata-label">
+                          <i className="fas fa-eye"></i>
+                          Views
+                        </div>
+                        <div className="metadata-value">
+                          {formatViews(video.views || 0)}
+                        </div>
+                      </div>
+                      
+                      <div className="metadata-item">
+                        <div className="metadata-label">
+                          <i className="fas fa-clock"></i>
+                          Duration
+                        </div>
+                        <div className="metadata-value">
+                          {formatDuration(video.duration || 120)}
+                        </div>
+                      </div>
+                      
+                      <div className="metadata-item highlight">
+                        <div className="metadata-label">
+                          <i className="fas fa-tags"></i>
+                          Genre
+                        </div>
+                        <div className="metadata-value">
+                          <span className="genre-badge">{video.genre}</span>
+                        </div>
+                      </div>
+                      
+                      {video.createdAt && (
+                        <div className="metadata-item">
+                          <div className="metadata-label">
+                            <i className="fas fa-calendar"></i>
+                            Date Added
+                          </div>
+                          <div className="metadata-value">
+                            {video.createdAt.toDate ? 
+                              new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              }) : 
+                              'Recently added'
+                            }
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="metadata-item engagement-stats">
+                        <div className="metadata-label">
+                          <i className="fas fa-chart-bar"></i>
+                          Engagement
+                        </div>
+                        <div className="engagement-metrics">
+                          <div className="engagement-item">
+                            <i className="fas fa-thumbs-up"></i>
+                            <span>{likeCount} likes</span>
+                          </div>
+                          <div className="engagement-item">
+                            <i className="fas fa-thumbs-down"></i>
+                            <span>{dislikeCount} dislikes</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {video.description && (
+                      <div className="metadata-description">
+                        <div className="description-header">
+                          <i className="fas fa-align-left"></i>
+                          <h4>Description</h4>
+                          <div className="description-badge">
+                            {video.description.length > 200 ? 'Detailed' : 'Brief'}
+                          </div>
+                        </div>
+                        <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
+                          {video.description}
+                        </div>
+                        {video.description.length > 150 && (
+                          <button 
+                            className="read-more-btn"
+                            onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                          >
+                            <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
+                            {descriptionExpanded ? 'Show Less' : 'Read More'}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+
+                <AdSlot position="in_video" videoId={video.id} />
+              </div>
+            </div>
+
+            <div className="video-sidebar">
+              <AdSlot position="sidebar" />
+              
+              <div className="suggested-videos">
+                <div className="sidebar-header">
+                  <i className="fas fa-film"></i>
+                  <h3>Related Movies</h3>
+                  <span className="sidebar-badge">{relatedVideos.length}</span>
+                </div>
+                
+                {relatedLoading ? (
+                  <LoadingSpinner size="small" text="Loading related videos..." />
+                ) : relatedVideos.length > 0 ? (
+                  relatedVideos.map(relatedVideo => (
+                    <VideoCard key={relatedVideo.id} video={relatedVideo} />
+                  ))
+                ) : (
+                  <div className="no-related">
+                    <i className="fas fa-search"></i>
+                    <p>No related videos found</p>
+                    <button 
+                      className="btn-secondary"
+                      onClick={() => navigate('/')}
+                    >
+                      Browse All Movies
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
