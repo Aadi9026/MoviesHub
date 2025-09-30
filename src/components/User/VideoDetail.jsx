@@ -20,7 +20,7 @@ const VideoDetail = () => {
   // Refs
   const actionBarRef = useRef(null);
   const videoPlayerRef = useRef(null);
-  const pageRef = useRef(null);
+  const contentRef = useRef(null);
   
   // State management
   const [currentSource, setCurrentSource] = useState(0);
@@ -47,29 +47,31 @@ const VideoDetail = () => {
     setIsSticky(false);
   }, [id, video]);
 
-  // Handle scroll for sticky video player - FULL PAGE SCROLL
+  // Handle scroll for sticky video player - FIXED VERSION
   useEffect(() => {
     const handleScroll = () => {
       if (!videoPlayerRef.current) return;
       
-      const videoRect = videoPlayerRef.current.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset;
+      const videoHeight = videoPlayerRef.current.offsetHeight;
       
-      // Make video player sticky when it reaches top of viewport
-      // This works for ANY scrolling on the page
-      if (videoRect.top <= 0) {
+      // Activate sticky when scrolled past the video height
+      if (scrollY > videoHeight - 100) {
         setIsSticky(true);
       } else {
         setIsSticky(false);
       }
     };
 
-    // Listen to scroll on the entire window
+    // Add scroll event listener
     window.addEventListener('scroll', handleScroll, { passive: true });
     
-    // Also check on initial load
+    // Check initial position
     handleScroll();
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleLike = () => {
@@ -198,8 +200,8 @@ const VideoDetail = () => {
     Object.entries(video.downloadLinks).filter(([_, link]) => link && link.trim() !== '') : [];
 
   return (
-    <div className="video-detail-page" ref={pageRef}>
-      {/* YouTube-like Sticky Video Player - FULL PAGE SCROLL */}
+    <div className="video-detail-page" ref={contentRef}>
+      {/* YouTube-like Sticky Video Player */}
       <div 
         className={`video-player-sticky-container ${isSticky ? 'sticky-active' : ''}`}
         ref={videoPlayerRef}
@@ -212,8 +214,8 @@ const VideoDetail = () => {
         </div>
       </div>
 
-      {/* Main Content Area - Scrolls under the sticky video */}
-      <div className={`video-content-area ${isSticky ? 'content-with-sticky-video' : ''}`}>
+      {/* Main Content Area */}
+      <div className={`video-content-main ${isSticky ? 'sticky-video-active' : ''}`}>
         <div className="container">
           <div className="video-layout">
             <div className="video-main">
