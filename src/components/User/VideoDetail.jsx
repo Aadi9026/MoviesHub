@@ -236,37 +236,17 @@ const VideoDetail = () => {
                       </button>
                     )}
                     
-  {/* Video Info Button */}
-<button 
-  className={`action-bar-btn info-btn ${metadataExpanded ? 'active' : ''}`}
-  onClick={() => setMetadataExpanded(!metadataExpanded)}
-  aria-expanded={metadataExpanded}
-  aria-label="Show video information"
->
-  <i className="fas fa-info-circle"></i>
-  <span>Video Info</span>
-</button>
-
-{/* Download Button */}
-{availableDownloads.length > 0 && (
-  <button 
-    className={`action-bar-btn download-btn ${showDownloads ? 'active' : ''}`}
-    onClick={() => setShowDownloads(!showDownloads)}
-    aria-label={`Download options (${availableDownloads.length} available)`}
-  >
-    <i className="fas fa-download"></i>
-    <span>Download</span>
-  </button>
-)}
-
-{/* Primary Source Button */}
-<button 
-  className="action-bar-btn source-btn active"
-  aria-label="Primary source selected"
->
-  <i className="fas fa-star"></i>
-  <span>Primary Source</span>
-</button>
+                    {/* Video Information Button */}
+                    <button 
+                      className="action-bar-btn info-btn"
+                      onClick={() => setMetadataExpanded(!metadataExpanded)}
+                      aria-expanded={metadataExpanded}
+                      aria-label="Show video information"
+                    >
+                      <i className="fas fa-info-circle"></i>
+                      <span>Info</span>
+                      <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
+                    </button>
                     
                     {/* Primary Source Dropdown */}
                     {sources.length > 0 && (
@@ -320,25 +300,49 @@ const VideoDetail = () => {
                     </div>
                   </div>
                 )}
-                {/* Enhanced Collapsible Metadata Section */}
-                <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                  <button 
-                    className="metadata-header"
-                    onClick={() => setMetadataExpanded(!metadataExpanded)}
-                    aria-expanded={metadataExpanded}
-                  >
-                    <div className="metadata-title">
-                      <i className="fas fa-info-circle"></i>
-                      <span>Video Information</span>
-                      <div className="metadata-badge">
-                        <i className="fas fa-film"></i>
-                        Details
-                      </div>
-                    </div>
-                    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
-                  </button>
-                  
-                  <div className="metadata-content">
+               {/* Three Button Section */}
+<div className="three-button-section">
+  <button 
+    className={`action-btn ${metadataExpanded ? 'active' : ''}`}
+    onClick={() => setMetadataExpanded(!metadataExpanded)}
+  >
+    <i className="fas fa-info-circle"></i>
+    Video Info
+  </button>
+  
+  {availableDownloads.length > 0 && (
+    <button 
+      className={`action-btn ${showDownloads ? 'active' : ''}`}
+      onClick={() => setShowDownloads(!showDownloads)}
+    >
+      <i className="fas fa-download"></i>
+      Download
+    </button>
+  )}
+  
+  <button className="action-btn active">
+    <i className="fas fa-star"></i>
+    Primary Source
+  </button>
+</div>
+
+{/* Metadata content (appears when Video Info clicked) */}
+{metadataExpanded && (
+  <div className="metadata-content-expanded">
+    {/* Your existing metadata content goes here */}
+    <div className="metadata-grid">
+      {/* ... your existing metadata grid content ... */}
+    </div>
+    {/* ... rest of your metadata content ... */}
+  </div>
+)}
+
+{/* Download options (appears when Download clicked) */}
+{showDownloads && availableDownloads.length > 0 && (
+  <div className="download-section">
+    {/* Your existing download section content */}
+  </div>
+)}
                     {/* Enhanced Metadata Grid */}
                     <div className="metadata-grid">
                       <div className="metadata-item highlight">
