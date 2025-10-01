@@ -2948,76 +2948,46 @@ body {
 }
 
 .video-detail-page {
-  position: relative;
   width: 100vw;
   height: 100vh;
   background: var(--dark);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .video-player-sticky {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 30vh; /* Use viewport height for responsiveness */
-  min-height: 200px; /* Minimum height */
-  max-height: 250px; /* Maximum height */
+  width: 100%;
+  height: 30vh;
   z-index: 11;
   background: var(--dark);
 }
 
 .video-content-scroll {
-  margin-top: 30vh; /* Match video player height */
-  height: 70vh; /* Remaining viewport height */
-  overflow-y: auto;
-  overflow-x: hidden;
+  position: fixed;
+  top: 30vh;
+  left: 0;
+  width: 100%;
+  height: 70vh;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px; /* Reduced padding */
+  background: var(--dark);
 }
 
-/* Remove any container padding/margin that might be cutting content */
-.video-content-scroll .container {
-  padding: 0;
-  margin: 0;
-  width: 100%;
-}
-
-.video-content-scroll .video-layout {
+/* Reset all container styles inside scroll area */
+.video-content-scroll .container,
+.video-content-scroll .video-layout,
+.video-content-scroll .video-main,
+.video-content-scroll .video-sidebar {
   width: 100%;
   margin: 0;
   padding: 0;
+  max-width: none;
 }
 
-/* Ensure all content is visible */
-.video-content-scroll * {
-  box-sizing: border-box;
-}
-
-.custom-scroll-hide,
-.video-content-scroll {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.custom-scroll-hide::-webkit-scrollbar,
-.video-content-scroll::-webkit-scrollbar {
-  width: 0 !important;
-  background: transparent;
-}
-
-/* Make sure action bar and other content don't have fixed heights that cause overflow */
-.horizontal-action-bar {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.metadata-collapsible {
-  width: 100%;
-}
-
-.suggested-videos {
-  width: 100%;
+/* Ensure no horizontal overflow */
+.video-content-scroll > * {
+  max-width: 100%;
+  overflow-x: hidden;
 }
