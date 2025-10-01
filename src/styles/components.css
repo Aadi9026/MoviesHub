@@ -3114,43 +3114,48 @@ html:has(.video-detail-page) {
 .sidebar-badge {
   display: none !important;
 }
-/* ===== THREE BUTTONS IN BOX ===== */
+/* ===== THREE BUTTONS IN BOX - SMALL SIZE ===== */
 .three-buttons-box {
   background: var(--dark-light);
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px;
   margin: 20px 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 100%;
 }
 
 .button-container {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .box-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 6px;
+  padding: 8px 12px;
   background: var(--dark-lighter);
   color: var(--text);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 1;
-  min-width: 140px;
+  min-width: 0;
+  white-space: nowrap;
   justify-content: center;
+  max-width: 120px;
 }
 
 .box-btn:hover {
   background: var(--primary);
   color: white;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .box-btn.active {
@@ -3160,21 +3165,101 @@ html:has(.video-detail-page) {
 }
 
 .box-btn i {
-  font-size: 16px;
+  font-size: 12px;
 }
 
-/* Content Boxes */
-.metadata-content-box,
-.download-content-box {
+.btn-chevron {
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+/* Sources Content */
+.sources-content-box {
   background: var(--dark-light);
   border-radius: 12px;
-  padding: 20px;
-  margin: 15px 0;
+  padding: 15px;
+  margin: 10px 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
   animation: fadeIn 0.3s ease;
 }
 
+.sources-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.sources-header i {
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.sources-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--dark-lighter);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+
+.source-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--primary);
+}
+
+.source-item.active {
+  background: rgba(229, 9, 20, 0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.source-item i:first-child {
+  font-size: 14px;
+  width: 16px;
+}
+
+.source-star {
+  color: gold;
+  font-size: 12px;
+  margin-left: auto;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .button-container {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .box-btn {
+    flex: 1 1 calc(33.333% - 12px);
+    min-width: 80px;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
 }
