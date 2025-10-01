@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /admin/login/
-Disallow: /api/
-
-Sitemap: https://movieshub.vercel.app/sitemap.xml
