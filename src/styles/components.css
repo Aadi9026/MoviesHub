@@ -2947,7 +2947,7 @@ body {
   z-index: 999;
 }
 
-  .video-detail-page {
+.video-detail-page {
   position: relative;
   width: 100vw;
   height: 100vh;
@@ -2970,24 +2970,20 @@ body {
 }
 
 .video-content-scroll {
-  position: absolute;
-  top: 30vh;
-  left: 0;
-  width: 100%;
-  height: calc(100vh - 30vh);
+  margin-top: 30vh;
+  height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background: var(--dark);
+  padding-bottom: 100px; /* Increased for better scrolling */
 }
 
-/* Reset all container styles */
+/* Add padding to container to see all content */
 .video-content-scroll .container {
-  width: 100%;
-  max-width: none;
+  padding: 20px 16px; /* Added top and side padding */
   margin: 0;
-  padding: 16px;
-  padding-bottom: 100px; /* Extra space for bottom navigation */
+  width: 100%;
+  min-height: 100%; /* Ensure container takes full height */
 }
 
 .video-content-scroll .video-layout {
@@ -2996,46 +2992,45 @@ body {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 16px; /* Add spacing between sections */
 }
 
-/* Ensure all content containers are flexible */
-.video-content-scroll .video-main,
-.video-content-scroll .video-sidebar {
-  width: 100%;
-  margin: 0;
+/* Ensure video title is visible */
+.video-detail-title {
+  color: white;
+  font-size: 1.4rem;
+  margin: 0 0 16px 0;
   padding: 0;
+  line-height: 1.3;
 }
 
-/* Video info section */
-.video-content-scroll .video-info {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Action bar fixes */
-.video-content-scroll .horizontal-action-bar {
+/* Ensure metadata section is visible */
+.metadata-collapsible {
   width: 100%;
   margin: 16px 0;
-  padding: 0;
 }
 
-/* Metadata section */
-.video-content-scroll .metadata-collapsible {
+.metadata-header {
   width: 100%;
-  margin: 16px 0;
-  padding: 0;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Related videos section */
-.video-content-scroll .suggested-videos {
-  width: 100%;
-  margin: 16px 0;
-  padding: 0;
+.metadata-content {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-top: 8px;
+  color: white;
 }
 
-/* Ensure all content is visible and properly spaced */
+/* Ensure all content is visible */
 .video-content-scroll * {
   box-sizing: border-box;
 }
@@ -3052,35 +3047,24 @@ body {
   background: transparent;
 }
 
-/* Remove any potential overflow hidden from parent elements */
-.video-content-scroll > * {
-  overflow: visible !important;
-}
-
-/* Make sure text and buttons are properly visible */
-.video-detail-title {
-  font-size: 1.5rem;
+/* Make sure action bar and other content don't have fixed heights that cause overflow */
+.horizontal-action-bar {
+  width: 100%;
+  overflow-x: auto;
   margin: 16px 0;
-  padding: 0;
+}
+
+.suggested-videos {
+  width: 100%;
+  margin: 16px 0;
+}
+
+/* Ensure related videos are properly spaced */
+.sidebar-header {
   color: white;
+  margin-bottom: 16px;
 }
 
-/* Action bar scroll container */
-.action-bar-scroll {
-  width: 100%;
-  padding: 8px 0;
-}
-
-/* Metadata content */
-.metadata-content {
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  margin-top: 8px;
-}
-
-/* Related videos cards */
 .video-card {
-  margin: 8px 0;
-  width: 100%;
+  margin-bottom: 12px;
 }
