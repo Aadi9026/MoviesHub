@@ -3068,29 +3068,3 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-/* ===== ADMIN FORM VISIBILITY FIX ===== */
-.upload-options {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.upload-option {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  margin-bottom: 15px;
-}
-
-.upload-option .form-input,
-.upload-option .file-input {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100%;
-}
-
-.file-input {
-  display: block !important;
-  visibility: visible !important;
-}
