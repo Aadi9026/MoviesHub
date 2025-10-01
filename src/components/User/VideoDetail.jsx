@@ -285,19 +285,27 @@ const VideoDetail = () => {
                 {/* Info Box Container - Video Information, Details, Download in same row */}
                 <div className="info-box-container">
                   <div className="info-box-header">
-                    <div className="info-box-item">
+                    {/* Video Information - Clickable */}
+                    <div 
+                      className={`info-box-item ${metadataExpanded ? 'active' : ''}`}
+                      onClick={() => setMetadataExpanded(!metadataExpanded)}
+                    >
                       <i className="fas fa-info-circle"></i>
                       <span>Video Information</span>
                     </div>
                     
+                    {/* Details - Static */}
                     <div className="info-box-item">
                       <i className="fas fa-film"></i>
                       <span>Details</span>
-                      <div className="info-check">✓</div>
                     </div>
                     
+                    {/* Download - Clickable */}
                     {availableDownloads.length > 0 && (
-                      <div className="info-box-item download-info-item">
+                      <div 
+                        className={`info-box-item ${showDownloads ? 'active' : ''}`}
+                        onClick={() => setShowDownloads(!showDownloads)}
+                      >
                         <i className="fas fa-download"></i>
                         <span>Download</span>
                         <div className="download-count">({availableDownloads.length})</div>
@@ -338,9 +346,9 @@ const VideoDetail = () => {
                     </div>
                   )}
 
-                  {/* Collapsible Metadata Content */}
-                  <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                    <div className="metadata-content">
+                  {/* Video Information Content - Shows when Video Information is clicked */}
+                  {metadataExpanded && (
+                    <div className="metadata-content-box">
                       {/* Enhanced Metadata Grid */}
                       <div className="metadata-grid">
                         <div className="metadata-item highlight">
@@ -436,7 +444,7 @@ const VideoDetail = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <AdSlot position="in_video" videoId={video.id} />
