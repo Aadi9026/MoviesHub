@@ -3008,18 +3008,16 @@ body {
 
 .video-content-scroll {
   margin-top: 35vh; /* Match the increased video player height */
-  height: 65vh; /* Adjusted remaining height */
+  height: calc(100vh - 35vh - 80px); /* Calculate remaining space minus footer */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px;
+  padding-bottom: 100px; /* Increased padding to ensure content is visible above footer */
 }
 
-/* Remove any container padding/margin that might be cutting content */
+/* Ensure the container has proper spacing */
 .video-content-scroll .container {
-  padding: 0;
-  margin: 0;
-  width: 100%;
+  padding-bottom: 60px;
 }
 
 .video-content-scroll .video-layout {
