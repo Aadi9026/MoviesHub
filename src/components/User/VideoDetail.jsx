@@ -473,8 +473,7 @@ const VideoDetail = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      
   );
 };
 export default VideoDetail;
