@@ -3114,29 +3114,31 @@ html:has(.video-detail-page) {
 .sidebar-badge {
   display: none !important;
 }
-/* ===== THREE BUTTONS IN BOX - SMALL SIZE ===== */
+/* ===== PROFESSIONAL THREE BUTTONS BOX ===== */
 .three-buttons-box {
   background: var(--dark-light);
-  border-radius: 12px;
-  padding: 15px;
-  margin: 20px 0;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 15px 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .button-container {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;
-  justify-content: space-between;
   width: 100%;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .box-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 10px 8px;
   background: var(--dark-lighter);
   color: var(--text);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -3144,59 +3146,65 @@ html:has(.video-detail-page) {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   flex: 1;
   min-width: 0;
   white-space: nowrap;
-  justify-content: center;
-  max-width: 120px;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .box-btn:hover {
   background: var(--primary);
   color: white;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3);
 }
 
 .box-btn.active {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
 }
 
 .box-btn i {
   font-size: 12px;
+  flex-shrink: 0;
 }
 
-.btn-chevron {
-  font-size: 10px;
-  margin-left: 4px;
+.box-btn span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Sources Content */
+/* Content Boxes */
+.metadata-content-box,
+.download-content-box,
 .sources-content-box {
   background: var(--dark-light);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 15px;
   margin: 10px 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .sources-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .sources-header i {
   color: var(--primary);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .sources-header h3 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0;
   color: var(--text);
@@ -3205,21 +3213,21 @@ html:has(.video-detail-page) {
 .sources-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .source-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 8px 10px;
   background: var(--dark-lighter);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--text);
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 13px;
+  transition: all 0.2s ease;
+  font-size: 12px;
 }
 
 .source-item:hover {
@@ -3234,32 +3242,38 @@ html:has(.video-detail-page) {
 }
 
 .source-item i:first-child {
-  font-size: 14px;
-  width: 16px;
+  font-size: 12px;
+  width: 14px;
 }
 
 .source-star {
   color: gold;
-  font-size: 12px;
+  font-size: 10px;
   margin-left: auto;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
+  from { opacity: 0; transform: translateY(-3px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* Mobile responsive */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
+  .three-buttons-box {
+    padding: 10px;
+  }
+  
   .button-container {
-    flex-wrap: wrap;
     gap: 6px;
   }
   
   .box-btn {
-    flex: 1 1 calc(33.333% - 12px);
-    min-width: 80px;
+    padding: 8px 6px;
     font-size: 11px;
-    padding: 6px 8px;
+    height: 32px;
+  }
+  
+  .box-btn i {
+    font-size: 11px;
   }
 }
