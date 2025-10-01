@@ -237,16 +237,16 @@ const VideoDetail = () => {
                     )}
                     
                     {/* Video Information Button */}
-                    <button 
-                      className="action-bar-btn info-btn"
-                      onClick={() => setMetadataExpanded(!metadataExpanded)}
-                      aria-expanded={metadataExpanded}
-                      aria-label="Show video information"
-                    >
-                      <i className="fas fa-info-circle"></i>
-                      <span>Info</span>
-                      <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
-                    </button>
+<button 
+  className="action-bar-btn info-btn"
+  onClick={() => setMetadataExpanded(!metadataExpanded)}
+  aria-expanded={metadataExpanded}
+  aria-label="Show video information"
+>
+  <i className="fas fa-info-circle"></i>
+  <span>Info</span>
+  <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
+</button>
                     
                     {/* Primary Source Dropdown */}
                     {sources.length > 0 && (
