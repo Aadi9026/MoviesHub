@@ -3059,12 +3059,18 @@ body {
   width: 100%;
 }
 /* Disable main scrollbar on video detail page */
+body:has(.video-detail-page),
+html:has(.video-detail-page) {
+    overflow: hidden !important;
+}
+
 .video-detail-page {
-  overflow: hidden !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 }
 
 .video-content-scroll {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
 }
