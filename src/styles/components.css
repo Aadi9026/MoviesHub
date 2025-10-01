@@ -2999,20 +2999,20 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 30vh; /* Use viewport height for responsiveness */
-  min-height: 200px; /* Minimum height */
-  max-height: 250px; /* Maximum height */
+  height: 35vh; /* Increased height */
+  min-height: 220px; /* Increased minimum height */
+  max-height: 280px; /* Increased maximum height */
   z-index: 11;
   background: var(--dark);
 }
 
 .video-content-scroll {
-  margin-top: 30vh; /* Match video player height */
-  height: 70vh; /* Remaining viewport height */
+  margin-top: 35vh; /* Match the increased video player height */
+  height: 65vh; /* Adjusted remaining height */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px; /* Reduced padding */
+  padding-bottom: 20px;
 }
 
 /* Remove any container padding/margin that might be cutting content */
