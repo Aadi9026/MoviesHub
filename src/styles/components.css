@@ -3115,7 +3115,6 @@ html:has(.video-detail-page) {
   display: none !important;
 }
 
-
 /* ===== INFO BOX CONTAINER STYLES ===== */
 .info-box-container {
   background: var(--dark-light);
@@ -3142,29 +3141,25 @@ html:has(.video-detail-page) {
   font-weight: 600;
   color: var(--text);
   font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.info-box-item:not(.active):hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary);
+}
+
+.info-box-item.active {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(229, 9, 20, 0.3);
 }
 
 .info-box-item i {
-  color: var(--primary);
   font-size: 16px;
-}
-
-.info-check {
-  color: var(--success);
-  font-weight: bold;
-  margin-left: 5px;
-}
-
-.download-info-item {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 5px 10px;
-  border-radius: 6px;
-}
-
-.download-info-item:hover {
-  background: rgba(229, 9, 20, 0.1);
-  color: var(--primary);
 }
 
 .download-count {
@@ -3264,6 +3259,42 @@ html:has(.video-detail-page) {
   margin-left: 4px;
 }
 
+/* Video Information Content Box */
+.metadata-content-box {
+  padding: 20px;
+  background: var(--dark-light);
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.metadata-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metadata-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .info-box-header {
@@ -3273,6 +3304,7 @@ html:has(.video-detail-page) {
   
   .info-box-item {
     font-size: 13px;
+    padding: 6px 10px;
   }
   
   .download-quality-buttons {
@@ -3280,6 +3312,10 @@ html:has(.video-detail-page) {
   }
   
   .download-options-box {
+    padding: 15px;
+  }
+  
+  .metadata-content-box {
     padding: 15px;
   }
 }
@@ -3292,6 +3328,10 @@ html:has(.video-detail-page) {
   }
   
   .download-quality-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .metadata-grid {
     grid-template-columns: 1fr;
   }
 }
