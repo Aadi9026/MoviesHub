@@ -3397,3 +3397,16 @@ html:has(.video-detail-page) {
     grid-template-columns: 1fr;
   }
 }
+
+.download-debug-info {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.download-debug-info p {
+  margin: 5px 0;
+}
