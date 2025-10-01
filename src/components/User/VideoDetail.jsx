@@ -371,30 +371,32 @@ const VideoDetail = () => {
                       </div>
                     </div>
 
-                    {/* DOWNLOAD SECTION INSIDE VIDEO INFORMATION */}
+                    {/* DOWNLOAD SECTION - Inside Video Information Box */}
                     {availableDownloads.length > 0 && (
                       <div className="download-metadata-section">
-                        <div className="metadata-item download-item">
-                          <div className="metadata-label">
-                            <i className="fas fa-download"></i>
-                            Download
+                        <div className="download-section-header">
+                          <i className="fas fa-download"></i>
+                          <h4>Download</h4>
+                          <div className="download-badge">
+                            <i className="fas fa-cloud-download-alt"></i>
+                            Available
                           </div>
-                          <div className="download-options-metadata">
-                            {availableDownloads.map(([quality, link]) => (
-                              <a 
-                                key={quality} 
-                                href={link} 
-                                className="download-quality-btn"
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                download
-                              >
-                                <i className="fas fa-download"></i>
-                                {quality}
-                                <span className="quality-tag">HD</span>
-                              </a>
-                            ))}
-                          </div>
+                        </div>
+                        <div className="download-options-metadata">
+                          {availableDownloads.map(([quality, link]) => (
+                            <a 
+                              key={quality} 
+                              href={link} 
+                              className="download-quality-btn"
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              download
+                            >
+                              <i className="fas fa-download"></i>
+                              {quality}
+                              <span className="quality-tag">HD</span>
+                            </a>
+                          ))}
                         </div>
                       </div>
                     )}
