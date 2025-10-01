@@ -2952,27 +2952,29 @@ body {
   width: 100vw;
   height: 100vh;
   background: var(--dark);
-  overflow: hidden; /* hide full page scrollbar */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* Video player takes full top section */
 .video-player-sticky {
   position: fixed;
-  top: 80px; /* height of your header */
+  top: 0;
   left: 0;
   width: 100vw;
+  height: 35vh; /* 35% of viewport height */
   z-index: 11;
   background: var(--dark);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
 }
 
+/* Content starts right after video player */
 .video-content-scroll {
-  margin-top: 300px; /* header + video player height */
-  height: calc(100vh - 80px);
+  margin-top: 35vh; /* Same as video player height */
+  height: 65vh; /* Remaining viewport height */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 84px; /* bottom navigation height */
+  padding-bottom: 84px;
 }
 
 .custom-scroll-hide,
