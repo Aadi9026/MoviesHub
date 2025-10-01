@@ -3114,15 +3114,22 @@ html:has(.video-detail-page) {
 .sidebar-badge {
   display: none !important;
 }
-/* ===== THREE BUTTON SECTION ===== */
-.three-button-section {
+/* ===== THREE BUTTONS IN BOX ===== */
+.three-buttons-box {
+  background: var(--dark-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.button-container {
   display: flex;
   gap: 10px;
-  margin: 20px 0;
   flex-wrap: wrap;
 }
 
-.action-btn {
+.box-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3136,30 +3143,38 @@ html:has(.video-detail-page) {
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 1;
-  min-width: 120px;
+  min-width: 140px;
   justify-content: center;
 }
 
-.action-btn:hover {
+.box-btn:hover {
   background: var(--primary);
   color: white;
   transform: translateY(-2px);
 }
 
-.action-btn.active {
+.box-btn.active {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
 }
 
-.action-btn i {
+.box-btn i {
   font-size: 16px;
 }
 
-.metadata-content-expanded {
+/* Content Boxes */
+.metadata-content-box,
+.download-content-box {
   background: var(--dark-light);
   border-radius: 12px;
   padding: 20px;
   margin: 15px 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
