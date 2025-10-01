@@ -91,6 +91,34 @@ const VideoDetail = () => {
     }
   };
 
+  // Handle download click
+  const handleDownloadClick = (link, quality) => {
+    console.log('Download clicked:', quality, link);
+    
+    // Close the popup first
+    setShowDownloadPopup(false);
+    
+    // Create a temporary anchor element to trigger download
+    const downloadLink = document.createElement('a');
+    downloadLink.href = link;
+    downloadLink.target = '_blank';
+    downloadLink.rel = 'noopener noreferrer';
+    
+    // Try to extract filename from URL or create one
+    const filename = `${video.title} - ${quality}.mp4`.replace(/[^a-zA-Z0-9.-]/g, '_');
+    downloadLink.download = filename;
+    
+    // Append to body, click, and remove
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // Fallback: if download attribute doesn't work, open in new tab
+    setTimeout(() => {
+      window.open(link, '_blank');
+    }, 100);
+  };
+
   const handleScrollIndicator = () => {
     const scrollContainer = actionBarRef.current;
     if (scrollContainer) {
@@ -447,19 +475,15 @@ const VideoDetail = () => {
                       <div className="popup-body">
                         <div className="download-quality-buttons">
                           {availableDownloads.map(([quality, link]) => (
-                            <a 
-                              key={quality} 
-                              href={link} 
+                            <button
+                              key={quality}
                               className="download-quality-btn"
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              download
-                              onClick={() => setShowDownloadPopup(false)}
+                              onClick={() => handleDownloadClick(link, quality)}
                             >
                               <i className="fas fa-download"></i>
                               {quality}
                               <span className="quality-tag">HD</span>
-                            </a>
+                            </button>
                           ))}
                         </div>
                       </div>
