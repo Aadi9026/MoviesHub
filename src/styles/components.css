@@ -2948,7 +2948,6 @@ body {
 }
 
 .video-detail-page {
-  position: relative;
   width: 100vw;
   height: 100vh;
   background: var(--dark);
@@ -2961,41 +2960,97 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 30vh; /* Use viewport height for responsiveness */
-  min-height: 200px; /* Minimum height */
-  max-height: 250px; /* Maximum height */
+  width: 100%;
+  height: 35vh; /* Increased height for better video visibility */
+  min-height: 220px;
   z-index: 11;
   background: var(--dark);
 }
 
 .video-content-scroll {
-  margin-top: 30vh; /* Match video player height */
-  height: 70vh; /* Remaining viewport height */
+  position: fixed;
+  top: 35vh; /* Match video player height */
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 35vh - 60px); /* Account for bottom nav */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px; /* Reduced padding */
-}
-
-/* Remove any container padding/margin that might be cutting content */
-.video-content-scroll .container {
+  background: var(--dark);
   padding: 0;
   margin: 0;
+}
+
+/* Reset all container styles */
+.video-content-scroll .container {
   width: 100%;
+  margin: 0;
+  padding: 15px;
+  max-width: none;
+  min-height: 100%; /* Ensure container takes full height */
 }
 
 .video-content-scroll .video-layout {
   width: 100%;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Ensure all content is visible */
-.video-content-scroll * {
-  box-sizing: border-box;
+/* Ensure video info section is fully visible */
+.video-info {
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
+/* Fix horizontal action bar scrolling */
+.horizontal-action-bar {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.action-bar-scroll {
+  width: 100%;
+  padding: 10px 0;
+}
+
+/* Make sure metadata section is visible */
+.metadata-collapsible {
+  width: 100%;
+  margin: 15px 0;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.metadata-content {
+  width: 100%;
+  padding: 15px;
+}
+
+/* Fix sidebar and related videos */
+.video-sidebar {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.suggested-videos {
+  width: 100%;
+  padding: 0;
+}
+
+/* Ensure all content fits properly */
+.video-detail-title {
+  font-size: 1.4rem;
+  margin: 10px 0;
+  padding: 0 5px;
+  word-wrap: break-word;
+}
+
+/* Custom scrollbar hiding */
 .custom-scroll-hide,
 .video-content-scroll {
   scrollbar-width: none;
@@ -3008,16 +3063,19 @@ body {
   background: transparent;
 }
 
-/* Make sure action bar and other content don't have fixed heights that cause overflow */
-.horizontal-action-bar {
-  width: 100%;
-  overflow-x: auto;
+/* Bottom navigation spacing */
+.video-content-scroll {
+  padding-bottom: 80px; /* Space for bottom nav */
 }
 
-.metadata-collapsible {
-  width: 100%;
+/* Make sure content doesn't get cut off */
+.video-main, .video-sidebar {
+  max-width: 100%;
+  overflow: visible;
 }
 
-.suggested-videos {
+/* Related videos cards */
+.suggested-videos .video-card {
+  margin: 10px 0;
   width: 100%;
 }
