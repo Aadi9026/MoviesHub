@@ -3074,33 +3074,21 @@ html:has(.video-detail-page) {
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
 }
-/* COMPLETELY HIDE ALL SCROLLBARS ON VIDEO PAGE */
-.video-detail-page *::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+/* HIDE MAIN PAGE SCROLLBAR - THE ONE IN SCREENSHOT */
+body.video-page-open,
+html.video-page-open {
+    overflow: hidden !important;
 }
 
-.video-detail-page * {
-  -ms-overflow-style: none !important;  /* IE and Edge */
-  scrollbar-width: none !important;      /* Firefox */
+body.video-page-open::-webkit-scrollbar,
+html.video-page-open::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
 }
 
-/* Force hide on all elements inside video page */
-.video-detail-page {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.video-detail-page::-webkit-scrollbar {
-  display: none !important;
-}
-
-.video-content-scroll::-webkit-scrollbar {
-  display: none !important;
-}
-
-body:has(.video-detail-page)::-webkit-scrollbar,
-html:has(.video-detail-page)::-webkit-scrollbar {
-  display: none !important;
+/* Ensure video content remains scrollable */
+.video-content-scroll {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
 }
