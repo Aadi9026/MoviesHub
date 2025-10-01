@@ -977,17 +977,52 @@ body {
   border-radius: 0;
 }
 
+
+/* ===== VIDEO TITLE FIX - MOBILE VISIBLE ===== */
 .video-detail-title {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 15px;
   line-height: 1.4;
   color: var(--text);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0 0 15px 0;
+  padding: 15px 15px 0 15px;
+  display: block !important;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
+
+/* Ensure video info section is visible */
+.video-info {
+  background: var(--dark-light);
+  padding: 0;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  display: block !important;
+}
+
+/* Mobile title adjustments */
+@media (max-width: 768px) {
+  .video-detail-title {
+    font-size: 18px;
+    padding: 12px 12px 0 12px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Small mobile title adjustments */
+@media (max-width: 480px) {
+  .video-detail-title {
+    font-size: 16px;
+    padding: 10px 10px 0 10px;
+    margin-bottom: 10px;
+  }
+}
+
+
 
 /* ===== HORIZONTAL ACTION BAR ===== */
 .horizontal-action-bar {
