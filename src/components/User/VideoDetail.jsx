@@ -31,6 +31,25 @@ const VideoDetail = () => {
   const [dislikeCount, setDislikeCount] = useState(video?.dislikes || 0);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
 
+  // Hide main scrollbar when component mounts
+  useEffect(() => {
+    // Add class to body when component mounts
+    document.body.classList.add('video-page-open');
+    document.documentElement.classList.add('video-page-open');
+    
+    // Hide scrollbar
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    // Remove class and restore scrollbar when component unmounts
+    return () => {
+      document.body.classList.remove('video-page-open');
+      document.documentElement.classList.remove('video-page-open');
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    };
+  }, []);
+
   // Reset states when video changes
   useEffect(() => {
     setCurrentSource(0);
@@ -174,14 +193,12 @@ const VideoDetail = () => {
   return (
     <div className="video-detail-page custom-scroll-hide">
       {/* Sticky Video Player at Top */}
-<div className="video-player-sticky">
-  <VideoPlayer 
-    embedCode={sources[currentSource]?.code}
-    title={video.title}
-  />
-</div>
-
-
+      <div className="video-player-sticky">
+        <VideoPlayer 
+          embedCode={sources[currentSource]?.code}
+          title={video.title}
+        />
+      </div>
 
       {/* Scrollable Content Below Video */}
       <div className="video-content-scroll">
