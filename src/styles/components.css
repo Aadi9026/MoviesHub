@@ -3012,12 +3012,14 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 100px; /* Increased padding to ensure content is visible above footer */
+  padding-bottom: 100px; /* Increased padding to ensure content is visible */
 }
 
-/* Ensure the container has proper spacing */
+/* Keep the container styles as they are */
 .video-content-scroll .container {
-  padding-bottom: 60px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .video-content-scroll .video-layout {
