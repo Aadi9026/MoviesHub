@@ -174,12 +174,13 @@ const VideoDetail = () => {
   return (
     <div className="video-detail-page custom-scroll-hide">
       {/* Sticky Video Player at Top */}
-<div className="video-player-sticky" style={{ paddingTop: '100px' }}>
+<div className="video-player-sticky">
   <VideoPlayer 
     embedCode={sources[currentSource]?.code}
     title={video.title}
   />
 </div>
+
 
 
       {/* Scrollable Content Below Video */}
