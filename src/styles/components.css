@@ -978,48 +978,35 @@ body {
 }
 
 
-/* ===== VIDEO TITLE FIX - MOBILE VISIBLE ===== */
+/* ===== VIDEO TITLE FIX - FULLY VISIBLE & PROPERLY POSITIONED ===== */
 .video-detail-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.3;
   color: var(--text);
-  margin: 0 0 15px 0;
-  padding: 15px 15px 0 15px;
+  margin: 0;
+  padding: 12px 15px;
   display: block !important;
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   visibility: visible !important;
   opacity: 1 !important;
+  background: var(--dark);
+  position: relative;
+  z-index: 5;
+  min-height: 50px;
 }
 
-/* Ensure video info section is visible */
+/* Ensure video info section displays properly below video */
 .video-info {
-  background: var(--dark-light);
+  background: var(--dark);
   padding: 0;
   width: 100%;
   position: relative;
   z-index: 10;
   display: block !important;
-}
-
-/* Mobile title adjustments */
-@media (max-width: 768px) {
-  .video-detail-title {
-    font-size: 18px;
-    padding: 12px 12px 0 12px;
-    margin-bottom: 12px;
-  }
-}
-
-/* Small mobile title adjustments */
-@media (max-width: 480px) {
-  .video-detail-title {
-    font-size: 16px;
-    padding: 10px 10px 0 10px;
-    margin-bottom: 10px;
-  }
+  margin-top: 0;
 }
 
 
@@ -2599,6 +2586,25 @@ input:focus {
     font-size: 10px;
     padding: 2px 6px;
   }
+
+  /* Mobile video title fix */
+  .video-detail-title {
+    font-size: 16px;
+    padding: 10px 12px;
+    line-height: 1.4;
+    min-height: 45px;
+  }
+
+  .video-player-sticky {
+    height: 25vh;
+    min-height: 180px;
+    max-height: 220px;
+  }
+
+  .video-content-scroll {
+    margin-top: 25vh;
+    height: 75vh;
+  }
 }
 
 /* SMALL MOBILE OPTIMIZATION */
@@ -2787,6 +2793,24 @@ input:focus {
   .genre-tag {
     font-size: 9px;
     padding: 1px 5px;
+  }
+
+  /* Small mobile video title fix */
+  .video-detail-title {
+    font-size: 15px;
+    padding: 10px 10px;
+    min-height: 42px;
+  }
+
+  .video-player-sticky {
+    height: 22vh;
+    min-height: 160px;
+    max-height: 200px;
+  }
+
+  .video-content-scroll {
+    margin-top: 22vh;
+    height: 78vh;
   }
 }
 
@@ -2999,20 +3023,22 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 30vh; /* Use viewport height for responsiveness */
-  min-height: 200px; /* Minimum height */
-  max-height: 250px; /* Maximum height */
+  height: 30vh;
+  min-height: 200px;
+  max-height: 250px;
   z-index: 11;
-  background: var(--dark);
+  background: #000;
 }
 
 .video-content-scroll {
-  margin-top: 30vh; /* Match video player height */
-  height: 70vh; /* Remaining viewport height */
+  margin-top: 30vh;
+  height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px; /* Reduced padding */
+  padding-bottom: 80px;
+  position: relative;
+  z-index: 5;
 }
 
 /* Remove any container padding/margin that might be cutting content */
