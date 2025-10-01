@@ -300,47 +300,140 @@ const VideoDetail = () => {
                     </div>
                   </div>
                 )}
-               {/* Three Button Section */}
-<div className="three-button-section">
-  <button 
-    className={`action-btn ${metadataExpanded ? 'active' : ''}`}
-    onClick={() => setMetadataExpanded(!metadataExpanded)}
-  >
-    <i className="fas fa-info-circle"></i>
-    Video Info
-  </button>
-  
-  {availableDownloads.length > 0 && (
+      {/* Three Buttons in Box */}
+<div className="three-buttons-box">
+  <div className="button-container">
     <button 
-      className={`action-btn ${showDownloads ? 'active' : ''}`}
-      onClick={() => setShowDownloads(!showDownloads)}
+      className={`box-btn ${metadataExpanded ? 'active' : ''}`}
+      onClick={() => {
+        setMetadataExpanded(!metadataExpanded);
+        setShowDownloads(false);
+      }}
     >
-      <i className="fas fa-download"></i>
-      Download
+      <i className="fas fa-info-circle"></i>
+      Video Info
     </button>
-  )}
-  
-  <button className="action-btn active">
-    <i className="fas fa-star"></i>
-    Primary Source
-  </button>
+    
+    {availableDownloads.length > 0 && (
+      <button 
+        className={`box-btn ${showDownloads ? 'active' : ''}`}
+        onClick={() => {
+          setShowDownloads(!showDownloads);
+          setMetadataExpanded(false);
+        }}
+      >
+        <i className="fas fa-download"></i>
+        Download
+      </button>
+    )}
+    
+    <button className="box-btn active">
+      <i className="fas fa-star"></i>
+      Primary Source
+    </button>
+  </div>
 </div>
 
-{/* Metadata content (appears when Video Info clicked) */}
+{/* Video Info Content */}
 {metadataExpanded && (
-  <div className="metadata-content-expanded">
-    {/* Your existing metadata content goes here */}
+  <div className="metadata-content-box">
     <div className="metadata-grid">
-      {/* ... your existing metadata grid content ... */}
+      <div className="metadata-item highlight">
+        <div className="metadata-label">
+          <i className="fas fa-eye"></i>
+          Views
+        </div>
+        <div className="metadata-value">
+          {formatViews(video.views || 0)}
+        </div>
+      </div>
+      
+      <div className="metadata-item">
+        <div className="metadata-label">
+          <i className="fas fa-clock"></i>
+          Duration
+        </div>
+        <div className="metadata-value">
+          {formatDuration(video.duration || 120)}
+        </div>
+      </div>
+      
+      <div className="metadata-item highlight">
+        <div className="metadata-label">
+          <i className="fas fa-tags"></i>
+          Genre
+        </div>
+        <div className="metadata-value">
+          <span className="genre-badge">{video.genre}</span>
+        </div>
+      </div>
+      
+      {video.createdAt && (
+        <div className="metadata-item">
+          <div className="metadata-label">
+            <i className="fas fa-calendar"></i>
+            Date Added
+          </div>
+          <div className="metadata-value">
+            {video.createdAt.toDate ? 
+              new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : 
+              'Recently added'
+            }
+          </div>
+        </div>
+      )}
     </div>
-    {/* ... rest of your metadata content ... */}
+
+    {video.description && (
+      <div className="metadata-description">
+        <div className="description-header">
+          <i className="fas fa-align-left"></i>
+          <h4>Description</h4>
+        </div>
+        <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
+          {video.description}
+        </div>
+        {video.description.length > 150 && (
+          <button 
+            className="read-more-btn"
+            onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+          >
+            <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
+            {descriptionExpanded ? 'Show Less' : 'Read More'}
+          </button>
+        )}
+      </div>
+    )}
   </div>
 )}
 
-{/* Download options (appears when Download clicked) */}
+{/* Download Content */}
 {showDownloads && availableDownloads.length > 0 && (
-  <div className="download-section">
-    {/* Your existing download section content */}
+  <div className="download-content-box">
+    <div className="download-header">
+      <i className="fas fa-download"></i>
+      <h3>Download Options</h3>
+    </div>
+    <div className="quality-buttons">
+      {availableDownloads.map(([quality, link]) => (
+        <a 
+          key={quality} 
+          href={link} 
+          className="quality-btn"
+          target="_blank" 
+          rel="noopener noreferrer"
+          download
+        >
+          <i className="fas fa-download"></i>
+          {quality}
+          <span className="quality-badge">HD</span>
+        </a>
+      ))}
+    </div>
   </div>
 )}
                     {/* Enhanced Metadata Grid */}
