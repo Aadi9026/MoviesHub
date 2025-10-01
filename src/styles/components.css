@@ -3074,3 +3074,12 @@ html:has(.video-detail-page) {
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
 }
+/* Hide scrollbar but keep scrolling functionality */
+.video-content-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+.video-content-scroll {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;      /* Firefox */
+}
