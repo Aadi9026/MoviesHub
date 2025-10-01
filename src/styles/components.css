@@ -3068,3 +3068,14 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+.thumbnail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.thumbnail-section > * {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
