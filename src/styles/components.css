@@ -2957,24 +2957,43 @@ body {
   flex-direction: column;
 }
 
-/* Video player takes full top section */
 .video-player-sticky {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  height: 35vh; /* 35% of viewport height */
+  height: 30vh; /* Use viewport height for responsiveness */
+  min-height: 200px; /* Minimum height */
+  max-height: 250px; /* Maximum height */
   z-index: 11;
   background: var(--dark);
 }
 
-/* Content starts right after video player */
 .video-content-scroll {
-  margin-top: 35vh; /* Same as video player height */
-  height: 65vh; /* Remaining viewport height */
+  margin-top: 30vh; /* Match video player height */
+  height: 70vh; /* Remaining viewport height */
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 84px;
+  padding-bottom: 20px; /* Reduced padding */
+}
+
+/* Remove any container padding/margin that might be cutting content */
+.video-content-scroll .container {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.video-content-scroll .video-layout {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure all content is visible */
+.video-content-scroll * {
+  box-sizing: border-box;
 }
 
 .custom-scroll-hide,
@@ -2987,4 +3006,18 @@ body {
 .video-content-scroll::-webkit-scrollbar {
   width: 0 !important;
   background: transparent;
+}
+
+/* Make sure action bar and other content don't have fixed heights that cause overflow */
+.horizontal-action-bar {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.metadata-collapsible {
+  width: 100%;
+}
+
+.suggested-videos {
+  width: 100%;
 }
