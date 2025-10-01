@@ -236,16 +236,36 @@ const VideoDetail = () => {
                       </button>
                     )}
                     
-                    {/* Video Information Button */}
+  {/* Video Info Button */}
 <button 
-  className="action-bar-btn info-btn"
+  className={`action-bar-btn info-btn ${metadataExpanded ? 'active' : ''}`}
   onClick={() => setMetadataExpanded(!metadataExpanded)}
   aria-expanded={metadataExpanded}
   aria-label="Show video information"
 >
   <i className="fas fa-info-circle"></i>
-  <span>Info</span>
-  <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
+  <span>Video Info</span>
+</button>
+
+{/* Download Button */}
+{availableDownloads.length > 0 && (
+  <button 
+    className={`action-bar-btn download-btn ${showDownloads ? 'active' : ''}`}
+    onClick={() => setShowDownloads(!showDownloads)}
+    aria-label={`Download options (${availableDownloads.length} available)`}
+  >
+    <i className="fas fa-download"></i>
+    <span>Download</span>
+  </button>
+)}
+
+{/* Primary Source Button */}
+<button 
+  className="action-bar-btn source-btn active"
+  aria-label="Primary source selected"
+>
+  <i className="fas fa-star"></i>
+  <span>Primary Source</span>
 </button>
                     
                     {/* Primary Source Dropdown */}
