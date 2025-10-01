@@ -3110,3 +3110,7 @@ html:has(.video-detail-page) {
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
 }
+/* ===== HIDE RELATED MOVIES COUNT NUMBER ONLY ===== */
+.sidebar-badge {
+  display: none !important;
+}
