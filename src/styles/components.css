@@ -2947,42 +2947,20 @@ body {
   z-index: 999;
 }
 
-.video-detail-page {
-  position: relative;
-  width: 100vw;
+.video-detail-page.custom-scroll-hide {
   height: 100vh;
-  background: var(--dark);
-  overflow: hidden; /* hide full page scrollbar */
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
 .video-player-sticky {
-  position: fixed;
-  top: 80px; /* height of your header */
-  left: 0;
-  width: 100vw;
-  z-index: 11;
-  background: var(--dark);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #000;
 }
 
 .video-content-scroll {
-  margin-top: 300px; /* header + video player height */
-  height: calc(100vh - 80px);
+  height: calc(100vh - 100px); /* Adjust based on video player height */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 84px; /* bottom navigation height */
-}
-
-.custom-scroll-hide,
-.video-content-scroll {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.custom-scroll-hide::-webkit-scrollbar,
-.video-content-scroll::-webkit-scrollbar {
-  width: 0 !important;
-  background: transparent;
+  overflow-x: hidden;
 }
