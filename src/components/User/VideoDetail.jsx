@@ -282,149 +282,160 @@ const VideoDetail = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Collapsible Metadata Section */}
-                <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                  <button 
-                    className="metadata-header"
-                    onClick={() => setMetadataExpanded(!metadataExpanded)}
-                    aria-expanded={metadataExpanded}
-                  >
-                    <div className="metadata-title">
+                {/* Info Box Container - Video Information, Details, Download in same row */}
+                <div className="info-box-container">
+                  <div className="info-box-header">
+                    <div className="info-box-item">
                       <i className="fas fa-info-circle"></i>
                       <span>Video Information</span>
-                      <div className="metadata-badge">
-                        <i className="fas fa-film"></i>
-                        Details
+                    </div>
+                    
+                    <div className="info-box-item">
+                      <i className="fas fa-film"></i>
+                      <span>Details</span>
+                      <div className="info-check">✓</div>
+                    </div>
+                    
+                    {availableDownloads.length > 0 && (
+                      <div className="info-box-item download-info-item">
+                        <i className="fas fa-download"></i>
+                        <span>Download</span>
+                        <div className="download-count">({availableDownloads.length})</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Download options appear below when download is clicked */}
+                  {showDownloads && availableDownloads.length > 0 && (
+                    <div className="download-options-box">
+                      <div className="download-options-header">
+                        <i className="fas fa-download"></i>
+                        <h4>Download Options</h4>
+                        <button 
+                          className="download-close-btn"
+                          onClick={() => setShowDownloads(false)}
+                          aria-label="Close download options"
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                      <div className="download-quality-buttons">
+                        {availableDownloads.map(([quality, link]) => (
+                          <a 
+                            key={quality} 
+                            href={link} 
+                            className="download-quality-btn"
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            download
+                          >
+                            <i className="fas fa-download"></i>
+                            {quality}
+                            <span className="quality-tag">HD</span>
+                          </a>
+                        ))}
                       </div>
                     </div>
-                    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
-                  </button>
-                  
-                  <div className="metadata-content">
-                    {/* Enhanced Metadata Grid */}
-                    <div className="metadata-grid">
-                      <div className="metadata-item highlight">
-                        <div className="metadata-label">
-                          <i className="fas fa-eye"></i>
-                          Views
-                        </div>
-                        <div className="metadata-value">
-                          {formatViews(video.views || 0)}
-                        </div>
-                      </div>
-                      
-                      <div className="metadata-item">
-                        <div className="metadata-label">
-                          <i className="fas fa-clock"></i>
-                          Duration
-                        </div>
-                        <div className="metadata-value">
-                          {formatDuration(video.duration || 120)}
-                        </div>
-                      </div>
-                      
-                      <div className="metadata-item highlight">
-                        <div className="metadata-label">
-                          <i className="fas fa-tags"></i>
-                          Genre
-                        </div>
-                        <div className="metadata-value">
-                          <span className="genre-badge">{video.genre}</span>
-                        </div>
-                      </div>
-                      
-                      {video.createdAt && (
-                        <div className="metadata-item">
+                  )}
+
+                  {/* Collapsible Metadata Content */}
+                  <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
+                    <div className="metadata-content">
+                      {/* Enhanced Metadata Grid */}
+                      <div className="metadata-grid">
+                        <div className="metadata-item highlight">
                           <div className="metadata-label">
-                            <i className="fas fa-calendar"></i>
-                            Date Added
+                            <i className="fas fa-eye"></i>
+                            Views
                           </div>
                           <div className="metadata-value">
-                            {video.createdAt.toDate ? 
-                              new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              }) : 
-                              'Recently added'
-                            }
+                            {formatViews(video.views || 0)}
                           </div>
+                        </div>
+                        
+                        <div className="metadata-item">
+                          <div className="metadata-label">
+                            <i className="fas fa-clock"></i>
+                            Duration
+                          </div>
+                          <div className="metadata-value">
+                            {formatDuration(video.duration || 120)}
+                          </div>
+                        </div>
+                        
+                        <div className="metadata-item highlight">
+                          <div className="metadata-label">
+                            <i className="fas fa-tags"></i>
+                            Genre
+                          </div>
+                          <div className="metadata-value">
+                            <span className="genre-badge">{video.genre}</span>
+                          </div>
+                        </div>
+                        
+                        {video.createdAt && (
+                          <div className="metadata-item">
+                            <div className="metadata-label">
+                              <i className="fas fa-calendar"></i>
+                              Date Added
+                            </div>
+                            <div className="metadata-value">
+                              {video.createdAt.toDate ? 
+                                new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                }) : 
+                                'Recently added'
+                              }
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Engagement Stats */}
+                        <div className="metadata-item engagement-stats">
+                          <div className="metadata-label">
+                            <i className="fas fa-chart-bar"></i>
+                            Engagement
+                          </div>
+                          <div className="engagement-metrics">
+                            <div className="engagement-item">
+                              <i className="fas fa-thumbs-up"></i>
+                              <span>{likeCount} likes</span>
+                            </div>
+                            <div className="engagement-item">
+                              <i className="fas fa-thumbs-down"></i>
+                              <span>{dislikeCount} dislikes</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Description */}
+                      {video.description && (
+                        <div className="metadata-description">
+                          <div className="description-header">
+                            <i className="fas fa-align-left"></i>
+                            <h4>Description</h4>
+                            <div className="description-badge">
+                              {video.description.length > 200 ? 'Detailed' : 'Brief'}
+                            </div>
+                          </div>
+                          <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
+                            {video.description}
+                          </div>
+                          {video.description.length > 150 && (
+                            <button 
+                              className="read-more-btn"
+                              onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                            >
+                              <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
+                              {descriptionExpanded ? 'Show Less' : 'Read More'}
+                            </button>
+                          )}
                         </div>
                       )}
-                      
-                      {/* Engagement Stats */}
-                      <div className="metadata-item engagement-stats">
-                        <div className="metadata-label">
-                          <i className="fas fa-chart-bar"></i>
-                          Engagement
-                        </div>
-                        <div className="engagement-metrics">
-                          <div className="engagement-item">
-                            <i className="fas fa-thumbs-up"></i>
-                            <span>{likeCount} likes</span>
-                          </div>
-                          <div className="engagement-item">
-                            <i className="fas fa-thumbs-down"></i>
-                            <span>{dislikeCount} dislikes</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
-
-                    {/* DOWNLOAD SECTION - Inside Video Information Box */}
-                    {availableDownloads.length > 0 && (
-                      <div className="download-metadata-section">
-                        <div className="download-section-header">
-                          <i className="fas fa-download"></i>
-                          <h4>Download</h4>
-                          <div className="download-badge">
-                            <i className="fas fa-cloud-download-alt"></i>
-                            Available
-                          </div>
-                        </div>
-                        <div className="download-options-metadata">
-                          {availableDownloads.map(([quality, link]) => (
-                            <a 
-                              key={quality} 
-                              href={link} 
-                              className="download-quality-btn"
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              download
-                            >
-                              <i className="fas fa-download"></i>
-                              {quality}
-                              <span className="quality-tag">HD</span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Enhanced Description */}
-                    {video.description && (
-                      <div className="metadata-description">
-                        <div className="description-header">
-                          <i className="fas fa-align-left"></i>
-                          <h4>Description</h4>
-                          <div className="description-badge">
-                            {video.description.length > 200 ? 'Detailed' : 'Brief'}
-                          </div>
-                        </div>
-                        <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
-                          {video.description}
-                        </div>
-                        {video.description.length > 150 && (
-                          <button 
-                            className="read-more-btn"
-                            onClick={() => setDescriptionExpanded(!descriptionExpanded)}
-                          >
-                            <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
-                            {descriptionExpanded ? 'Show Less' : 'Read More'}
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
 
