@@ -3114,3 +3114,13 @@ html:has(.video-detail-page) {
 .sidebar-badge {
   display: none !important;
 }
+/* ===== NEW BUTTON STYLES ===== */
+.source-btn.active {
+  background: var(--primary) !important;
+  color: white !important;
+  border-color: var(--primary) !important;
+}
+
+.source-btn.active i {
+  color: white !important;
+}
