@@ -92,31 +92,14 @@ const VideoDetail = () => {
   };
 
   // Handle download click
-  const handleDownloadClick = (link, quality) => {
+  const handleDownloadClick = (link, quality, event) => {
     console.log('Download clicked:', quality, link);
     
-    // Close the popup first
+    // Close the popup
     setShowDownloadPopup(false);
     
-    // Create a temporary anchor element to trigger download
-    const downloadLink = document.createElement('a');
-    downloadLink.href = link;
-    downloadLink.target = '_blank';
-    downloadLink.rel = 'noopener noreferrer';
-    
-    // Try to extract filename from URL or create one
-    const filename = `${video.title} - ${quality}.mp4`.replace(/[^a-zA-Z0-9.-]/g, '_');
-    downloadLink.download = filename;
-    
-    // Append to body, click, and remove
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    
-    // Fallback: if download attribute doesn't work, open in new tab
-    setTimeout(() => {
-      window.open(link, '_blank');
-    }, 100);
+    // Let the default anchor tag behavior handle the download
+    // The download will happen automatically due to the anchor tag attributes
   };
 
   const handleScrollIndicator = () => {
@@ -475,16 +458,27 @@ const VideoDetail = () => {
                       <div className="popup-body">
                         <div className="download-quality-buttons">
                           {availableDownloads.map(([quality, link]) => (
-                            <button
-                              key={quality}
+                            <a 
+                              key={quality} 
+                              href={link}
                               className="download-quality-btn"
-                              onClick={() => handleDownloadClick(link, quality)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              onClick={(e) => handleDownloadClick(link, quality, e)}
                             >
                               <i className="fas fa-download"></i>
                               {quality}
                               <span className="quality-tag">HD</span>
-                            </button>
+                            </a>
                           ))}
+                        </div>
+                        
+                        {/* Debug info - you can remove this later */}
+                        <div className="download-debug-info">
+                          <p><strong>Debug Info:</strong></p>
+                          <p>Number of download links: {availableDownloads.length}</p>
+                          <p>Links available: {availableDownloads.map(([q]) => q).join(', ')}</p>
                         </div>
                       </div>
                     </div>
