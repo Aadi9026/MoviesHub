@@ -3058,3 +3058,13 @@ body {
 .suggested-videos {
   width: 100%;
 }
+/* Disable main scrollbar on video detail page */
+.video-detail-page {
+  overflow: hidden !important;
+}
+
+.video-content-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
