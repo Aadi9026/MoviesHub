@@ -206,7 +206,7 @@ const VideoDetail = () => {
               <div className="video-info">
                 <h1 className="video-detail-title">{video.title}</h1>
                 
-                {/* Clean Horizontal Action Bar - No Container Box */}
+                {/* Fixed Horizontal Action Bar - YouTube-like Scrolling */}
                 <div className="horizontal-action-bar">
                   <div 
                     className="action-bar-scroll scroll-start" 
@@ -296,7 +296,7 @@ const VideoDetail = () => {
                       </div>
                     )}
 
-                    {/* Additional Metadata Buttons for Better Scrolling Experience */}
+                    {/* Additional buttons for better scrolling experience */}
                     <button 
                       className="action-bar-btn"
                       onClick={() => navigate('/')}
@@ -313,6 +313,24 @@ const VideoDetail = () => {
                     >
                       <i className="fas fa-arrow-up"></i>
                       <span>Top</span>
+                    </button>
+
+                    <button 
+                      className="action-bar-btn"
+                      onClick={() => navigate('/trending')}
+                      aria-label="Browse trending movies"
+                    >
+                      <i className="fas fa-fire"></i>
+                      <span>Trending</span>
+                    </button>
+
+                    <button 
+                      className="action-bar-btn"
+                      onClick={() => navigate('/latest')}
+                      aria-label="Browse latest movies"
+                    >
+                      <i className="fas fa-clock"></i>
+                      <span>Latest</span>
                     </button>
                   </div>
                 </div>
