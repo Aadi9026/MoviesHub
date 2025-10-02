@@ -3012,15 +3012,19 @@ html:has(.video-detail-page) {
   display: none !important;
 }
 
-  /* ===== FIXED HORIZONTAL ACTION BAR - PROPER SCROLLING ===== */
+
+/* ===== ENHANCED MODERN HORIZONTAL ACTION BAR - PROFESSIONAL DESIGN ===== */
 .horizontal-action-bar {
-  margin: 20px 0;
+  margin: 24px 0;
   width: 100%;
   position: relative;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  overflow: visible;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(45, 45, 45, 0.9) 100%);
+  border-radius: 16px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 .action-bar-scroll {
@@ -3028,46 +3032,55 @@ html:has(.video-detail-page) {
   gap: 12px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 16px 0;
+  padding: 12px 8px;
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   position: relative;
   margin: 0;
-  /* CRITICAL FIX: Ensure horizontal scrolling works */
   flex-wrap: nowrap;
   white-space: nowrap;
   width: 100%;
   scroll-padding: 0 20px;
+  /* Professional smooth scrolling */
+  scroll-snap-type: x proximity;
 }
 
 .action-bar-scroll::-webkit-scrollbar {
   display: none;
 }
 
-/* Scroll Indicators */
+/* Modern Scroll Indicators with Gradient Fade */
 .action-bar-scroll::before,
 .action-bar-scroll::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 40px;
+  width: 50px;
   pointer-events: none;
   z-index: 3;
   opacity: 0;
-  transition: all 0.4s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-bar-scroll::before {
   left: 0;
-  background: linear-gradient(90deg, var(--dark) 0%, transparent 100%);
+  background: linear-gradient(90deg, 
+    rgba(26, 26, 26, 0.9) 0%, 
+    rgba(26, 26, 26, 0.7) 50%, 
+    transparent 100%
+  );
 }
 
 .action-bar-scroll::after {
   right: 0;
-  background: linear-gradient(270deg, var(--dark) 0%, transparent 100%);
+  background: linear-gradient(270deg, 
+    rgba(26, 26, 26, 0.9) 0%, 
+    rgba(26, 26, 26, 0.7) 50%, 
+    transparent 100%
+  );
 }
 
 .action-bar-scroll.scroll-start::after,
@@ -3077,87 +3090,167 @@ html:has(.video-detail-page) {
   opacity: 1;
 }
 
-/* Action Buttons - CRITICAL: Ensure they don't wrap */
+/* ===== MODERN PROFESSIONAL BUTTON DESIGN ===== */
 .action-bar-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 14px 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.08) 100%
+  );
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   flex-shrink: 0;
-  min-height: 48px;
-  backdrop-filter: blur(10px);
+  min-height: 52px;
+  backdrop-filter: blur(15px);
   position: relative;
   overflow: hidden;
-  /* CRITICAL: Prevent wrapping and ensure inline display */
   display: inline-flex !important;
   flex: 0 0 auto !important;
+  /* Professional glass effect */
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  /* Scroll snap for smooth navigation */
+  scroll-snap-align: center;
 }
 
+/* Glass morphism effect overlay */
+.action-bar-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.action-bar-btn:hover::before {
+  left: 100%;
+}
+
+/* Modern hover effects */
 .action-bar-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.18) 0%, 
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .action-bar-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px) scale(1.01);
+  transition: transform 0.1s ease;
 }
 
+/* Active state with primary color */
 .action-bar-btn.active {
-  background: var(--primary);
+  background: linear-gradient(135deg, 
+    var(--primary) 0%, 
+    var(--primary-dark) 100%
+  );
   border-color: var(--primary);
   color: white;
-  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(229, 9, 20, 0.4),
+    0 4px 16px rgba(229, 9, 20, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .action-bar-btn.active:hover {
-  background: var(--primary-dark);
-  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.5);
+  background: linear-gradient(135deg, 
+    var(--primary-dark) 0%, 
+    #8b0000 100%
+  );
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 16px 48px rgba(229, 9, 20, 0.5),
+    0 8px 24px rgba(229, 9, 20, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Button Icons */
+/* Professional button text styling */
+.action-bar-btn span {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: inline-block;
+}
+
+/* Enhanced button icons */
 .action-bar-btn i {
-  font-size: 16px;
-  transition: transform 0.3s ease;
+  font-size: 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .action-bar-btn:hover i {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 .action-bar-btn.active i {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
-/* Button Counters */
+/* Modern counter badges */
 .btn-counter {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%, 
+    rgba(255, 255, 255, 0.15) 100%
+  );
   color: var(--text);
-  padding: 3px 8px;
-  border-radius: 10px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
-  min-width: 20px;
+  min-width: 24px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .action-bar-btn.active .btn-counter {
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.35) 0%, 
+    rgba(255, 255, 255, 0.25) 100%
+  );
   color: white;
+  border-color: rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Share Tooltip */
+.action-bar-btn:hover .btn-counter {
+  transform: scale(1.1);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== ENHANCED SHARE TOOLTIP ===== */
 .share-button-container {
   position: relative;
   display: inline-flex;
@@ -3166,20 +3259,26 @@ html:has(.video-detail-page) {
 
 .share-tooltip {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--success);
+  background: linear-gradient(135deg, 
+    var(--success) 0%, 
+    #1e7e34 100%
+  );
   color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  margin-top: 10px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(40, 167, 69, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2);
   z-index: 100;
-  animation: tooltipFade 0.3s ease;
+  animation: tooltipSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .share-tooltip::before {
@@ -3188,14 +3287,20 @@ html:has(.video-detail-page) {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  border: 6px solid transparent;
+  border: 8px solid transparent;
   border-bottom-color: var(--success);
+  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1));
 }
 
-@keyframes tooltipFade {
+.share-tooltip i {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+@keyframes tooltipSlideUp {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateX(-50%) translateY(10px);
   }
   to {
     opacity: 1;
@@ -3203,7 +3308,7 @@ html:has(.video-detail-page) {
   }
 }
 
-/* Dropdown - CRITICAL: Ensure inline display */
+/* ===== MODERN DROPDOWN SELECT ===== */
 .action-bar-dropdown {
   position: relative;
   display: inline-flex;
@@ -3211,200 +3316,345 @@ html:has(.video-detail-page) {
 }
 
 .action-bar-select {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.08) 100%
+  );
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 12px 40px 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 14px 45px 14px 18px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  min-height: 48px;
-  min-width: 140px;
-  transition: all 0.3s ease;
+  min-height: 52px;
+  min-width: 160px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 16px;
-  /* CRITICAL: Ensure inline display */
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   display: inline-block;
   flex-shrink: 0;
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 18px;
+  scroll-snap-align: center;
 }
 
 .action-bar-select:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.18) 0%, 
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .action-bar-select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.3);
+  box-shadow: 
+    0 0 0 3px rgba(229, 9, 20, 0.2),
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Info Button Chevron */
+.action-bar-select option {
+  background: var(--dark-light);
+  color: var(--text);
+  padding: 12px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Info Button Chevron Animation */
 .info-chevron {
-  transition: transform 0.3s ease;
-  margin-left: 4px;
-  font-size: 12px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 6px;
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .action-bar-btn.active .info-chevron {
-  transform: rotate(180deg);
+  transform: rotate(180deg) scale(1.1);
 }
 
-/* CRITICAL FIX: Force horizontal layout */
-.action-bar-scroll > * {
-  flex-shrink: 0;
-  display: inline-flex !important;
+/* ===== BUTTON VARIATIONS FOR DIFFERENT ACTIONS ===== */
+.like-btn.active {
+  background: linear-gradient(135deg, 
+    #28a745 0%, 
+    #1e7e34 100%
+  );
+  border-color: #28a745;
 }
 
-/* Mobile Optimizations */
+.like-btn.active:hover {
+  background: linear-gradient(135deg, 
+    #34ce57 0%, 
+    #28a745 100%
+  );
+  box-shadow: 
+    0 16px 48px rgba(40, 167, 69, 0.4),
+    0 8px 24px rgba(40, 167, 69, 0.3);
+}
+
+.dislike-btn.active {
+  background: linear-gradient(135deg, 
+    #dc3545 0%, 
+    #c82333 100%
+  );
+  border-color: #dc3545;
+}
+
+.dislike-btn.active:hover {
+  background: linear-gradient(135deg, 
+    #e74c3c 0%, 
+    #dc3545 100%
+  );
+  box-shadow: 
+    0 16px 48px rgba(220, 53, 69, 0.4),
+    0 8px 24px rgba(220, 53, 69, 0.3);
+}
+
+.share-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(52, 152, 219, 0.2) 0%, 
+    rgba(41, 128, 185, 0.15) 100%
+  );
+  border-color: rgba(52, 152, 219, 0.3);
+}
+
+.download-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 193, 7, 0.2) 0%, 
+    rgba(255, 193, 7, 0.15) 100%
+  );
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.info-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(108, 117, 125, 0.2) 0%, 
+    rgba(108, 117, 125, 0.15) 100%
+  );
+  border-color: rgba(108, 117, 125, 0.3);
+}
+
+/* ===== RESPONSIVE DESIGN - MOBILE OPTIMIZATIONS ===== */
 @media (max-width: 768px) {
   .horizontal-action-bar {
-    margin: 16px 0;
+    margin: 18px 0;
+    border-radius: 14px;
+    padding: 6px;
   }
-  
+
   .action-bar-scroll {
-    padding: 12px 0;
+    padding: 10px 6px;
     gap: 10px;
     scroll-padding: 0 16px;
   }
-  
+
   .action-bar-btn {
-    padding: 10px 16px;
+    padding: 12px 16px;
     font-size: 13px;
-    min-height: 44px;
+    min-height: 48px;
     gap: 8px;
-    border-radius: 10px;
+    border-radius: 12px;
   }
-  
+
   .action-bar-btn span {
     display: inline-block !important;
     font-size: 13px;
+    font-weight: 600;
   }
-  
+
   .action-bar-btn i {
-    font-size: 15px;
+    font-size: 16px;
   }
-  
+
   .action-bar-select {
-    padding: 10px 36px 10px 14px;
+    padding: 12px 38px 12px 16px;
     font-size: 13px;
-    min-height: 44px;
-    min-width: 120px;
-    background-position: right 14px center;
-    border-radius: 10px;
+    min-height: 48px;
+    min-width: 130px;
+    background-position: right 16px center;
+    background-size: 16px;
+    border-radius: 12px;
   }
-  
+
   .btn-counter {
     font-size: 11px;
-    padding: 2px 6px;
-    min-width: 18px;
+    padding: 3px 8px;
+    min-width: 22px;
+    border-radius: 10px;
+  }
+
+  .action-bar-scroll::before,
+  .action-bar-scroll::after {
+    width: 40px;
   }
 }
 
 @media (max-width: 480px) {
   .horizontal-action-bar {
-    margin: 12px 0;
+    margin: 16px 0;
+    border-radius: 12px;
+    padding: 4px;
   }
-  
+
   .action-bar-scroll {
-    padding: 10px 0;
+    padding: 8px 4px;
     gap: 8px;
     scroll-padding: 0 12px;
   }
-  
+
   .action-bar-btn {
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-size: 12px;
-    min-height: 40px;
+    min-height: 44px;
     gap: 6px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
-  
+
   .action-bar-btn span {
     display: inline-block !important;
     font-size: 12px;
   }
-  
+
   .action-bar-btn i {
-    font-size: 14px;
+    font-size: 15px;
   }
-  
+
   .action-bar-select {
-    min-width: 100px;
+    min-width: 110px;
     font-size: 12px;
-    padding: 8px 32px 8px 12px;
-    min-height: 40px;
-    border-radius: 8px;
+    padding: 10px 34px 10px 14px;
+    min-height: 44px;
+    border-radius: 10px;
+    background-size: 15px;
   }
-  
+
   .btn-counter {
     font-size: 10px;
-    padding: 1px 4px;
-    min-width: 16px;
+    padding: 2px 6px;
+    min-width: 20px;
+    border-radius: 8px;
   }
-  
+
   .action-bar-scroll::before,
   .action-bar-scroll::after {
-    width: 20px;
+    width: 30px;
+  }
+
+  .share-tooltip {
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
   }
 }
 
-/* Touch Device Support */
+/* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
 @media (hover: none) and (pointer: coarse) {
   .action-bar-btn {
-    min-height: 44px;
+    min-height: 48px;
   }
-  
+
   .action-bar-btn:hover {
     transform: none;
   }
-  
+
   .action-bar-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
+    transition: transform 0.1s ease;
+  }
+
+  .action-bar-select:hover {
+    transform: none;
+  }
+
+  .action-bar-select:active {
+    transform: scale(0.98);
   }
 }
 
-/* Smooth Scrolling */
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .action-bar-btn,
+  .action-bar-select,
+  .btn-counter,
+  .info-chevron,
+  .action-bar-btn::before {
+    transition: none;
+  }
+
+  .action-bar-btn:hover,
+  .action-bar-btn.active,
+  .action-bar-select:hover {
+    transform: none;
+  }
+
+  .tooltipSlideUp {
+    animation: none;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE SUPPORT ===== */
+@media (prefers-contrast: high) {
+  .action-bar-btn {
+    border: 2px solid var(--text);
+    background: var(--dark-lighter);
+  }
+
+  .action-bar-btn:hover,
+  .action-bar-btn.active {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+
+  .action-bar-select {
+    border: 2px solid var(--text);
+    background: var(--dark-lighter);
+  }
+
+  .horizontal-action-bar {
+    border: 1px solid var(--text);
+  }
+}
+
+/* ===== SMOOTH PERFORMANCE OPTIMIZATIONS ===== */
 .action-bar-scroll {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
 }
 
-/* Optional: Show scrollbar when scrolling */
-.action-bar-scroll::-webkit-scrollbar {
-  height: 4px;
-  display: block;
+.action-bar-btn,
+.action-bar-select {
+  /* Hardware acceleration for smooth animations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  /* Performance isolation */
+  contain: layout style paint;
 }
 
-.action-bar-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
-}
-
-.action-bar-scroll::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 2px;
-}
-
-.action-bar-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
-}
-
-/* CRITICAL: Force horizontal layout and prevent wrapping */
-.action-bar-scroll {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-}
-
-.action-bar-scroll > * {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
+/* Force hardware acceleration on scroll indicators */
+.action-bar-scroll::before,
+.action-bar-scroll::after {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
