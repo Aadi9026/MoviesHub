@@ -1022,398 +1022,6 @@ body {
   }
 }
 
-/* ===== ENHANCED YOUTUBE-LIKE HORIZONTAL ACTION BAR ===== */
-.horizontal-action-bar {
-  margin: 15px 0;
-  width: 100%;
-  position: relative;
-}
-
-.action-bar-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 12px 16px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  position: relative;
-  margin: 0 -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.action-bar-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-/* Scroll indicators for better UX */
-.action-bar-scroll::before,
-.action-bar-scroll::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 30px;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.action-bar-scroll::before {
-  left: 0;
-  background: linear-gradient(90deg, var(--dark-light) 0%, transparent 100%);
-}
-
-.action-bar-scroll::after {
-  right: 0;
-  background: linear-gradient(270deg, var(--dark-light) 0%, transparent 100%);
-}
-
-/* Show scroll indicators when needed */
-.action-bar-scroll.scroll-start::after,
-.action-bar-scroll.scroll-middle::before,
-.action-bar-scroll.scroll-middle::after,
-.action-bar-scroll.scroll-end::before {
-  opacity: 1;
-}
-
-/* Enhanced Action Buttons */
-.action-bar-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-height: 44px;
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
-}
-
-.action-bar-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: inherit;
-}
-
-.action-bar-btn > * {
-  position: relative;
-  z-index: 1;
-}
-
-.action-bar-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.action-bar-btn:active {
-  transform: translateY(0);
-}
-
-.action-bar-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.4);
-}
-
-.action-bar-btn.active::before {
-  opacity: 1;
-}
-
-.action-bar-btn.active:hover {
-  background: var(--primary-dark);
-  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
-}
-
-/* Button Icons */
-.action-bar-btn i {
-  font-size: 16px;
-  transition: transform 0.2s ease;
-}
-
-.action-bar-btn:hover i {
-  transform: scale(1.1);
-}
-
-.action-bar-btn.active i {
-  transform: scale(1.1);
-}
-
-/* Button Counters */
-.btn-counter {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--text);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  min-width: 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.action-bar-btn.active .btn-counter {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-/* Enhanced Share Button with Tooltip */
-.share-button-container {
-  position: relative;
-  display: flex;
-}
-
-.share-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--success);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  margin-top: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  animation: tooltipFade 0.3s ease;
-}
-
-.share-tooltip::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-bottom-color: var(--success);
-}
-
-@keyframes tooltipFade {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-/* Enhanced Dropdown */
-.action-bar-dropdown {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.action-bar-select {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 10px 40px 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  min-height: 44px;
-  min-width: 140px;
-  transition: all 0.3s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 16px;
-  backdrop-filter: blur(10px);
-}
-
-.action-bar-select:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.action-bar-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
-}
-
-.action-bar-select option {
-  background: var(--dark-light);
-  color: var(--text);
-  padding: 12px;
-  font-size: 14px;
-}
-
-/* Info Button Chevron Animation */
-.info-chevron {
-  transition: transform 0.3s ease;
-  margin-left: 4px;
-}
-
-.action-bar-btn.active .info-chevron {
-  transform: rotate(180deg);
-}
-
-/* Download Button with Counter */
-.download-btn .btn-counter {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--text);
-}
-
-/* Like/Dislike Button States */
-.like-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-.dislike-btn.active {
-  background: #6b7280;
-  border-color: #6b7280;
-}
-
-/* Mobile Optimizations */
-@media (max-width: 768px) {
-  .horizontal-action-bar {
-    margin: 12px 0;
-  }
-  
-  .action-bar-scroll {
-    padding: 10px 12px;
-    margin: 0 -12px;
-    padding-left: 12px;
-    padding-right: 12px;
-    gap: 6px;
-  }
-  
-  .action-bar-btn {
-    padding: 8px 14px;
-    font-size: 13px;
-    min-height: 40px;
-    gap: 6px;
-  }
-  
-  .action-bar-btn i {
-    font-size: 15px;
-  }
-  
-  .action-bar-select {
-    padding: 8px 36px 8px 14px;
-    font-size: 13px;
-    min-height: 40px;
-    min-width: 130px;
-    background-position: right 14px center;
-  }
-  
-  .btn-counter {
-    font-size: 11px;
-    padding: 2px 6px;
-    min-width: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  .action-bar-scroll {
-    padding: 8px 10px;
-    margin: 0 -10px;
-    padding-left: 10px;
-    padding-right: 10px;
-    gap: 4px;
-  }
-  
-  .action-bar-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-    min-height: 38px;
-  }
-  
-  .action-bar-btn span {
-    display: none;
-  }
-  
-  .action-bar-btn i {
-    margin: 0;
-    font-size: 14px;
-  }
-  
-  .action-bar-select {
-    min-width: 110px;
-    font-size: 12px;
-    padding: 8px 32px 8px 12px;
-  }
-  
-  .btn-counter {
-    display: none;
-  }
-}
-
-/* Touch Device Optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .action-bar-btn {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .action-bar-btn:hover {
-    transform: none;
-  }
-  
-  .action-bar-btn:active {
-    transform: scale(0.95);
-  }
-}
-
-/* Smooth scrolling for the action bar */
-.action-bar-scroll {
-  scroll-behavior: smooth;
-}
-
-/* Custom scrollbar for webkit browsers (optional) */
-.action-bar-scroll::-webkit-scrollbar {
-  height: 4px;
-  display: block;
-}
-
-.action-bar-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.action-bar-scroll::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 2px;
-}
-
-.action-bar-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
-}
-
-
 
 /* ===== METADATA COLLAPSIBLE SECTION ===== */
 .metadata-collapsible {
@@ -3404,10 +3012,578 @@ html:has(.video-detail-page) {
   display: none !important;
 }
 
-/* FIX: Ensure button text is always visible */
+/* ===== PREMIUM ENHANCED HORIZONTAL ACTION BAR ===== */
+.horizontal-action-bar {
+  margin: 20px 0;
+  width: 100%;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%);
+  border-radius: 20px;
+  padding: 4px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.action-bar-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  position: relative;
+  margin: 0;
+  padding-left: 20px;
+  padding-right: 20px;
+  /* Prevent button cutoff */
+  scroll-padding: 0 20px;
+}
+
+.action-bar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Premium Scroll Indicators with Glow Effect */
+.action-bar-scroll::before,
+.action-bar-scroll::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(90deg, var(--dark-light) 0%, transparent 100%);
+}
+
+.action-bar-scroll::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--dark-light) 0%, transparent 100%);
+  box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar-scroll::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--dark-light) 0%, transparent 100%);
+  box-shadow: inset -10px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar-scroll.scroll-start::after,
+.action-bar-scroll.scroll-middle::before,
+.action-bar-scroll.scroll-middle::after,
+.action-bar-scroll.scroll-end::before {
+  opacity: 1;
+}
+
+/* Premium Action Buttons */
+.action-bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  color: var(--text);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 52px;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.action-bar-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.action-bar-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.action-bar-btn > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Hover Effects */
+.action-bar-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.25),
+    0 4px 15px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.action-bar-btn:hover::before {
+  left: 100%;
+}
+
+.action-bar-btn:active {
+  transform: translateY(-1px) scale(1.01);
+  transition: all 0.1s ease;
+}
+
+/* Active State with Premium Effects */
+.action-bar-btn.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 
+    0 8px 35px rgba(229, 9, 20, 0.4),
+    0 4px 20px rgba(229, 9, 20, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(229, 9, 20, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.action-bar-btn.active::after {
+  opacity: 1;
+}
+
+.action-bar-btn.active:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #8b0000 100%);
+  box-shadow: 
+    0 12px 40px rgba(229, 9, 20, 0.5),
+    0 6px 25px rgba(229, 9, 20, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 25px rgba(229, 9, 20, 0.4);
+  transform: translateY(-3px) scale(1.03);
+}
+
+/* Premium Button Icons */
+.action-bar-btn i {
+  font-size: 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.action-bar-btn:hover i {
+  transform: scale(1.15) translateY(-1px);
+}
+
+.action-bar-btn.active i {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+/* Premium Button Counters */
+.btn-counter {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.action-bar-btn.active .btn-counter {
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 100%);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Share Button with Premium Tooltip */
+.share-button-container {
+  position: relative;
+  display: flex;
+}
+
+.share-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--success) 0%, #1e7e34 100%);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-top: 12px;
+  box-shadow: 
+    0 8px 30px rgba(40, 167, 69, 0.4),
+    0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  animation: premiumTooltip 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.share-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-bottom-color: var(--success);
+  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.share-tooltip i {
+  margin-right: 8px;
+  animation: bounceIn 0.6s ease;
+}
+
+@keyframes premiumTooltip {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+  }
+  50% {
+    transform: translateX(-50%) translateY(5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Premium Dropdown */
+.action-bar-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.action-bar-select {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  color: var(--text);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px 48px 14px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 52px;
+  min-width: 160px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  background-size: 18px;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.action-bar-select:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.25),
+    0 4px 15px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.action-bar-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 
+    0 0 0 3px rgba(229, 9, 20, 0.3),
+    0 8px 30px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.action-bar-select option {
+  background: var(--dark-light);
+  color: var(--text);
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-bar-select option:checked {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+}
+
+/* Info Button Chevron Animation */
+.info-chevron {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 6px;
+  font-size: 14px;
+}
+
+.action-bar-btn.active .info-chevron {
+  transform: rotate(180deg) scale(1.2);
+}
+
+/* Premium Download Button */
+.download-btn .btn-counter {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.2) 100%);
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+/* Like/Dislike Premium States */
+.like-btn.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.dislike-btn.active {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  border-color: #6b7280;
+  box-shadow: 
+    0 8px 35px rgba(107, 114, 128, 0.4),
+    0 4px 20px rgba(107, 114, 128, 0.3);
+}
+
+/* FIX: Prevent Button Cutoff During Scrolling */
+.action-bar-scroll {
+  scroll-snap-type: x proximity;
+}
+
+.action-bar-btn {
+  scroll-snap-align: start;
+  /* Ensure buttons are fully visible */
+  margin: 2px;
+}
+
+/* Enhanced Mobile Optimizations */
+@media (max-width: 768px) {
+  .horizontal-action-bar {
+    margin: 16px 0;
+    border-radius: 18px;
+    padding: 3px;
+  }
+  
+  .action-bar-scroll {
+    padding: 14px 16px;
+    gap: 10px;
+    scroll-padding: 0 16px;
+  }
+  
+  .action-bar-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+    min-height: 48px;
+    gap: 8px;
+    border-radius: 14px;
+  }
+  
+  .action-bar-btn i {
+    font-size: 16px;
+  }
+  
+  .action-bar-select {
+    padding: 12px 42px 12px 16px;
+    font-size: 14px;
+    min-height: 48px;
+    min-width: 140px;
+    background-position: right 16px center;
+    border-radius: 14px;
+  }
+  
+  .btn-counter {
+    font-size: 12px;
+    padding: 3px 8px;
+    min-width: 22px;
+    border-radius: 10px;
+  }
+  
+  .share-tooltip {
+    padding: 10px 16px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+}
+
 @media (max-width: 480px) {
+  .horizontal-action-bar {
+    margin: 12px 0;
+    border-radius: 16px;
+  }
+  
+  .action-bar-scroll {
+    padding: 12px 14px;
+    gap: 8px;
+    scroll-padding: 0 14px;
+  }
+  
+  .action-bar-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 44px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+  
   .action-bar-btn span {
     display: inline-block !important;
-    font-size: 11px;
+    font-size: 12px;
   }
+  
+  .action-bar-btn i {
+    font-size: 15px;
+    margin: 0;
+  }
+  
+  .action-bar-select {
+    min-width: 120px;
+    font-size: 13px;
+    padding: 10px 38px 10px 14px;
+    min-height: 44px;
+    border-radius: 12px;
+  }
+  
+  .btn-counter {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 6px;
+    min-width: 20px;
+  }
+  
+  /* Ensure all content is visible on small screens */
+  .action-bar-scroll::before,
+  .action-bar-scroll::after {
+    width: 20px;
+  }
+}
+
+/* Touch Device Premium Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .action-bar-btn {
+    min-height: 52px;
+    min-width: 52px;
+  }
+  
+  .action-bar-btn:hover {
+    transform: none;
+  }
+  
+  .action-bar-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  .action-bar-btn.active:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Smooth scrolling with momentum */
+.action-bar-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for webkit browsers */
+.action-bar-scroll::-webkit-scrollbar {
+  height: 6px;
+  display: block;
+}
+
+.action-bar-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  margin: 0 20px;
+}
+
+.action-bar-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3);
+}
+
+.action-bar-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #8b0000 100%);
+}
+
+/* Premium Loading Animation */
+@keyframes buttonGlow {
+  0%, 100% {
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 4px 25px rgba(229, 9, 20, 0.3),
+      0 2px 12px rgba(229, 9, 20, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 15px rgba(229, 9, 20, 0.2);
+  }
+}
+
+.action-bar-btn.loading {
+  animation: buttonGlow 2s ease-in-out infinite;
+}
+
+/* Premium Focus States for Accessibility */
+.action-bar-btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  transform: translateY(-2px);
+}
+
+.action-bar-select:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
