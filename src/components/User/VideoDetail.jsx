@@ -265,64 +265,18 @@ const VideoDetail = () => {
                       </button>
                     )}
                     
-{/* Enhanced Video Information with Download and Primary Source */}
-<div className="video-info-controls">
-  {/* Video Information Section */}
-  <button
-    className="video-info-btn"
-    onClick={() => setMetadataExpanded(!metadataExpanded)}
-    aria-expanded={metadataExpanded}
-    aria-label="Show video information"
-  >
-    <div className="info-content">
-      <i className="fas fa-info-circle info-icon"></i>
-      <span className="info-text">Video Information</span>
-    </div>
-    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-toggle`}></i>
-  </button>
+{/* Video Information Button */}
+<button
+  className="action-bar-btn info-btn"
+  onClick={() => setMetadataExpanded(!metadataExpanded)}
+  aria-expanded={metadataExpanded}
+  aria-label="Show video information"
+>
+  <i className="fas fa-info-circle"></i>
+  <span>Info</span>
+  <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
+</button>
 
-  {/* Download Section */}
-  <button
-    className="download-info-btn"
-    onClick={() => setShowDownloads(!showDownloads)}
-    aria-expanded={showDownloads}
-    aria-label={`Download options (${availableDownloads.length} available)`}
-  >
-    <div className="download-content">
-      <i className="fas fa-download download-icon"></i>
-      <span className="download-text">Download</span>
-      {availableDownloads.length > 0 && (
-        <span className="download-counter">({availableDownloads.length})</span>
-      )}
-    </div>
-    <i className={`fas fa-chevron-${showDownloads ? 'up' : 'down'} download-toggle`}></i>
-  </button>
-
-  {/* Primary Source Section */}
-  <div className="primary-source-section">
-    <div className="source-content">
-      <i className="fas fa-star source-icon"></i>
-      <span className="source-text">Primary Source</span>
-      {sources.length > 1 && (
-        <select
-          className="source-select"
-          value={currentSource}
-          onChange={(e) => setCurrentSource(parseInt(e.target.value))}
-          aria-label="Select video source"
-        >
-          {sources.map((source, index) => (
-            <option key={index} value={index}>
-              {source.label} {index === 0 && '★'}
-            </option>
-          ))}
-        </select>
-      )}
-      {sources.length === 1 && (
-        <span className="source-label">{sources[0]?.label}</span>
-      )}
-    </div>
-  </div>
-</div>
 
                     
                     {/* Primary Source Dropdown */}
@@ -416,25 +370,190 @@ const VideoDetail = () => {
                   </div>
                 )}
 
-                {/* Enhanced Collapsible Metadata Section */}
-                <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                  <button 
-                    className="metadata-header"
-                    onClick={() => setMetadataExpanded(!metadataExpanded)}
-                    aria-expanded={metadataExpanded}
-                  >
-                    <div className="metadata-title">
-                      <i className="fas fa-info-circle"></i>
-                      <span>Video Information</span>
-                      <div className="metadata-badge">
-                        <i className="fas fa-film"></i>
-                        Details
-                      </div>
-                    </div>
-                    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
-                  </button>
-                  
-                  <div className="metadata-content">
+                
+{/* Enhanced Collapsible Download Section - REPLACE THE EXISTING metadata-collapsible */}
+<div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
+  <button
+    className="metadata-header"
+    onClick={() => setMetadataExpanded(!metadataExpanded)}
+    aria-expanded={metadataExpanded}
+  >
+    <div className="metadata-title">
+      <i className="fas fa-info-circle"></i>
+      <span>Video Information</span>
+      <div className="metadata-badge">
+        <i className="fas fa-download"></i>
+        Download
+      </div>
+    </div>
+    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} metadata-toggle`}></i>
+  </button>
+
+  {/* Enhanced Download Section Inside */}
+  <div className="metadata-content">
+    {/* Download Options First */}
+    {availableDownloads.length > 0 && (
+      <div className="download-section-inline">
+        <div className="download-header-inline">
+          <div className="download-title-inline">
+            <i className="fas fa-download"></i>
+            <h4>Download Options</h4>
+            <div className="download-badge-inline">
+              {availableDownloads.length} available
+            </div>
+          </div>
+        </div>
+        <div className="quality-buttons-inline">
+          {availableDownloads.map(([quality, link]) => (
+            <a
+              key={quality}
+              href={link}
+              className="quality-btn-inline"
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+            >
+              <i className="fas fa-download"></i>
+              {quality}
+              <span className="quality-badge-inline">HD</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Primary Source Section */}
+    <div className="source-section-inline">
+      <div className="source-header-inline">
+        <div className="source-title-inline">
+          <i className="fas fa-star"></i>
+          <h4>Primary Source</h4>
+          <div className="source-badge-inline">
+            Active
+          </div>
+        </div>
+      </div>
+      <div className="source-selector-inline">
+        {sources.length > 1 ? (
+          <select
+            className="source-select-inline"
+            value={currentSource}
+            onChange={(e) => setCurrentSource(parseInt(e.target.value))}
+            aria-label="Select video source"
+          >
+            {sources.map((source, index) => (
+              <option key={index} value={index}>
+                {source.label} {index === 0 && '★'}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="source-display-inline">
+            <i className="fas fa-play-circle"></i>
+            <span>{sources[0]?.label || 'Primary Source'}</span>
+            <span className="primary-star">★</span>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Enhanced Metadata Grid */}
+    <div className="metadata-grid">
+      <div className="metadata-item highlight">
+        <div className="metadata-label">
+          <i className="fas fa-eye"></i>
+          Views
+        </div>
+        <div className="metadata-value">
+          {formatViews(video.views || 0)}
+        </div>
+      </div>
+
+      <div className="metadata-item">
+        <div className="metadata-label">
+          <i className="fas fa-clock"></i>
+          Duration
+        </div>
+        <div className="metadata-value">
+          {formatDuration(video.duration || 120)}
+        </div>
+      </div>
+
+      <div className="metadata-item highlight">
+        <div className="metadata-label">
+          <i className="fas fa-tags"></i>
+          Genre
+        </div>
+        <div className="metadata-value">
+          <span className="genre-badge">{video.genre}</span>
+        </div>
+      </div>
+
+      {video.createdAt && (
+        <div className="metadata-item">
+          <div className="metadata-label">
+            <i className="fas fa-calendar"></i>
+            Date Added
+          </div>
+          <div className="metadata-value">
+            {video.createdAt.toDate ?
+              new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) :
+              'Recently added'
+            }
+          </div>
+        </div>
+      )}
+
+      {/* Engagement Stats */}
+      <div className="metadata-item engagement-stats">
+        <div className="metadata-label">
+          <i className="fas fa-chart-bar"></i>
+          Engagement
+        </div>
+        <div className="engagement-metrics">
+          <div className="engagement-item">
+            <i className="fas fa-thumbs-up"></i>
+            <span>{likeCount} likes</span>
+          </div>
+          <div className="engagement-item">
+            <i className="fas fa-thumbs-down"></i>
+            <span>{dislikeCount} dislikes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Enhanced Description */}
+    {video.description && (
+      <div className="metadata-description">
+        <div className="description-header">
+          <i className="fas fa-align-left"></i>
+          <h4>Description</h4>
+          <div className="description-badge">
+            {video.description.length > 200 ? 'Detailed' : 'Brief'}
+          </div>
+        </div>
+        <div className={`description-text ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
+          {video.description}
+        </div>
+        {video.description.length > 150 && (
+          <button
+            className="read-more-btn"
+            onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+          >
+            <i className={`fas fa-chevron-${descriptionExpanded ? 'up' : 'down'}`}></i>
+            {descriptionExpanded ? 'Show Less' : 'Read More'}
+          </button>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
                     {/* Enhanced Metadata Grid */}
                     <div className="metadata-grid">
                       <div className="metadata-item highlight">
