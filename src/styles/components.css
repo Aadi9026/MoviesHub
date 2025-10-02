@@ -3404,3 +3404,10 @@ html:has(.video-detail-page) {
   display: none !important;
 }
 
+/* FIX: Ensure button text is always visible */
+@media (max-width: 480px) {
+  .action-bar-btn span {
+    display: inline-block !important;
+    font-size: 11px;
+  }
+}
