@@ -85,25 +85,26 @@ const VideoDetail = () => {
       console.log('Share cancelled or failed');
     }
   };
-  const handleScrollIndicator = () => {
-    const scrollContainer = actionBarRef.current;
-    if (scrollContainer) {
-      const scrollLeft = scrollContainer.scrollLeft;
-      const scrollWidth = scrollContainer.scrollWidth;
-      const clientWidth = scrollContainer.clientWidth;
-      
-      if (scrollLeft === 0) {
-        scrollContainer.classList.add('scroll-start');
-        scrollContainer.classList.remove('scroll-middle', 'scroll-end');
-      } else if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        scrollContainer.classList.add('scroll-end');
-        scrollContainer.classList.remove('scroll-start', 'scroll-middle');
-      } else {
-        scrollContainer.classList.add('scroll-middle');
-        scrollContainer.classList.remove('scroll-start', 'scroll-end');
-      }
-    }
-  };
+ const handleScrollIndicator = () => {
+  const scrollContainer = actionBarRef.current;
+  if (scrollContainer) {
+    const scrollLeft = scrollContainer.scrollLeft;
+    const scrollWidth = scrollContainer.scrollWidth;
+    const clientWidth = scrollContainer.clientWidth;
+    
+    // Remove all classes first
+    scrollContainer.classList.remove('scroll-start', 'scroll-middle', 'scroll-end');
+    
+    // Add appropriate class based on scroll position
+    if (scrollLeft === 0) {
+      scrollContainer.classList.add('scroll-start');
+    } else if (scrollLeft + clientWidth >= scrollWidth - 10) {
+      scrollContainer.classList.add('scroll-end');
+    } else {
+      scrollContainer.classList.add('scroll-middle');
+    }
+  }
+};
   // Initialize scroll indicators
   useEffect(() => {
     handleScrollIndicator();
