@@ -265,17 +265,65 @@ const VideoDetail = () => {
                       </button>
                     )}
                     
-                    {/* Video Information Button */}
-                    <button 
-                      className={`action-bar-btn info-btn ${metadataExpanded ? 'active' : ''}`}
-                      onClick={() => setMetadataExpanded(!metadataExpanded)}
-                      aria-expanded={metadataExpanded}
-                      aria-label="Show video information"
-                    >
-                      <i className="fas fa-info-circle"></i>
-                      <span>Info</span>
-                      <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-chevron`}></i>
-                    </button>
+{/* Enhanced Video Information with Download and Primary Source */}
+<div className="video-info-controls">
+  {/* Video Information Section */}
+  <button
+    className="video-info-btn"
+    onClick={() => setMetadataExpanded(!metadataExpanded)}
+    aria-expanded={metadataExpanded}
+    aria-label="Show video information"
+  >
+    <div className="info-content">
+      <i className="fas fa-info-circle info-icon"></i>
+      <span className="info-text">Video Information</span>
+    </div>
+    <i className={`fas fa-chevron-${metadataExpanded ? 'up' : 'down'} info-toggle`}></i>
+  </button>
+
+  {/* Download Section */}
+  <button
+    className="download-info-btn"
+    onClick={() => setShowDownloads(!showDownloads)}
+    aria-expanded={showDownloads}
+    aria-label={`Download options (${availableDownloads.length} available)`}
+  >
+    <div className="download-content">
+      <i className="fas fa-download download-icon"></i>
+      <span className="download-text">Download</span>
+      {availableDownloads.length > 0 && (
+        <span className="download-counter">({availableDownloads.length})</span>
+      )}
+    </div>
+    <i className={`fas fa-chevron-${showDownloads ? 'up' : 'down'} download-toggle`}></i>
+  </button>
+
+  {/* Primary Source Section */}
+  <div className="primary-source-section">
+    <div className="source-content">
+      <i className="fas fa-star source-icon"></i>
+      <span className="source-text">Primary Source</span>
+      {sources.length > 1 && (
+        <select
+          className="source-select"
+          value={currentSource}
+          onChange={(e) => setCurrentSource(parseInt(e.target.value))}
+          aria-label="Select video source"
+        >
+          {sources.map((source, index) => (
+            <option key={index} value={index}>
+              {source.label} {index === 0 && '★'}
+            </option>
+          ))}
+        </select>
+      )}
+      {sources.length === 1 && (
+        <span className="source-label">{sources[0]?.label}</span>
+      )}
+    </div>
+  </div>
+</div>
+
                     
                     {/* Primary Source Dropdown */}
                     {sources.length > 0 && (
