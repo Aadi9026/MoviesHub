@@ -38,7 +38,7 @@ const VideoPage = () => {
     const duration = formatDuration(video.duration);
     
     return {
-      title: `${video.title} - Watch Online Free HD | MoviesHub`,
+      title: `${video.title} - Watch Online Free HD | YTMoviesHub`,
       description: video.description || `Watch ${video.title} online free in HD quality. ${video.genre} movie with English subtitles. ${video.views || 0}+ views.`,
       keywords: `${video.title}, watch ${video.title} online, ${video.genre} movies, ${video.title} full movie, ${video.title} HD, free movie streaming`,
       image: video.thumbnail,
@@ -67,19 +67,19 @@ const VideoPage = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://movieshub.vercel.app/"
+        "item": "https://ytmovieshub.website/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": video?.genre || "Movies",
-        "item": `https://movieshub.vercel.app/?genre=${video?.genre || 'movies'}`
+        "item": `https://ytmovieshub.website/?genre=${video?.genre || 'movies'}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": video?.title || "Movie",
-        "item": `https://movieshub.vercel.app/video/${id}`
+        "item": `https://ytmovieshub.website/video/${id}`
       }
     ]
   });
