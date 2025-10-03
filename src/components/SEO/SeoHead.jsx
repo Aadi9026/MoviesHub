@@ -3,14 +3,14 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
 const SeoHead = ({ 
-  title = "MoviesHub - Stream HD Movies Online Free", 
+  title = "YTMoviesHub - Stream HD Movies Online Free", 
   description = "Watch latest movies online free in HD quality. Stream Hollywood, Bollywood, Action, Romance, Comedy movies with English subtitles.",
   keywords = "watch movies online, free movies, HD movies, Hollywood movies, Bollywood movies, stream movies",
-  image = "https://movieshub.vercel.app/og-image.jpg",
+  image = "https://ytmovieshub.website/og-image.jpg",
   video = null 
 }) => {
   const location = useLocation();
-  const currentUrl = `https://movieshub.vercel.app${location.pathname}`;
+  const currentUrl = `https://ytmovieshub.website${location.pathname}`;
   
   const schemaData = {
     "@context": "https://schema.org",
@@ -43,7 +43,7 @@ const SeoHead = ({
       <meta property="og:url" content={currentUrl} />
       <meta property="og:image" content={image} />
       <meta property="og:type" content={video ? "video.movie" : "website"} />
-      <meta property="og:site_name" content="MoviesHub" />
+      <meta property="og:site_name" content="YTMoviesHub" />
 
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content={video ? "player" : "summary_large_image"} />
