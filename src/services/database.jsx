@@ -70,6 +70,77 @@ export const deleteVideo = async (id) => {
   }
 };
 
+// ADD THIS FUNCTION: Duplicate Video Detection
+export const checkDuplicateVideo = async (title, genre, excludeId = null) => {
+  try {
+    // Validate input
+    if (!title || !genre) {
+      return { success: true, duplicates: [] };
+    }
+
+    const allVideosResult = await getVideos(100);
+    
+    // Ensure we have a valid videos array
+    const videos = Array.isArray(allVideosResult.videos) ? allVideosResult.videos : [];
+    
+    const searchTitle = title.toLowerCase().trim();
+    const searchGenre = genre.toLowerCase().trim();
+    
+    const duplicates = videos.filter(video => {
+      if (!video || !video.id) return false;
+      
+      // Skip the excluded video (for edit mode)
+      if (excludeId && video.id === excludeId) return false;
+      
+      const videoTitle = (video.title || '').toLowerCase();
+      const videoGenre = (video.genre || '').toLowerCase();
+      
+      // Check for exact match
+      if (videoTitle === searchTitle && videoGenre === searchGenre) {
+        return true;
+      }
+      
+      // Check for similar titles (fuzzy match)
+      const titleSimilarity = calculateSimilarity(videoTitle, searchTitle);
+      const genreMatch = videoGenre === searchGenre;
+      
+      // Consider duplicate if titles are very similar and same genre
+      if (titleSimilarity > 0.8 && genreMatch) {
+        return true;
+      }
+      
+      // Check for contained titles (e.g., "KGF Chapter 2" vs "KGF Chapter 2 (2022)")
+      if ((videoTitle.includes(searchTitle) || searchTitle.includes(videoTitle)) && genreMatch) {
+        return true;
+      }
+      
+      return false;
+    });
+
+    return { success: true, duplicates };
+  } catch (error) {
+    console.error('Error checking duplicate videos:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Helper function for similarity calculation
+const calculateSimilarity = (str1, str2) => {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  
+  if (longer.length === 0) return 1.0;
+  
+  // Simple similarity calculation
+  const words1 = str1.split(/\s+/).filter(word => word.length > 2);
+  const words2 = str2.split(/\s+/).filter(word => word.length > 2);
+  
+  const commonWords = words1.filter(word => words2.includes(word));
+  const similarity = commonWords.length / Math.max(words1.length, words2.length);
+  
+  return similarity;
+};
+
 export const getVideos = async (limitCount = 50) => {
   try {
     let q;
@@ -270,7 +341,6 @@ export const updateAdSettings = async (adSettings) => {
     return { success: false, error: error.message };
   }
 };
-// Add these functions to your existing database.js file
 
 // Get random videos (for Home page)
 export const getRandomVideos = async (limit = 50) => {
