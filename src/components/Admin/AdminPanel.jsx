@@ -9,6 +9,7 @@ import TabPanel from '../UI/TabPanel';
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('movies');
   const [refreshList, setRefreshList] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -25,6 +26,10 @@ const AdminPanel = () => {
 
   const handleBackToSite = () => {
     navigate('/');
+  };
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
   };
 
   if (!isAdmin) {
@@ -57,6 +62,30 @@ const AdminPanel = () => {
         </div>
       </div>
 
+      {/* Add Search Bar in Movies Tab */}
+      {activeTab === 'movies' && (
+        <div className="admin-search-bar">
+          <div className="search-container">
+            <i className="fas fa-search"></i>
+            <input
+              type="text"
+              placeholder="Search movies by title, year, or genre..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button 
+                className="clear-search"
+                onClick={() => setSearchTerm('')}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <TabPanel 
         tabs={tabs} 
         activeTab={activeTab} 
@@ -64,8 +93,18 @@ const AdminPanel = () => {
       />
 
       <div className="admin-content">
-        {activeTab === 'movies' && <MovieList key={refreshList} />}
-        {activeTab === 'add' && <MovieForm onSuccess={handleMovieAdded} />}
+        {activeTab === 'movies' && (
+          <MovieList 
+            key={refreshList} 
+            searchTerm={searchTerm}
+          />
+        )}
+        {activeTab === 'add' && (
+          <MovieForm 
+            onSuccess={handleMovieAdded} 
+            onDuplicateCheck={true}
+          />
+        )}
         {activeTab === 'ads' && <AdSettings />}
       </div>
     </div>
