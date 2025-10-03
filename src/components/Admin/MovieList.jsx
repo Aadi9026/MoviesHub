@@ -4,8 +4,9 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import MovieForm from './MovieForm';
 import Modal from '../UI/Modal';
 
-const MovieList = () => {
+const MovieList = ({ searchTerm = '' }) => {
   const [videos, setVideos] = useState([]);
+  const [filteredVideos, setFilteredVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingVideo, setEditingVideo] = useState(null);
@@ -14,6 +15,10 @@ const MovieList = () => {
   useEffect(() => {
     loadVideos();
   }, []);
+
+  useEffect(() => {
+    filterVideos();
+  }, [searchTerm, videos]);
 
   const loadVideos = async () => {
     setLoading(true);
@@ -24,6 +29,23 @@ const MovieList = () => {
       setError(result.error);
     }
     setLoading(false);
+  };
+
+  const filterVideos = () => {
+    if (!searchTerm.trim()) {
+      setFilteredVideos(videos);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    const filtered = videos.filter(video => 
+      video.title?.toLowerCase().includes(term) ||
+      video.genre?.toLowerCase().includes(term) ||
+      video.description?.toLowerCase().includes(term) ||
+      video.releaseYear?.toString().includes(term) ||
+      video.duration?.toString().includes(term)
+    );
+    setFilteredVideos(filtered);
   };
 
   const handleEdit = (video) => {
@@ -51,28 +73,47 @@ const MovieList = () => {
   if (loading) return <LoadingSpinner text="Loading videos..." />;
   if (error) return <div className="error-message">Error: {error}</div>;
 
+  const displayVideos = searchTerm ? filteredVideos : videos;
+
   return (
     <div className="movie-list">
       <div className="list-header">
-        <h3>Manage Movies ({videos.length})</h3>
+        <h3>Manage Movies ({displayVideos.length}) 
+          {searchTerm && (
+            <span className="search-results">
+              {" "}for "{searchTerm}"
+            </span>
+          )}
+        </h3>
         <button className="btn btn-secondary" onClick={loadVideos}>
           <i className="fas fa-sync-alt"></i> Refresh
         </button>
       </div>
 
-      {videos.length === 0 ? (
+      {searchTerm && filteredVideos.length === 0 && (
+        <div className="search-no-results">
+          <i className="fas fa-search"></i>
+          <h4>No movies found for "{searchTerm}"</h4>
+          <p>Try searching with different keywords</p>
+        </div>
+      )}
+
+      {!searchTerm && videos.length === 0 ? (
         <div className="empty-state">
           <i className="fas fa-film"></i>
           <p>No movies found. Add your first movie!</p>
         </div>
       ) : (
         <div className="movies-grid">
-          {videos.map(video => (
+          {displayVideos.map(video => (
             <div key={video.id} className="movie-item">
               <div className="movie-thumb">
                 <img src={video.thumbnail} alt={video.title} />
                 <div className="movie-stats">
                   <span><i className="fas fa-eye"></i> {video.views || 0}</span>
+                  {video.releaseYear && (
+                    <span><i className="fas fa-calendar"></i> {video.releaseYear}</span>
+                  )}
                 </div>
               </div>
               <div className="movie-info">
