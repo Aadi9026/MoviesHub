@@ -21,7 +21,7 @@ const HomePage = () => {
   const getSeoData = () => {
     if (searchTerm) {
       return {
-        title: `Search Results for "${searchTerm}" - MoviesHub | Find & Watch Movies Online`,
+        title: `Search Results for "${searchTerm}" - YTMoviesHub | Find & Watch Movies Online`,
         description: `Find and watch ${searchTerm} movies online free in HD quality. Browse ${safeVideos.length} ${searchTerm} movies with instant streaming.`,
         keywords: `${searchTerm} movies, watch ${searchTerm} movies online, ${searchTerm} films, ${searchTerm} cinema, stream ${searchTerm} movies, ${searchTerm} HD`,
       };
@@ -29,7 +29,7 @@ const HomePage = () => {
 
     // Default SEO for home page
     return {
-      title: "MoviesHub - Stream HD Movies Online Free | Latest Hollywood & Bollywood Movies",
+      title: "YTMoviesHub - Stream HD Movies Online Free | Latest Hollywood & Bollywood Movies",
       description: "Watch latest movies online free in HD quality. Stream Hollywood, Bollywood, Action, Romance, Comedy movies with English subtitles. No registration required.",
       keywords: "watch movies online, free movies, HD movies, Hollywood movies, Bollywood movies, stream movies, latest movies, action movies, romance movies, comedy movies, drama movies",
     };
@@ -44,7 +44,7 @@ const HomePage = () => {
       "@type": "SearchResultsPage",
       "name": `Search Results for ${searchTerm}`,
       "description": `Search results for ${searchTerm} movies`,
-      "url": `https://movieshub.vercel.app/?search=${encodeURIComponent(searchTerm)}`,
+      "url": `https://ytmovieshub.website/?search=${encodeURIComponent(searchTerm)}`,
       "mainEntity": {
         "@type": "ItemList",
         "numberOfItems": safeVideos.length,
@@ -56,7 +56,7 @@ const HomePage = () => {
             "name": video.title,
             "description": video.description,
             "genre": video.genre,
-            "url": `https://movieshub.vercel.app/video/${video.id}`
+            "url": `https://ytmovieshub.website/video/${video.id}`
           }
         }))
       }
@@ -81,7 +81,7 @@ const HomePage = () => {
           "name": video.title,
           "description": video.description || `Watch ${video.title} online free`,
           "genre": video.genre,
-          "url": `https://movieshub.vercel.app/video/${video.id}`
+          "url": `https://ytmovieshub.website/video/${video.id}`
         }
       }))
     };
