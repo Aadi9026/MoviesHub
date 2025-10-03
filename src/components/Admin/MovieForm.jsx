@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { addVideo, updateVideo } from '../../services/database';
+import { addVideo, updateVideo, checkDuplicateVideo } from '../../services/database';
 import { GENRES, QUALITIES } from '../../utils/constants';
 import { validateEmbedCode } from '../../utils/helpers';
 
-const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
+const MovieForm = ({ editVideo, onSuccess, onCancel, onDuplicateCheck = true }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -22,6 +22,11 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [imagePreview, setImagePreview] = useState('');
+  const [duplicateCheck, setDuplicateCheck] = useState({
+    isDuplicate: false,
+    duplicateVideos: [],
+    showDuplicateModal: false
+  });
 
   // Sample embed codes for testing
   const sampleEmbedCodes = [
@@ -51,12 +56,50 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }
   }, [editVideo]);
 
+  // Check for duplicates when title changes
+  useEffect(() => {
+    if (onDuplicateCheck && !editVideo && formData.title.trim() && formData.genre) {
+      const timer = setTimeout(() => {
+        checkForDuplicates();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData.title, formData.genre, editVideo]);
+
+  const checkForDuplicates = async () => {
+    if (!formData.title.trim() || !formData.genre) return;
+
+    const result = await checkDuplicateVideo(formData.title, formData.genre);
+    if (result.success && result.duplicates.length > 0) {
+      setDuplicateCheck({
+        isDuplicate: true,
+        duplicateVideos: result.duplicates,
+        showDuplicateModal: false
+      });
+    } else {
+      setDuplicateCheck({
+        isDuplicate: false,
+        duplicateVideos: [],
+        showDuplicateModal: false
+      });
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Clear duplicate warning when user starts editing
+    if (name === 'title' || name === 'genre') {
+      setDuplicateCheck(prev => ({
+        ...prev,
+        isDuplicate: false
+      }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -121,28 +164,42 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleForceAdd = async () => {
+    setDuplicateCheck(prev => ({
+      ...prev,
+      isDuplicate: false,
+      showDuplicateModal: false
+    }));
+    await submitForm();
+  };
+
+  const handleShowDuplicateModal = () => {
+    setDuplicateCheck(prev => ({
+      ...prev,
+      showDuplicateModal: true
+    }));
+  };
+
+  const submitForm = async () => {
     setLoading(true);
     setError('');
-    setSuccess('');
 
     if (!formData.title.trim()) {
       setError('Please enter a movie title');
       setLoading(false);
-      return;
+      return false;
     }
 
     if (!formData.thumbnail.trim() && !formData.thumbnailFile) {
       setError('Please provide a thumbnail URL or upload an image');
       setLoading(false);
-      return;
+      return false;
     }
 
     if (!formData.embedCode.trim()) {
       setError('Please provide an embed code');
       setLoading(false);
-      return;
+      return false;
     }
 
     try {
@@ -191,14 +248,39 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         if (onSuccess) {
           setTimeout(onSuccess, 1500);
         }
+        return true;
       } else {
         setError(result.error);
+        return false;
       }
     } catch (err) {
       setError('Error: ' + err.message);
+      return false;
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    setLoading(false);
+    // Skip duplicate check for editing or if disabled
+    if (editVideo || !onDuplicateCheck) {
+      await submitForm();
+      return;
+    }
+
+    // Check for duplicates before submitting
+    const duplicateResult = await checkDuplicateVideo(formData.title, formData.genre);
+    if (duplicateResult.success && duplicateResult.duplicates.length > 0) {
+      setDuplicateCheck({
+        isDuplicate: true,
+        duplicateVideos: duplicateResult.duplicates,
+        showDuplicateModal: true
+      });
+    } else {
+      await submitForm();
+    }
   };
 
   return (
@@ -221,6 +303,19 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
               required
               placeholder="Enter movie title"
             />
+            {duplicateCheck.isDuplicate && !duplicateCheck.showDuplicateModal && (
+              <div className="duplicate-warning">
+                <i className="fas fa-exclamation-triangle"></i>
+                <span>Similar movie already exists!</span>
+                <button 
+                  type="button" 
+                  className="btn-link"
+                  onClick={handleShowDuplicateModal}
+                >
+                  View Details
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -240,6 +335,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
           </div>
         </div>
 
+        {/* Rest of your form remains the same */}
         <div className="form-group">
           <label className="form-label">Duration (minutes) *</label>
           <input
@@ -425,6 +521,57 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
           )}
         </div>
       </form>
+
+      {/* Duplicate Confirmation Modal */}
+      {duplicateCheck.showDuplicateModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Duplicate Movie Detected</h3>
+            </div>
+            <div className="modal-body">
+              <div className="duplicate-alert">
+                <i className="fas fa-exclamation-triangle"></i>
+                <p>A movie with similar title and genre already exists:</p>
+              </div>
+              
+              <div className="duplicate-list">
+                {duplicateCheck.duplicateVideos.map(video => (
+                  <div key={video.id} className="duplicate-item">
+                    <img src={video.thumbnail} alt={video.title} />
+                    <div className="duplicate-info">
+                      <h4>{video.title}</h4>
+                      <p>{video.genre} • {video.duration} min</p>
+                      <small>Added: {video.createdAt?.toDate().toLocaleDateString()}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="duplicate-options">
+                <p>What would you like to do?</p>
+                <div className="option-buttons">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary"
+                    onClick={() => setDuplicateCheck(prev => ({ ...prev, showDuplicateModal: false }))}
+                  >
+                    Cancel & Edit
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-warning"
+                    onClick={handleForceAdd}
+                    disabled={loading}
+                  >
+                    Add Anyway (Duplicate)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
