@@ -52,7 +52,7 @@ const Header = () => {
           <div className="header-left">
             <Link to="/" className="logo">
               <i className="fas fa-film"></i>
-              <span className="logo-text">MoviesHub</span>
+              <span className="logo-text">YTMoviesHub</span>
             </Link>
           </div>
 
