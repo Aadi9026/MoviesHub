@@ -7,16 +7,9 @@ const VideoCard = ({ video }) => {
 
   return (
     <div className="video-card">
-      <Link to={`/video/${id}`} className="video-link">
+      <Link to={`/video/${id}`}>
         <div className="thumbnail">
-          <img 
-            src={thumbnail} 
-            alt={title} 
-            className="thumbnail-image"
-            onError={(e) => {
-              e.target.src = '/default-thumbnail.jpg'; // Fallback image
-            }}
-          />
+          <img src={thumbnail} alt={title} />
           <div className="video-duration">{formatDuration(duration)}</div>
           <div className="play-icon">
             <i className="fas fa-play"></i>
@@ -25,13 +18,13 @@ const VideoCard = ({ video }) => {
       </Link>
       
       <div className="video-info">
-        <Link to={`/video/${id}`} className="video-title-link">
+        <Link to={`/video/${id}`}>
           <h3 className="video-title">{title}</h3>
         </Link>
         <div className="video-meta">
-          <span className="views-count">{formatViews(views || 0)} views</span>
-          <span className="separator"> • </span>
-          <span className="upload-date">{new Date(createdAt?.toDate()).toLocaleDateString()}</span>
+          <span>{formatViews(views)} views</span>
+          <span> • </span>
+          <span>{new Date(createdAt?.toDate()).toLocaleDateString()}</span>
         </div>
         <div className="video-genre">
           <span className="genre-tag">{genre}</span>
