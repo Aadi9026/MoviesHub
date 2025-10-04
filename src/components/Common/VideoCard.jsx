@@ -1,55 +1,35 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatViews, formatDuration } from '../../utils/helpers';
+import { formatDuration, formatViews } from '../../utils/helpers';
 
 const VideoCard = ({ video }) => {
   const { id, title, thumbnail, duration, views, genre, createdAt } = video;
 
-  // Format date function
-  const formatDate = (date) => {
-    if (!date) return 'Recently';
-    
-    const videoDate = date.toDate ? date.toDate() : new Date(date);
-    const now = new Date();
-    const diffTime = Math.abs(now - videoDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
-  };
-
   return (
     <div className="video-card">
-      <Link to={`/video/${id}`} className="video-card-link">
-        <div className="thumbnail-container">
-          <img 
-            src={thumbnail} 
-            alt={title}
-            className="thumbnail"
-            loading="lazy"
-          />
-          <div className="video-duration">{formatDuration(duration || 120)}</div>
-        </div>
-        
-        <div className="video-info-container">
-          <div className="video-details">
-            <h3 className="video-title" title={title}>
-              {title}
-            </h3>
-            
-            <div className="video-meta">
-              <span>{formatViews(views || 0)} views</span>
-              <span className="separator">•</span>
-              <span>{formatDate(createdAt)}</span>
-              {genre && (
-                <span className="genre-tag">{genre}</span>
-              )}
-            </div>
+      <Link to={`/video/${id}`} className="video-link">
+        <div className="thumbnail">
+          <img src={thumbnail} alt={title} />
+          <div className="video-duration">{formatDuration(duration)}</div>
+          <div className="play-icon">
+            <i className="fas fa-play"></i>
           </div>
         </div>
       </Link>
+      
+      <div className="video-info">
+        <Link to={`/video/${id}`} className="video-title-link">
+          <h3 className="video-title">{title}</h3>
+        </Link>
+        <div className="video-meta">
+          <span>{formatViews(views || 0)} views</span>
+          <span> • </span>
+          <span>{new Date(createdAt?.toDate()).toLocaleDateString()}</span>
+        </div>
+        <div className="video-genre">
+          <span className="genre-tag">{genre}</span>
+        </div>
+      </div>
     </div>
   );
 };
