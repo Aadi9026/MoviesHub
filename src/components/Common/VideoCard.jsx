@@ -9,7 +9,7 @@ const VideoCard = ({ video }) => {
     <div className="video-card">
       <Link to={`/video/${id}`} className="video-link">
         <div className="thumbnail">
-          <img src={thumbnail} alt={title} />
+          <img src={thumbnail} alt={title} loading="lazy" />
           <div className="video-duration">{formatDuration(duration)}</div>
           <div className="play-icon">
             <i className="fas fa-play"></i>
