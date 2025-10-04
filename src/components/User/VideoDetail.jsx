@@ -30,7 +30,7 @@ const VideoDetail = () => {
   const [likeCount, setLikeCount] = useState(video?.likes || 0);
   const [dislikeCount, setDislikeCount] = useState(video?.dislikes || 0);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
-  const [shareOptions, setShareOptions] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   // Reset states when video changes
   useEffect(() => {
@@ -42,7 +42,7 @@ const VideoDetail = () => {
     setDisliked(false);
     setLikeCount(video?.likes || 0);
     setDislikeCount(video?.dislikes || 0);
-    setShareOptions(false);
+    setShowShareOptions(false);
   }, [id, video]);
 
   const handleLike = () => {
@@ -75,143 +75,77 @@ const VideoDetail = () => {
     // Add your dislike API call here
   };
 
-  // Enhanced share function with direct movie file links including domain
-  const handleShare = async (shareType = 'link') => {
+  // Fixed Share Functionality
+  const handleShare = async () => {
+    const videoUrl = window.location.href;
+    
     try {
-      const currentDomain = window.location.origin; // Your full domain: https://yoursite.com
-      
-      // Get the current video source
-      const currentVideoSource = sources[currentSource]?.code;
-      
-      // Video page URL with domain
-      const videoPageUrl = `${currentDomain}/watch/${id}`;
-      
-      // Process download links to include domain if they're relative
-      const processedDownloadLinks = {};
-      if (video?.downloadLinks) {
-        Object.entries(video.downloadLinks).forEach(([quality, link]) => {
-          if (link && link.trim() !== '') {
-            // Add domain if it's a relative path
-            processedDownloadLinks[quality] = link.startsWith('http') ? 
-              link : 
-              `${currentDomain}${link.startsWith('/') ? link : '/' + link}`;
-          }
+      // Check if Web Share API is available (mobile devices)
+      if (navigator.share) {
+        await navigator.share({
+          title: video?.title || 'Watch this movie on YTMoviesHub',
+          text: video?.description || 'Check out this amazing movie',
+          url: videoUrl,
         });
+      } else {
+        // Fallback for desktop - copy to clipboard
+        await navigator.clipboard.writeText(videoUrl);
+        setShowShareTooltip(true);
+        setTimeout(() => setShowShareTooltip(false), 3000);
       }
-
-      // Process current video source to include domain if needed
-      let directVideoUrl = currentVideoSource;
-      if (currentVideoSource && !currentVideoSource.startsWith('http') && !currentVideoSource.startsWith('<')) {
-        directVideoUrl = `${currentDomain}${currentVideoSource.startsWith('/') ? currentVideoSource : '/' + currentVideoSource}`;
-      }
-
-      switch (shareType) {
-        case 'link':
-          // Copy video page URL with domain
-          await navigator.clipboard.writeText(videoPageUrl);
-          setShowShareTooltip(true);
-          setTimeout(() => setShowShareTooltip(false), 3000);
-          break;
-
-        case 'file-links':
-          // Copy all download links with domain
-          if (Object.keys(processedDownloadLinks).length > 0) {
-            const linksText = Object.entries(processedDownloadLinks)
-              .map(([quality, link]) => `${quality}: ${link}`)
-              .join('\n');
-            
-            const shareText = `Watch "${video?.title}"\n\nDownload Links:\n${linksText}\n\nOr watch online: ${videoPageUrl}`;
-            await navigator.clipboard.writeText(shareText);
-          } else {
-            // Fallback to video page URL
-            await navigator.clipboard.writeText(videoPageUrl);
-          }
-          setShowShareTooltip(true);
-          setTimeout(() => setShowShareTooltip(false), 3000);
-          break;
-
-        case 'direct-file':
-          // Copy direct file link
-          if (directVideoUrl && !directVideoUrl.includes('<')) {
-            await navigator.clipboard.writeText(directVideoUrl);
-          } else {
-            await navigator.clipboard.writeText(videoPageUrl);
-          }
-          setShowShareTooltip(true);
-          setTimeout(() => setShowShareTooltip(false), 3000);
-          break;
-
-        case 'native':
-          // Use native share API
-          if (navigator.share) {
-            await navigator.share({
-              title: video?.title || 'Movie',
-              text: video?.description || 'Check out this movie!',
-              url: videoPageUrl,
-            });
-          } else {
-            // Fallback to copying link
-            await navigator.clipboard.writeText(videoPageUrl);
-            setShowShareTooltip(true);
-            setTimeout(() => setShowShareTooltip(false), 3000);
-          }
-          break;
-
-        case 'social':
-          // Open social media sharing
-          const socialText = encodeURIComponent(`Watch "${video?.title}" on ${currentDomain}`);
-          const twitterUrl = `https://twitter.com/intent/tweet?text=${socialText}&url=${encodeURIComponent(videoPageUrl)}`;
-          window.open(twitterUrl, '_blank', 'width=600,height=400');
-          break;
-
-        default:
-          break;
-      }
-
-      setShareOptions(false);
     } catch (err) {
-      console.log('Share cancelled or failed:', err);
-      // Fallback for older browsers
-      const fallbackUrl = `${window.location.origin}/watch/${id}`;
-      const textArea = document.createElement('textarea');
-      textArea.value = fallbackUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setShowShareTooltip(true);
-      setTimeout(() => setShowShareTooltip(false), 3000);
+      // If Web Share API fails or user cancels, fallback to clipboard
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(videoUrl);
+          setShowShareTooltip(true);
+          setTimeout(() => setShowShareTooltip(false), 3000);
+        } catch (clipboardErr) {
+          // Final fallback - show share options modal
+          setShowShareOptions(true);
+        }
+      }
     }
   };
 
-  // Generate file links for UI display
-  const generateFileLinks = () => {
-    const currentDomain = window.location.origin;
-    
-    if (!video?.downloadLinks) {
-      // If no download links, try to use the current video source
-      const currentVideoSource = sources[currentSource]?.code;
-      if (currentVideoSource && !currentVideoSource.includes('<')) {
-        return [{
-          quality: 'Direct Play',
-          link: currentVideoSource.startsWith('http') ? 
-            currentVideoSource : 
-            `${currentDomain}${currentVideoSource.startsWith('/') ? currentVideoSource : '/' + currentVideoSource}`
-        }];
-      }
-      return null;
+  // Copy link to clipboard
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShowShareTooltip(true);
+      setShowShareOptions(false);
+      setTimeout(() => setShowShareTooltip(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
     }
+  };
 
-    const fileLinks = Object.entries(video.downloadLinks)
-      .filter(([_, link]) => link && link.trim() !== '')
-      .map(([quality, link]) => ({
-        quality,
-        link: link.startsWith('http') ? 
-          link : 
-          `${currentDomain}${link.startsWith('/') ? link : '/' + link}`
-      }));
-
-    return fileLinks;
+  // Share on social media
+  const shareOnSocialMedia = (platform) => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(video?.title || 'Watch this movie on YTMoviesHub');
+    
+    let shareUrl = '';
+    
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${title}%20${url}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${url}&text=${title}`;
+        break;
+      default:
+        return;
+    }
+    
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    setShowShareOptions(false);
   };
 
   // Enhanced scroll indicator function
@@ -253,142 +187,13 @@ const VideoDetail = () => {
 
   // Update scroll indicators when video loads
   useEffect(() => {
+    // Small delay to ensure DOM is updated
     const timer = setTimeout(() => {
       handleScrollIndicator();
     }, 100);
     
     return () => clearTimeout(timer);
   }, [video]);
-
-  // Render share button with options
-  const renderShareButton = () => (
-    <div className="share-button-container">
-      <button 
-        className="action-bar-btn share-btn"
-        onClick={() => setShareOptions(!shareOptions)}
-        aria-label="Share this video"
-      >
-        <i className="fas fa-share-alt"></i>
-        <span>Share</span>
-      </button>
-      
-      {/* Share Options Dropdown */}
-      {shareOptions && (
-        <div className="share-options-dropdown">
-          <div className="share-option-header">
-            <i className="fas fa-share-alt"></i>
-            <span>Share Movie Links</span>
-            <button 
-              className="close-share-options"
-              onClick={() => setShareOptions(false)}
-              aria-label="Close share options"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-          
-          <div className="share-option-list">
-            {/* Copy Video Page Link */}
-            <button 
-              className="share-option-item"
-              onClick={() => handleShare('link')}
-            >
-              <i className="fas fa-link"></i>
-              <div className="share-option-text">
-                <span className="share-option-title">Copy Video Page Link</span>
-                <span className="share-option-desc">Share this movie page</span>
-              </div>
-            </button>
-
-            {/* Copy Direct File Link */}
-            <button 
-              className="share-option-item"
-              onClick={() => handleShare('direct-file')}
-            >
-              <i className="fas fa-film"></i>
-              <div className="share-option-text">
-                <span className="share-option-title">Copy Direct Video Link</span>
-                <span className="share-option-desc">Direct video file URL</span>
-              </div>
-            </button>
-
-            {/* Copy All File Links */}
-            {generateFileLinks() && generateFileLinks().length > 0 && (
-              <button 
-                className="share-option-item"
-                onClick={() => handleShare('file-links')}
-              >
-                <i className="fas fa-download"></i>
-                <div className="share-option-text">
-                  <span className="share-option-title">Copy All Download Links</span>
-                  <span className="share-option-desc">All available formats</span>
-                </div>
-              </button>
-            )}
-
-            {/* Native Share */}
-            {navigator.share && (
-              <button 
-                className="share-option-item"
-                onClick={() => handleShare('native')}
-              >
-                <i className="fas fa-mobile-alt"></i>
-                <div className="share-option-text">
-                  <span className="share-option-title">Share via Device</span>
-                  <span className="share-option-desc">Apps, messages, etc.</span>
-                </div>
-              </button>
-            )}
-
-            {/* Social Media Share */}
-            <button 
-              className="share-option-item"
-              onClick={() => handleShare('social')}
-            >
-              <i className="fab fa-twitter"></i>
-              <div className="share-option-text">
-                <span className="share-option-title">Share on Social Media</span>
-                <span className="share-option-desc">Twitter, Facebook, etc.</span>
-              </div>
-            </button>
-          </div>
-
-          {/* Quick Links Preview */}
-          {generateFileLinks() && generateFileLinks().length > 0 && (
-            <div className="quick-links-preview">
-              <div className="preview-header">
-                <i className="fas fa-bolt"></i>
-                <span>Quick Direct Links</span>
-              </div>
-              <div className="quick-links-list">
-                {generateFileLinks().slice(0, 3).map((file, index) => (
-                  <a 
-                    key={index}
-                    href={file.link}
-                    className="quick-link-item"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setShareOptions(false)}
-                  >
-                    <i className="fas fa-play-circle"></i>
-                    <span>{file.quality}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Share Tooltip */}
-      {showShareTooltip && (
-        <div className="share-tooltip">
-          <i className="fas fa-check"></i>
-          Link copied to clipboard!
-        </div>
-      )}
-    </div>
-  );
 
   if (loading) return <LoadingSpinner text="Loading video..." />;
   if (error) return <div className="error-message">Error: {error}</div>;
@@ -442,6 +247,70 @@ const VideoDetail = () => {
 
   return (
     <div className="video-detail-page custom-scroll-hide">
+      {/* Share Options Modal */}
+      {showShareOptions && (
+        <div className="share-modal-overlay" onClick={() => setShowShareOptions(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-modal-header">
+              <h3>Share this video</h3>
+              <button 
+                className="share-modal-close"
+                onClick={() => setShowShareOptions(false)}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="share-modal-content">
+              <div className="share-link-container">
+                <input 
+                  type="text" 
+                  value={window.location.href}
+                  readOnly 
+                  className="share-link-input"
+                />
+                <button 
+                  className="btn btn-primary copy-link-btn"
+                  onClick={copyToClipboard}
+                >
+                  <i className="fas fa-copy"></i>
+                  Copy
+                </button>
+              </div>
+              <div className="social-share-buttons">
+                <button 
+                  className="social-share-btn facebook"
+                  onClick={() => shareOnSocialMedia('facebook')}
+                >
+                  <i className="fab fa-facebook-f"></i>
+                  Facebook
+                </button>
+                <button 
+                  className="social-share-btn twitter"
+                  onClick={() => shareOnSocialMedia('twitter')}
+                >
+                  <i className="fab fa-twitter"></i>
+                  Twitter
+                </button>
+                <button 
+                  className="social-share-btn whatsapp"
+                  onClick={() => shareOnSocialMedia('whatsapp')}
+                >
+                  <i className="fab fa-whatsapp"></i>
+                  WhatsApp
+                </button>
+                <button 
+                  className="social-share-btn telegram"
+                  onClick={() => shareOnSocialMedia('telegram')}
+                >
+                  <i className="fab fa-telegram"></i>
+                  Telegram
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sticky Video Player at Top */}
       <div className="video-player-sticky">
         <VideoPlayer 
@@ -486,8 +355,23 @@ const VideoDetail = () => {
                       {dislikeCount > 0 && <span className="btn-counter">{dislikeCount}</span>}
                     </button>
                     
-                    {/* Updated Share Button */}
-                    {renderShareButton()}
+                    {/* Share Button with Enhanced Functionality */}
+                    <div className="share-button-container">
+                      <button 
+                        className="action-bar-btn share-btn"
+                        onClick={handleShare}
+                        aria-label="Share this video"
+                      >
+                        <i className="fas fa-share-alt"></i>
+                        <span>Share</span>
+                      </button>
+                      {showShareTooltip && (
+                        <div className="share-tooltip">
+                          <i className="fas fa-check"></i>
+                          Link copied to clipboard!
+                        </div>
+                      )}
+                    </div>
                     
                     {/* Download Button */}
                     {availableDownloads.length > 0 && (
@@ -584,26 +468,20 @@ const VideoDetail = () => {
                       </button>
                     </div>
                     <div className="quality-buttons">
-                      {availableDownloads.map(([quality, link]) => {
-                        const fullLink = link.startsWith('http') ? 
-                          link : 
-                          `${window.location.origin}${link.startsWith('/') ? link : '/' + link}`;
-                        
-                        return (
-                          <a 
-                            key={quality} 
-                            href={fullLink} 
-                            className="quality-btn"
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            download
-                          >
-                            <i className="fas fa-download"></i>
-                            {quality}
-                            <span className="quality-badge">HD</span>
-                          </a>
-                        );
-                      })}
+                      {availableDownloads.map(([quality, link]) => (
+                        <a 
+                          key={quality} 
+                          href={link} 
+                          className="quality-btn"
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          <i className="fas fa-download"></i>
+                          {quality}
+                          <span className="quality-badge">HD</span>
+                        </a>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -723,11 +601,9 @@ const VideoDetail = () => {
                     )}
                   </div>
                 </div>
-
                 <AdSlot position="in_video" videoId={video.id} />
               </div>
             </div>
-
             <div className="video-sidebar">
               <AdSlot position="sidebar" />
               
