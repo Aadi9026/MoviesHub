@@ -5,7 +5,7 @@ import { formatDuration, formatViews } from '../../utils/helpers';
 const VideoCard = ({ video }) => {
   const { id, title, thumbnail, duration, views, genre, createdAt } = video;
 
-  // Format the created date (show "X days ago" if desired)
+  // Format the created date to show "X days ago"
   const getFormattedDate = (date) => {
     const now = new Date();
     const created = new Date(date);
@@ -26,12 +26,27 @@ const VideoCard = ({ video }) => {
         </div>
       </Link>
       <div className="video-info">
-        <h3 className="video-title">{title}</h3>
+        {/* Movie title with larger, bolder font */}
+        <h2 className="video-title">{title}</h2>
+        
+        {/* Duration placed right after title like in screenshot */}
+        <div className="video-duration-display">
+          {formatDuration(duration)}
+        </div>
+        
+        {/* Description text - you might need to add this to your video object */}
+        <div className="video-description">
+          {title} (2025) FULL MOVIE ON MOVIESHUB
+        </div>
+        
+        {/* Views and date in one line */}
         <div className="video-meta">
           <span>{formatViews(views || 0)} views</span>
           <span> • </span>
           <span>{getFormattedDate(createdAt)}</span>
         </div>
+        
+        {/* Genre tag with different styling */}
         <div className="video-genre">
           <span className="genre-tag">{genre}</span>
         </div>
