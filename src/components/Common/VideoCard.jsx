@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDuration, formatViews } from '../../utils/helpers';
-import './VideoCard.css'; // We'll create this CSS file
 
 const VideoCard = ({ video }) => {
   const { id, title, thumbnail, duration, views, genre, createdAt } = video;
@@ -9,7 +8,7 @@ const VideoCard = ({ video }) => {
   return (
     <div className="video-card">
       <Link to={`/video/${id}`} className="video-link">
-        <div className="thumbnail-container">
+        <div className="thumbnail">
           <img 
             src={thumbnail} 
             alt={title} 
