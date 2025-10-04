@@ -8,11 +8,13 @@ const VideoCard = ({ video }) => {
   return (
     <div className="video-card">
       <Link to={`/video/${id}`}>
-        <div className="thumbnail">
-          <img src={thumbnail} alt={title} />
-          <div className="video-duration">{formatDuration(duration)}</div>
-          <div className="play-icon">
-            <i className="fas fa-play"></i>
+        <div className="thumbnail-container">
+          <div className="thumbnail">
+            <img src={thumbnail} alt={title} />
+            <div className="video-duration">{formatDuration(duration)}</div>
+            <div className="play-icon">
+              <i className="fas fa-play"></i>
+            </div>
           </div>
         </div>
       </Link>
@@ -22,19 +24,16 @@ const VideoCard = ({ video }) => {
           <h3 className="video-title">{title}</h3>
         </Link>
         
-        {/* Fixed: Added the movie year in brackets */}
         <div className="video-year">
           {title.includes('(') ? '' : `(${new Date(createdAt?.toDate()).getFullYear()})`}
         </div>
         
-        {/* Fixed: Views and time ago formatting */}
         <div className="video-meta">
           <span>{formatViews(views)} views</span>
           <span> • </span>
           <span>{getTimeAgo(createdAt?.toDate())}</span>
         </div>
         
-        {/* Fixed: Genre styling */}
         <div className="video-genre">
           <span className="genre-tag">{genre}</span>
         </div>
