@@ -22,14 +22,9 @@ const VideoCard = ({ video }) => {
           <h3 className="video-title">{title}</h3>
         </Link>
         
-        {/* Fixed: Added the movie year in brackets like "(2025)" */}
+        {/* Fixed: Added the movie year in brackets */}
         <div className="video-year">
           {title.includes('(') ? '' : `(${new Date(createdAt?.toDate()).getFullYear()})`}
-        </div>
-        
-        {/* Fixed: Moved "FULL MOVIE ON MOVIESHUB" text */}
-        <div className="movie-platform">
-          FULL MOVIE ON MOVIESHUB
         </div>
         
         {/* Fixed: Views and time ago formatting */}
@@ -48,7 +43,7 @@ const VideoCard = ({ video }) => {
   );
 };
 
-// Helper function to format time ago (you can add this to your helpers)
+// Helper function to format time ago
 const getTimeAgo = (date) => {
   if (!date) return '';
   
@@ -58,9 +53,7 @@ const getTimeAgo = (date) => {
   
   if (diffInDays === 0) return 'today';
   if (diffInDays === 1) return '1 day ago';
-  if (diffInDays < 7) return `${diffInDays} days ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-  return `${Math.floor(diffInDays / 30)} months ago`;
+  return `${diffInDays} days ago`;
 };
 
 export default VideoCard;
