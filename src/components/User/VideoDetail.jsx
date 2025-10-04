@@ -13,7 +13,7 @@ const VideoDetail = () => {
   const navigate = useNavigate();
   const { video, loading, error } = useVideo(id);
   const { videos: relatedVideos, loading: relatedLoading } = useRelatedVideos(
-    video?.genre, 
+    video?.genre,
     id
   );
   
@@ -30,8 +30,7 @@ const VideoDetail = () => {
   const [likeCount, setLikeCount] = useState(video?.likes || 0);
   const [dislikeCount, setDislikeCount] = useState(video?.dislikes || 0);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
-  const [showShareOptions, setShowShareOptions] = useState(false);
-
+  
   // Reset states when video changes
   useEffect(() => {
     setCurrentSource(0);
@@ -42,9 +41,8 @@ const VideoDetail = () => {
     setDisliked(false);
     setLikeCount(video?.likes || 0);
     setDislikeCount(video?.dislikes || 0);
-    setShowShareOptions(false);
   }, [id, video]);
-
+  
   const handleLike = () => {
     if (liked) {
       setLiked(false);
@@ -59,7 +57,7 @@ const VideoDetail = () => {
     }
     // Add your like API call here
   };
-
+  
   const handleDislike = () => {
     if (disliked) {
       setDisliked(false);
@@ -74,10 +72,10 @@ const VideoDetail = () => {
     }
     // Add your dislike API call here
   };
-
-  // Fixed Share Functionality
+  
+  // Enhanced handleShare function with robust fallback system
   const handleShare = async () => {
-    const videoUrl = window.location.href;
+    const videoUrl = `https://ytmovieshub.website/video/${id}`;
     
     try {
       // Check if Web Share API is available (mobile devices)
@@ -101,53 +99,14 @@ const VideoDetail = () => {
           setShowShareTooltip(true);
           setTimeout(() => setShowShareTooltip(false), 3000);
         } catch (clipboardErr) {
-          // Final fallback - show share options modal
-          setShowShareOptions(true);
+          // Final fallback - show error message
+          console.error('Share failed:', clipboardErr);
+          alert('Unable to share. Please copy the URL manually.');
         }
       }
     }
   };
-
-  // Copy link to clipboard
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setShowShareTooltip(true);
-      setShowShareOptions(false);
-      setTimeout(() => setShowShareTooltip(false), 3000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
-  };
-
-  // Share on social media
-  const shareOnSocialMedia = (platform) => {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(video?.title || 'Watch this movie on YTMoviesHub');
-    
-    let shareUrl = '';
-    
-    switch (platform) {
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-        break;
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-        break;
-      case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${title}%20${url}`;
-        break;
-      case 'telegram':
-        shareUrl = `https://t.me/share/url?url=${url}&text=${title}`;
-        break;
-      default:
-        return;
-    }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
-    setShowShareOptions(false);
-  };
-
+  
   // Enhanced scroll indicator function
   const handleScrollIndicator = () => {
     const scrollContainer = actionBarRef.current;
@@ -169,7 +128,7 @@ const VideoDetail = () => {
       }
     }
   };
-
+  
   // Initialize scroll indicators
   useEffect(() => {
     handleScrollIndicator();
@@ -184,7 +143,7 @@ const VideoDetail = () => {
       };
     }
   }, []);
-
+  
   // Update scroll indicators when video loads
   useEffect(() => {
     // Small delay to ensure DOM is updated
@@ -194,18 +153,18 @@ const VideoDetail = () => {
     
     return () => clearTimeout(timer);
   }, [video]);
-
+  
   if (loading) return <LoadingSpinner text="Loading video..." />;
   if (error) return <div className="error-message">Error: {error}</div>;
   if (!video) return <div className="error-message">Video not found</div>;
-
+  
   // Prepare video sources
   const sources = [];
   
   // Add primary source if available
   if (video.embedCode && video.embedCode.trim() !== '') {
-    sources.push({ 
-      code: video.embedCode, 
+    sources.push({
+      code: video.embedCode,
       label: 'Primary Source',
       valid: true
     });
@@ -215,15 +174,15 @@ const VideoDetail = () => {
   if (video.altSources && video.altSourcesEnabled) {
     video.altSources.forEach((source, index) => {
       if (video.altSourcesEnabled[index] && source && source.trim() !== '') {
-        sources.push({ 
-          code: source, 
+        sources.push({
+          code: source,
           label: `Source ${index + 1}`,
           valid: true
         });
       }
     });
   }
-
+  
   // If no valid sources, show error
   if (sources.length === 0) {
     return (
@@ -241,79 +200,15 @@ const VideoDetail = () => {
       </div>
     );
   }
-
-  const availableDownloads = video.downloadLinks ? 
+  
+  const availableDownloads = video.downloadLinks ?
     Object.entries(video.downloadLinks).filter(([_, link]) => link && link.trim() !== '') : [];
-
+  
   return (
     <div className="video-detail-page custom-scroll-hide">
-      {/* Share Options Modal */}
-      {showShareOptions && (
-        <div className="share-modal-overlay" onClick={() => setShowShareOptions(false)}>
-          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="share-modal-header">
-              <h3>Share this video</h3>
-              <button 
-                className="share-modal-close"
-                onClick={() => setShowShareOptions(false)}
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="share-modal-content">
-              <div className="share-link-container">
-                <input 
-                  type="text" 
-                  value={window.location.href}
-                  readOnly 
-                  className="share-link-input"
-                />
-                <button 
-                  className="btn btn-primary copy-link-btn"
-                  onClick={copyToClipboard}
-                >
-                  <i className="fas fa-copy"></i>
-                  Copy
-                </button>
-              </div>
-              <div className="social-share-buttons">
-                <button 
-                  className="social-share-btn facebook"
-                  onClick={() => shareOnSocialMedia('facebook')}
-                >
-                  <i className="fab fa-facebook-f"></i>
-                  Facebook
-                </button>
-                <button 
-                  className="social-share-btn twitter"
-                  onClick={() => shareOnSocialMedia('twitter')}
-                >
-                  <i className="fab fa-twitter"></i>
-                  Twitter
-                </button>
-                <button 
-                  className="social-share-btn whatsapp"
-                  onClick={() => shareOnSocialMedia('whatsapp')}
-                >
-                  <i className="fab fa-whatsapp"></i>
-                  WhatsApp
-                </button>
-                <button 
-                  className="social-share-btn telegram"
-                  onClick={() => shareOnSocialMedia('telegram')}
-                >
-                  <i className="fab fa-telegram"></i>
-                  Telegram
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Sticky Video Player at Top */}
       <div className="video-player-sticky">
-        <VideoPlayer 
+        <VideoPlayer
           embedCode={sources[currentSource]?.code}
           title={video.title}
         />
@@ -329,12 +224,12 @@ const VideoDetail = () => {
                 
                 {/* Fixed Horizontal Action Bar - YouTube-like Scrolling */}
                 <div className="horizontal-action-bar">
-                  <div 
-                    className="action-bar-scroll scroll-start" 
+                  <div
+                    className="action-bar-scroll scroll-start"
                     ref={actionBarRef}
                   >
                     {/* Like Button */}
-                    <button 
+                    <button
                       className={`action-bar-btn like-btn ${liked ? 'active' : ''}`}
                       onClick={handleLike}
                       aria-label={liked ? 'Unlike this video' : 'Like this video'}
@@ -345,7 +240,7 @@ const VideoDetail = () => {
                     </button>
                     
                     {/* Dislike Button */}
-                    <button 
+                    <button
                       className={`action-bar-btn dislike-btn ${disliked ? 'active' : ''}`}
                       onClick={handleDislike}
                       aria-label={disliked ? 'Remove dislike' : 'Dislike this video'}
@@ -355,9 +250,9 @@ const VideoDetail = () => {
                       {dislikeCount > 0 && <span className="btn-counter">{dislikeCount}</span>}
                     </button>
                     
-                    {/* Share Button with Enhanced Functionality */}
+                    {/* Share Button with Tooltip */}
                     <div className="share-button-container">
-                      <button 
+                      <button
                         className="action-bar-btn share-btn"
                         onClick={handleShare}
                         aria-label="Share this video"
@@ -375,7 +270,7 @@ const VideoDetail = () => {
                     
                     {/* Download Button */}
                     {availableDownloads.length > 0 && (
-                      <button 
+                      <button
                         className="action-bar-btn download-btn"
                         onClick={() => setShowDownloads(!showDownloads)}
                         aria-label={`Download options (${availableDownloads.length} available)`}
@@ -401,9 +296,9 @@ const VideoDetail = () => {
                     {/* Primary Source Dropdown */}
                     {sources.length > 0 && (
                       <div className="action-bar-dropdown">
-                        <select 
+                        <select
                           className="action-bar-select"
-                          value={currentSource} 
+                          value={currentSource}
                           onChange={(e) => setCurrentSource(parseInt(e.target.value))}
                           aria-label="Select video source"
                         >
@@ -418,7 +313,7 @@ const VideoDetail = () => {
                     )}
                     
                     {/* Additional buttons for better scrolling experience */}
-                    <button 
+                    <button
                       className="action-bar-btn"
                       onClick={() => navigate('/')}
                       aria-label="Browse more movies"
@@ -426,7 +321,8 @@ const VideoDetail = () => {
                       <i className="fas fa-film"></i>
                       <span>More Movies</span>
                     </button>
-                    <button 
+                    
+                    <button
                       className="action-bar-btn"
                       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                       aria-label="Scroll to top"
@@ -434,7 +330,8 @@ const VideoDetail = () => {
                       <i className="fas fa-arrow-up"></i>
                       <span>Top</span>
                     </button>
-                    <button 
+                    
+                    <button
                       className="action-bar-btn"
                       onClick={() => navigate('/trending')}
                       aria-label="Browse trending movies"
@@ -442,7 +339,8 @@ const VideoDetail = () => {
                       <i className="fas fa-fire"></i>
                       <span>Trending</span>
                     </button>
-                    <button 
+                    
+                    <button
                       className="action-bar-btn"
                       onClick={() => navigate('/latest')}
                       aria-label="Browse latest movies"
@@ -452,14 +350,14 @@ const VideoDetail = () => {
                     </button>
                   </div>
                 </div>
-
+                
                 {/* Download options (appears when download button clicked) */}
                 {showDownloads && availableDownloads.length > 0 && (
                   <div className="download-section">
                     <div className="download-header">
                       <i className="fas fa-download"></i>
                       <h3>Download Options</h3>
-                      <button 
+                      <button
                         className="download-close-btn"
                         onClick={() => setShowDownloads(false)}
                         aria-label="Close download options"
@@ -469,11 +367,11 @@ const VideoDetail = () => {
                     </div>
                     <div className="quality-buttons">
                       {availableDownloads.map(([quality, link]) => (
-                        <a 
-                          key={quality} 
-                          href={link} 
+                        <a
+                          key={quality}
+                          href={link}
                           className="quality-btn"
-                          target="_blank" 
+                          target="_blank"
                           rel="noopener noreferrer"
                           download
                         >
@@ -488,7 +386,7 @@ const VideoDetail = () => {
                 
                 {/* Enhanced Collapsible Metadata Section */}
                 <div className={`metadata-collapsible ${metadataExpanded ? 'expanded' : ''}`}>
-                  <button 
+                  <button
                     className="metadata-header"
                     onClick={() => setMetadataExpanded(!metadataExpanded)}
                     aria-expanded={metadataExpanded}
@@ -544,12 +442,12 @@ const VideoDetail = () => {
                             Date Added
                           </div>
                           <div className="metadata-value">
-                            {video.createdAt.toDate ? 
+                            {video.createdAt.toDate ?
                               new Date(video.createdAt.toDate()).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
-                              }) : 
+                              }) :
                               'Recently added'
                             }
                           </div>
@@ -589,7 +487,7 @@ const VideoDetail = () => {
                           {video.description}
                         </div>
                         {video.description.length > 150 && (
-                          <button 
+                          <button
                             className="read-more-btn"
                             onClick={() => setDescriptionExpanded(!descriptionExpanded)}
                           >
@@ -601,9 +499,11 @@ const VideoDetail = () => {
                     )}
                   </div>
                 </div>
+                
                 <AdSlot position="in_video" videoId={video.id} />
               </div>
             </div>
+            
             <div className="video-sidebar">
               <AdSlot position="sidebar" />
               
@@ -623,7 +523,7 @@ const VideoDetail = () => {
                   <div className="no-related">
                     <i className="fas fa-search"></i>
                     <p>No related videos found</p>
-                    <button 
+                    <button
                       className="btn-secondary"
                       onClick={() => navigate('/')}
                     >
