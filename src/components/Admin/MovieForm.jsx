@@ -9,8 +9,10 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     title: '',
     description: '',
     genre: '',
-    thumbnail: '',
+    thumbnail: '', // Vertical thumbnail for all sections
     thumbnailFile: null,
+    horizontalThumbnail: '', // Horizontal thumbnail for latest section
+    horizontalThumbnailFile: null,
     embedCode: '',
     duration: 120,
     altSources: ['', '', '', ''],
@@ -22,7 +24,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [imagePreview, setImagePreview] = useState('');
+  const [verticalImagePreview, setVerticalImagePreview] = useState('');
+  const [horizontalImagePreview, setHorizontalImagePreview] = useState('');
   const [movieSearchQuery, setMovieSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -41,8 +44,10 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         title: editVideo.title || '',
         description: editVideo.description || '',
         genre: editVideo.genre || '',
-        thumbnail: editVideo.thumbnail || '',
+        thumbnail: editVideo.thumbnail || '', // Vertical thumb
         thumbnailFile: null,
+        horizontalThumbnail: editVideo.horizontalThumbnail || '', // Horizontal thumb
+        horizontalThumbnailFile: null,
         embedCode: editVideo.embedCode || '',
         duration: editVideo.duration || 120,
         altSources: editVideo.altSources || ['', '', '', ''],
@@ -51,7 +56,10 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         adCode: editVideo.adCode || ''
       });
       if (editVideo.thumbnail) {
-        setImagePreview(editVideo.thumbnail);
+        setVerticalImagePreview(editVideo.thumbnail);
+      }
+      if (editVideo.horizontalThumbnail) {
+        setHorizontalImagePreview(editVideo.horizontalThumbnail);
       }
     }
   }, [editVideo]);
@@ -102,12 +110,16 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       title: movieData.title || prev.title,
       description: movieData.description || prev.description,
       genre: movieData.genre || prev.genre,
-      thumbnail: movieData.thumbnail || prev.thumbnail,
+      thumbnail: movieData.thumbnail || prev.thumbnail, // Vertical thumb from API
+      horizontalThumbnail: movieData.backdrop || prev.horizontalThumbnail, // Use backdrop as horizontal
       duration: movieData.duration || prev.duration
     }));
     
     if (movieData.thumbnail) {
-      setImagePreview(movieData.thumbnail);
+      setVerticalImagePreview(movieData.thumbnail);
+    }
+    if (movieData.backdrop) {
+      setHorizontalImagePreview(movieData.backdrop);
     }
     
     setSuccess('Movie data fetched successfully!');
@@ -139,7 +151,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  // Handle vertical thumbnail upload (for all sections)
+  const handleVerticalThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -160,7 +173,35 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImagePreview(e.target.result);
+        setVerticalImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle horizontal thumbnail upload (for latest section)
+  const handleHorizontalThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        horizontalThumbnailFile: file,
+        horizontalThumbnail: ''
+      }));
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setHorizontalImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
     }
@@ -213,8 +254,9 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       return;
     }
 
+    // Require at least vertical thumbnail
     if (!formData.thumbnail.trim() && !formData.thumbnailFile) {
-      setError('Please provide a thumbnail URL or upload an image');
+      setError('Please provide a vertical thumbnail (required for all sections)');
       setLoading(false);
       return;
     }
@@ -226,18 +268,26 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     }
 
     try {
-      let thumbnailUrl = formData.thumbnail;
+      let verticalThumbnailUrl = formData.thumbnail;
+      let horizontalThumbnailUrl = formData.horizontalThumbnail;
 
+      // Handle vertical thumbnail upload
       if (formData.thumbnailFile) {
         // Simulate upload - in production, upload to Firebase Storage
-        thumbnailUrl = URL.createObjectURL(formData.thumbnailFile);
+        verticalThumbnailUrl = URL.createObjectURL(formData.thumbnailFile);
+      }
+
+      // Handle horizontal thumbnail upload
+      if (formData.horizontalThumbnailFile) {
+        horizontalThumbnailUrl = URL.createObjectURL(formData.horizontalThumbnailFile);
       }
 
       const videoData = {
         title: formData.title,
         description: formData.description,
         genre: formData.genre,
-        thumbnail: thumbnailUrl,
+        thumbnail: verticalThumbnailUrl, // Vertical for all sections
+        horizontalThumbnail: horizontalThumbnailUrl, // Horizontal for latest section
         embedCode: formData.embedCode,
         duration: parseInt(formData.duration),
         altSources: formData.altSources,
@@ -260,12 +310,15 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       if (result.success) {
         setSuccess(editVideo ? 'Movie updated successfully!' : 'Movie added successfully!');
         if (!editVideo) {
+          // Reset form
           setFormData({
             title: '',
             description: '',
             genre: '',
             thumbnail: '',
             thumbnailFile: null,
+            horizontalThumbnail: '',
+            horizontalThumbnailFile: null,
             embedCode: '',
             duration: 120,
             altSources: ['', '', '', ''],
@@ -273,7 +326,8 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
             downloadLinks: { '480p': '', '720p': '', '1080p': '', '4K': '' },
             adCode: ''
           });
-          setImagePreview('');
+          setVerticalImagePreview('');
+          setHorizontalImagePreview('');
           setSelectedMovie(null);
         }
         if (onSuccess) {
@@ -385,40 +439,100 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Thumbnail *</label>
-          <div className="thumbnail-upload">
-            <div className="upload-options">
-              <div className="upload-option">
-                <label className="form-label">Upload from system:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="file-input"
-                />
-                <small>Max 5MB - JPG, PNG, WebP</small>
+        {/* DUAL THUMBNAIL UPLOAD SECTION */}
+        <div className="thumbnail-section">
+          <h4>Thumbnail Uploads</h4>
+          
+          {/* Vertical Thumbnail - For All Sections */}
+          <div className="form-group">
+            <label className="form-label">
+              Vertical Thumbnail (Required) *
+              <small> - Shows in ALL sections except Latest</small>
+            </label>
+            <div className="thumbnail-upload">
+              <div className="upload-options">
+                <div className="upload-option">
+                  <label className="form-label">Upload from system:</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleVerticalThumbnailChange}
+                    className="file-input"
+                  />
+                  <small>Max 5MB - JPG, PNG, WebP (Recommended: 300x450px)</small>
+                </div>
+                
+                <div className="upload-option">
+                  <label className="form-label">Or enter URL:</label>
+                  <input
+                    type="url"
+                    name="thumbnail"
+                    className="form-input"
+                    value={formData.thumbnail}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/vertical-thumbnail.jpg"
+                  />
+                </div>
               </div>
-              
-              <div className="upload-option">
-                <label className="form-label">Or enter URL:</label>
-                <input
-                  type="url"
-                  name="thumbnail"
-                  className="form-input"
-                  value={formData.thumbnail}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com/thumbnail.jpg"
-                />
-              </div>
-            </div>
 
-            {imagePreview && (
-              <div className="image-preview">
-                <label className="form-label">Preview:</label>
-                <img src={imagePreview} alt="Thumbnail preview" className="preview-image" />
+              {verticalImagePreview && (
+                <div className="image-preview">
+                  <label className="form-label">Vertical Preview:</label>
+                  <img src={verticalImagePreview} alt="Vertical thumbnail preview" className="preview-image vertical-preview" />
+                  <div className="preview-info">Vertical (All Sections)</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Horizontal Thumbnail - For Latest Section Only */}
+          <div className="form-group">
+            <label className="form-label">
+              Horizontal Thumbnail (Optional)
+              <small> - Shows ONLY in Latest Section</small>
+            </label>
+            <div className="thumbnail-upload">
+              <div className="upload-options">
+                <div className="upload-option">
+                  <label className="form-label">Upload from system:</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleHorizontalThumbnailChange}
+                    className="file-input"
+                  />
+                  <small>Max 5MB - JPG, PNG, WebP (Recommended: 400x225px)</small>
+                </div>
+                
+                <div className="upload-option">
+                  <label className="form-label">Or enter URL:</label>
+                  <input
+                    type="url"
+                    name="horizontalThumbnail"
+                    className="form-input"
+                    value={formData.horizontalThumbnail}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/horizontal-thumbnail.jpg"
+                  />
+                </div>
               </div>
-            )}
+
+              {horizontalImagePreview && (
+                <div className="image-preview">
+                  <label className="form-label">Horizontal Preview:</label>
+                  <img src={horizontalImagePreview} alt="Horizontal thumbnail preview" className="preview-image horizontal-preview" />
+                  <div className="preview-info">Horizontal (Latest Section Only)</div>
+                </div>
+              )}
+
+              {!horizontalImagePreview && (
+                <div className="upload-note">
+                  <small>
+                    <strong>Note:</strong> If no horizontal thumbnail is provided, the vertical thumbnail will be used in Latest section (may appear cropped).
+                  </small>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
