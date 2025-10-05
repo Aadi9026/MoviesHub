@@ -1,4 +1,4 @@
-// Movie Data Fetcher Service - HORIZONTAL 16:9 IMAGES
+// Movie Data Fetcher Service - LANDSCAPE IMAGES ONLY
 const TMDB_API_KEY = '3aad529c86f3fd8fb8ac9fb059421be5'; // Your TMDB API key
 const OMDB_API_KEY = '53cca1db'; // Your OMDB API key
 
@@ -40,7 +40,7 @@ export const fetchMovieData = async (identifier) => {
   }
 };
 
-// Fetch movie by IMDb ID - FOCUS ON HORIZONTAL IMAGES
+// Fetch movie by IMDb ID - LANDSCAPE IMAGES ONLY
 const fetchMovieByIMDb = async (imdbId) => {
   try {
     // First try OMDB API with your key
@@ -57,22 +57,22 @@ const fetchMovieByIMDb = async (imdbId) => {
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB:', omdbData.Title);
       
-      // Get TMDB ID first, then fetch HORIZONTAL 16:9 images
+      // Get TMDB ID first, then fetch LANDSCAPE images only
       const tmdbId = await getTMDBIdFromIMDb(imdbId);
-      let horizontalImages = { horizontal16x9: '', backdrop: '' };
+      let landscapeImage = '';
       
       if (tmdbId) {
-        horizontalImages = await fetchHorizontalImagesByID(tmdbId);
+        landscapeImage = await fetchLandscapeImageByID(tmdbId);
       }
       
-      // If no horizontal images, try search as fallback
-      if (!horizontalImages.horizontal16x9) {
-        horizontalImages = await fetchHorizontalImagesBySearch(omdbData.Title, omdbData.Year);
+      // If no landscape image, try search as fallback
+      if (!landscapeImage) {
+        landscapeImage = await fetchLandscapeImageBySearch(omdbData.Title, omdbData.Year);
       }
       
       return {
         success: true,
-        data: formatOMDBData(omdbData, horizontalImages),
+        data: formatOMDBData(omdbData, landscapeImage),
         source: 'omdb'
       };
     } else {
@@ -89,7 +89,7 @@ const fetchMovieByIMDb = async (imdbId) => {
   }
 };
 
-// Fetch movie by TMDB ID - FOCUS ON HORIZONTAL IMAGES
+// Fetch movie by TMDB ID - LANDSCAPE IMAGES ONLY
 const fetchMovieByTMDB = async (tmdbId) => {
   try {
     const response = await fetch(
@@ -106,12 +106,12 @@ const fetchMovieByTMDB = async (tmdbId) => {
     const data = await response.json();
     
     if (data.id) {
-      // Get HORIZONTAL 16:9 images
-      const horizontalImages = await fetchHorizontalImagesByID(tmdbId);
+      // Get LANDSCAPE image only
+      const landscapeImage = await fetchLandscapeImageByID(tmdbId);
       
       return {
         success: true,
-        data: formatTMDBData(data, horizontalImages),
+        data: formatTMDBData(data, landscapeImage),
         source: 'tmdb'
       };
     }
@@ -129,7 +129,7 @@ const fetchMovieByTitle = async (title) => {
   return await searchMovieByTitle(title);
 };
 
-// Search movie by title across multiple APIs - FOCUS ON HORIZONTAL IMAGES
+// Search movie by title across multiple APIs - LANDSCAPE IMAGES ONLY
 const searchMovieByTitle = async (title) => {
   try {
     // First try OMDB with your API key
@@ -146,20 +146,20 @@ const searchMovieByTitle = async (title) => {
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB title search:', omdbData.Title);
       
-      // Get HORIZONTAL 16:9 images using multiple methods
-      let horizontalImages = await fetchHorizontalImagesBySearch(omdbData.Title, omdbData.Year);
+      // Get LANDSCAPE image only
+      let landscapeImage = await fetchLandscapeImageBySearch(omdbData.Title, omdbData.Year);
       
       // If search fails, try to get TMDB ID from IMDb ID
-      if (!horizontalImages.horizontal16x9 && omdbData.imdbID) {
+      if (!landscapeImage && omdbData.imdbID) {
         const tmdbId = await getTMDBIdFromIMDb(omdbData.imdbID);
         if (tmdbId) {
-          horizontalImages = await fetchHorizontalImagesByID(tmdbId);
+          landscapeImage = await fetchLandscapeImageByID(tmdbId);
         }
       }
       
       return {
         success: true,
-        data: formatOMDBData(omdbData, horizontalImages),
+        data: formatOMDBData(omdbData, landscapeImage),
         source: 'omdb'
       };
     }
@@ -180,10 +180,10 @@ const searchMovieByTitle = async (title) => {
       const movie = tmdbData.results[0];
       console.log('Found movie via TMDB:', movie.title);
       
-      // Get HORIZONTAL 16:9 images for the found movie
-      const horizontalImages = await fetchHorizontalImagesByID(movie.id);
+      // Get LANDSCAPE image only for the found movie
+      const landscapeImage = await fetchLandscapeImageByID(movie.id);
       
-      const formattedData = formatTMDBData(movie, horizontalImages);
+      const formattedData = formatTMDBData(movie, landscapeImage);
       return {
         success: true,
         data: formattedData,
@@ -225,110 +225,91 @@ const getTMDBIdFromIMDb = async (imdbId) => {
   }
 };
 
-// NEW: Fetch HORIZONTAL 16:9 images by movie ID
-const fetchHorizontalImagesByID = async (tmdbId) => {
+// NEW: Fetch LANDSCAPE image only by movie ID
+const fetchLandscapeImageByID = async (tmdbId) => {
   try {
     const response = await fetch(
       `https://api.themoviedb.org/3/movie/${tmdbId}/images?api_key=${TMDB_API_KEY}`
     );
     
     if (!response.ok) {
-      return { horizontal16x9: '', backdrop: '' };
+      return '';
     }
     
     const data = await response.json();
     
-    let horizontal16x9 = '';
-    let backdrop = '';
-    
-    // PRIORITIZE HORIZONTAL BACKDROPS (16:9 aspect ratio)
+    // ONLY USE BACKDROPS (landscape images)
     if (data.backdrops && data.backdrops.length > 0) {
-      // Sort by quality (width * height) and prefer 16:9 aspect ratio
+      // Sort by quality and aspect ratio closest to 16:9
       const sortedBackdrops = data.backdrops.sort((a, b) => {
         // Calculate aspect ratios
         const aspectA = a.width / a.height;
         const aspectB = b.width / b.height;
         
-        // Prefer images closer to 16:9 (1.777)
-        const targetAspect = 16/9; // 1.777...
+        // Target 16:9 aspect ratio (1.777...)
+        const targetAspect = 16/9;
         const aspectDiffA = Math.abs(aspectA - targetAspect);
         const aspectDiffB = Math.abs(aspectB - targetAspect);
         
-        // If similar aspect ratio, prefer higher resolution
-        if (Math.abs(aspectDiffA - aspectDiffB) < 0.1) {
-          return (b.width * b.height) - (a.width * a.height);
+        // Prefer images closer to 16:9
+        if (Math.abs(aspectDiffA - aspectDiffB) > 0.1) {
+          return aspectDiffA - aspectDiffB;
         }
         
-        // Otherwise prefer closer to 16:9
-        return aspectDiffA - aspectDiffB;
+        // Then prefer higher resolution
+        return (b.width * b.height) - (a.width * a.height);
       });
       
-      if (sortedBackdrops[0] && sortedBackdrops[0].file_path) {
-        // Use w1280 for high quality 16:9 backdrop (1280x720)
-        horizontal16x9 = `https://image.tmdb.org/t/p/w1280${sortedBackdrops[0].file_path}`;
-        backdrop = horizontal16x9; // Same image for both fields
+      // Take the best landscape backdrop
+      const bestLandscape = sortedBackdrops[0];
+      if (bestLandscape && bestLandscape.file_path) {
+        // Use w1280 for high quality landscape (1280x720 = 16:9)
+        return `https://image.tmdb.org/t/p/w1280${bestLandscape.file_path}`;
       }
     }
     
-    // If no good backdrops found, try to find horizontal posters
-    if (!horizontal16x9 && data.posters && data.posters.length > 0) {
-      // Look for horizontal posters (aspect ratio > 1.2)
-      const horizontalPosters = data.posters.filter(poster => {
-        const aspectRatio = poster.width / poster.height;
-        return aspectRatio > 1.2; // Horizontal-ish
-      });
-      
-      if (horizontalPosters.length > 0) {
-        const bestHorizontal = horizontalPosters.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0];
-        horizontal16x9 = `https://image.tmdb.org/t/p/w780${bestHorizontal.file_path}`;
-      }
-    }
+    // NO FALLBACK TO POSTERS - return empty if no landscape found
+    return '';
     
-    return { horizontal16x9, backdrop: horizontal16x9 || backdrop, tmdbId };
   } catch (error) {
-    console.error('Error fetching horizontal images by ID:', error);
-    return { horizontal16x9: '', backdrop: '' };
+    console.error('Error fetching landscape image by ID:', error);
+    return '';
   }
 };
 
-// NEW: Fetch HORIZONTAL 16:9 images by search
-const fetchHorizontalImagesBySearch = async (title, year) => {
+// NEW: Fetch LANDSCAPE image only by search
+const fetchLandscapeImageBySearch = async (title, year) => {
   try {
     const searchResponse = await fetch(
       `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1${year ? `&year=${year}` : ''}`
     );
     
     if (!searchResponse.ok) {
-      return { horizontal16x9: '', backdrop: '' };
+      return '';
     }
     
     const searchData = await searchResponse.json();
     
     if (searchData.results && searchData.results.length > 0) {
       const movie = searchData.results[0];
-      let horizontal16x9 = '';
       
-      // Get backdrop if available (usually horizontal 16:9)
+      // ONLY use backdrop_path (landscape), NEVER poster_path
       if (movie.backdrop_path) {
-        horizontal16x9 = `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`;
+        return `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`;
       }
-      
-      return { 
-        horizontal16x9, 
-        backdrop: horizontal16x9,
-        tmdbId: movie.id 
-      };
     }
     
-    return { horizontal16x9: '', backdrop: '' };
+    // NO FALLBACK TO POSTERS
+    return '';
+    
   } catch (error) {
-    console.error('Error fetching horizontal images by search:', error);
-    return { horizontal16x9: '', backdrop: '' };
+    console.error('Error fetching landscape image by search:', error);
+    return '';
   }
 };
 
-// Format OMDB data to our schema - FOCUS ON HORIZONTAL IMAGES
-const formatOMDBData = (data, horizontalImages = {}) => {
+// Format OMDB data to our schema - LANDSCAPE IMAGES ONLY
+const formatOMDBData = (data, landscapeImage = '') => {
   // Extract year from "2020–2021" or "2020" format
   let year = data.Year || '';
   if (year.includes('–')) {
@@ -349,10 +330,6 @@ const formatOMDBData = (data, horizontalImages = {}) => {
     rating = parseFloat(data.imdbRating).toFixed(1);
   }
   
-  // Use HORIZONTAL 16:9 image as primary
-  const horizontal16x9 = horizontalImages.horizontal16x9 || '';
-  const originalPoster = data.Poster !== 'N/A' ? data.Poster : '';
-  
   // Create title with year
   const titleWithYear = year ? `${data.Title} (${year})` : data.Title;
   const displayTitle = year ? `${data.Title} ${year}` : data.Title;
@@ -372,15 +349,14 @@ const formatOMDBData = (data, horizontalImages = {}) => {
     year: year,
     rating: rating,
     
-    // IMAGES - HORIZONTAL 16:9 FOCUS
-    thumbnail: horizontal16x9 || originalPoster, // Use horizontal as thumbnail
-    poster: horizontal16x9 || originalPoster, // Use horizontal as poster
-    horizontal16x9: horizontal16x9, // Specific horizontal image
-    backdrop: horizontalImages.backdrop || horizontal16x9, // Same as horizontal
-    originalPoster: originalPoster,
-    hasHorizontalImage: !!horizontal16x9,
-    imageType: horizontal16x9 ? 'Horizontal 16:9' : (originalPoster ? 'Vertical Poster' : 'No Image'),
-    aspectRatio: horizontal16x9 ? '16:9' : (originalPoster ? '2:3' : 'Unknown'),
+    // IMAGES - LANDSCAPE ONLY, NO POSTERS
+    thumbnail: landscapeImage, // Only landscape
+    poster: landscapeImage, // Only landscape (same as thumbnail)
+    landscapeImage: landscapeImage, // Specific landscape field
+    backdrop: landscapeImage, // Same as landscape
+    hasLandscapeImage: !!landscapeImage,
+    imageType: landscapeImage ? 'Landscape 16:9' : 'No Landscape Available',
+    aspectRatio: landscapeImage ? '16:9' : 'N/A',
     
     // Additional details
     actors: data.Actors?.split(', ') || [],
@@ -407,13 +383,9 @@ const formatOMDBData = (data, horizontalImages = {}) => {
   };
 };
 
-// Format TMDB data to our schema - FOCUS ON HORIZONTAL IMAGES
-const formatTMDBData = (data, horizontalImages = {}) => {
+// Format TMDB data to our schema - LANDSCAPE IMAGES ONLY
+const formatTMDBData = (data, landscapeImage = '') => {
   const year = data.release_date ? new Date(data.release_date).getFullYear().toString() : '';
-  
-  // Use horizontal images as primary
-  const horizontal16x9 = horizontalImages.horizontal16x9 || 
-                        (data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '');
   
   const titleWithYear = year ? `${data.title} (${year})` : data.title;
   const displayTitle = year ? `${data.title} ${year}` : data.title;
@@ -433,15 +405,14 @@ const formatTMDBData = (data, horizontalImages = {}) => {
     year: year,
     rating: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
     
-    // IMAGES - HORIZONTAL 16:9 FOCUS
-    thumbnail: horizontal16x9,
-    poster: horizontal16x9,
-    horizontal16x9: horizontal16x9,
-    backdrop: horizontal16x9,
-    originalPoster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
-    hasHorizontalImage: !!horizontal16x9,
-    imageType: horizontal16x9 ? 'Horizontal 16:9' : 'No Image',
-    aspectRatio: horizontal16x9 ? '16:9' : 'Unknown',
+    // IMAGES - LANDSCAPE ONLY, NO POSTERS
+    thumbnail: landscapeImage,
+    poster: landscapeImage,
+    landscapeImage: landscapeImage,
+    backdrop: landscapeImage,
+    hasLandscapeImage: !!landscapeImage,
+    imageType: landscapeImage ? 'Landscape 16:9' : 'No Landscape Available',
+    aspectRatio: landscapeImage ? '16:9' : 'N/A',
     
     // Additional details
     releaseDate: data.release_date || '',
@@ -483,7 +454,7 @@ const testImageUrl = async (url) => {
   }
 };
 
-// DISPLAY FUNCTION FOR HORIZONTAL IMAGES
+// DISPLAY FUNCTION FOR LANDSCAPE IMAGES ONLY
 export const displayMovieData = async (movieData) => {
   if (!movieData || !movieData.success) {
     return `
@@ -495,105 +466,91 @@ export const displayMovieData = async (movieData) => {
   
   const data = movieData.data;
   
-  // Test the HORIZONTAL image URL
-  const horizontalImageUrl = data.horizontal16x9;
-  const imageTest = horizontalImageUrl ? await testImageUrl(horizontalImageUrl) : { works: false, error: 'No horizontal image URL' };
+  // Test the LANDSCAPE image URL
+  const landscapeImageUrl = data.landscapeImage;
+  const imageTest = landscapeImageUrl ? await testImageUrl(landscapeImageUrl) : { works: false, error: 'No landscape image available' };
   
   let imageHtml = '';
   if (imageTest.works) {
     imageHtml = `
-    <div style="flex: 0 0 400px;">
-      <img src="${horizontalImageUrl}" alt="${data.title}" 
-           style="width: 100%; height: 225px; object-fit: cover; border-radius: 8px; border: 3px solid #2196F3;"
-           onerror="this.onerror=null; this.src='https://via.placeholder.com/400x225/2196F3/white?text=16:9+Horizontal+Image';">
+    <div style="flex: 0 0 500px;">
+      <img src="${landscapeImageUrl}" alt="${data.title}" 
+           style="width: 100%; height: 281px; object-fit: cover; border-radius: 8px; border: 3px solid #4CAF50;"
+           onerror="this.onerror=null; this.src='https://via.placeholder.com/500x281/4CAF50/white?text=Landscape+16:9+Image';">
       <div style="text-align: center; margin-top: 8px;">
-        <span style="color: #2196F3; font-size: 12px; font-weight: bold;">✅ HORIZONTAL 16:9 IMAGE</span>
+        <span style="color: #4CAF50; font-size: 14px; font-weight: bold;">✅ LANDSCAPE 16:9 BACKDROP</span>
       </div>
-      <div style="text-align: center; font-size: 10px; color: #666; word-break: break-all; margin-top: 3px;">
-        Aspect Ratio: ${data.aspectRatio} | ${horizontalImageUrl.substring(0, 50)}...
+      <div style="text-align: center; font-size: 11px; color: #666; word-break: break-all; margin-top: 3px; padding: 5px; background: #f0f8f0; border-radius: 3px;">
+        <strong>Aspect Ratio:</strong> ${data.aspectRatio} | <strong>Type:</strong> ${data.imageType}
+      </div>
+      <div style="text-align: center; font-size: 10px; color: #888; margin-top: 3px;">
+        ${landscapeImageUrl.substring(0, 60)}...
       </div>
     </div>
     `;
   } else {
-    // Fallback to original poster (vertical)
-    const fallbackTest = data.originalPoster ? await testImageUrl(data.originalPoster) : { works: false };
-    
-    if (fallbackTest.works) {
-      imageHtml = `
-      <div style="flex: 0 0 200px;">
-        <img src="${data.originalPoster}" alt="${data.title}" 
-             style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 5px; border: 2px solid #ff9800;">
-        <div style="text-align: center; margin-top: 8px;">
-          <span style="color: #ff9800; font-size: 12px;">⚠️ VERTICAL POSTER (Fallback)</span>
-        </div>
-        <div style="text-align: center; font-size: 10px; color: #666;">
-          Aspect Ratio: 2:3
-        </div>
+    // NO FALLBACK TO POSTERS - show message instead
+    imageHtml = `
+    <div style="flex: 0 0 500px; text-align: center; padding: 50px 20px; background: linear-gradient(135deg, #f5f5f5, #e0e0e0); border-radius: 8px; border: 2px dashed #9E9E9E;">
+      <div style="font-size: 64px; color: #9E9E9E;">🏞️</div>
+      <div style="color: #757575; margin-top: 15px; font-weight: bold; font-size: 16px;">No Landscape Image Available</div>
+      <div style="color: #9E9E9E; margin-top: 10px; font-size: 13px;">This movie doesn't have landscape backdrops in TMDB</div>
+      <div style="background: #FFEB3B; color: #FF6F00; padding: 8px; border-radius: 4px; margin-top: 15px; font-size: 12px; border: 1px solid #FFC107;">
+        <strong>Note:</strong> Only fetching landscape 16:9 backdrops - no poster images
       </div>
-      `;
-    } else {
-      imageHtml = `
-      <div style="flex: 0 0 400px; text-align: center; padding: 40px; background: #f5f5f5; border-radius: 8px; border: 2px dashed #ccc;">
-        <div style="font-size: 48px; color: #ccc;">🏞️</div>
-        <div style="color: #666; margin-top: 10px; font-weight: bold;">No Horizontal Image Available</div>
-        <div style="font-size: 11px; color: #999; margin-top: 5px;">${imageTest.error}</div>
-        <div style="font-size: 10px; color: #666; margin-top: 10px; background: #e0e0e0; padding: 5px; border-radius: 3px;">
-          Looking for 16:9 horizontal backdrops...
-        </div>
-      </div>
-      `;
-    }
+    </div>
+    `;
   }
   
   return `
-  <div style="border: 2px solid #2196F3; border-radius: 10px; padding: 20px; background: white; margin: 20px 0;">
-    <div style="background: #2196F3; color: white; padding: 10px; border-radius: 5px; margin: -20px -20px 20px -20px;">
+  <div style="border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; background: white; margin: 20px 0;">
+    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 5px; margin: -20px -20px 20px -20px;">
       <h3 style="margin: 0;">✅ Movie Data Fetched Successfully</h3>
-      <small>TMDB API: ✅ Active | Image Type: ${data.imageType} | Aspect Ratio: ${data.aspectRatio}</small>
+      <small>TMDB API: ✅ Active | Image Policy: 🏞️ LANDSCAPE ONLY | Status: ${data.imageType}</small>
     </div>
     
-    <div style="display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start;">
+    <div style="display: flex; gap: 25px; margin-bottom: 20px; align-items: flex-start;">
       ${imageHtml}
       
       <div style="flex: 1;">
-        <h2 style="color: #333; margin-top: 0;">${data.titleWithYear}</h2>
+        <h2 style="color: #333; margin-top: 0; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">${data.titleWithYear}</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;">
-          <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; border-left: 3px solid #2196F3;">
-            <strong>Rating:</strong> ${data.rating}/10
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0;">
+          <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+            <strong>Rating:</strong><br>${data.rating}/10
           </div>
-          <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; border-left: 3px solid #2196F3;">
-            <strong>Duration:</strong> ${data.duration} min
+          <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+            <strong>Duration:</strong><br>${data.duration} min
           </div>
-          <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; border-left: 3px solid #2196F3;">
-            <strong>Genre:</strong> ${data.genre}
+          <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+            <strong>Genre:</strong><br>${data.genre}
           </div>
-          <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; border-left: 3px solid #2196F3;">
-            <strong>Year:</strong> ${data.year}
+          <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+            <strong>Year:</strong><br>${data.year}
           </div>
         </div>
         
-        <div style="background: #f3f8ff; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;">
-          <strong>Description:</strong><br>
-          ${data.description || 'No description available.'}
+        <div style="background: #f8fff8; padding: 20px; border-radius: 6px; border-left: 4px solid #4CAF50; border: 1px solid #E8F5E8;">
+          <strong style="color: #2E7D32;">Description:</strong><br>
+          <div style="margin-top: 8px; line-height: 1.6; color: #555;">${data.description || 'No description available.'}</div>
         </div>
       </div>
     </div>
     
-    <div style="background: #e3f2fd; padding: 15px; border-radius: 5px;">
-      <h4 style="margin-top: 0; color: #1565C0;">Add Download & Embed Information</h4>
+    <div style="background: #E8F5E8; padding: 20px; border-radius: 6px; border: 1px solid #C8E6C9;">
+      <h4 style="margin-top: 0; color: #2E7D32;">Add Download & Embed Information</h4>
       
-      <div style="display: grid; gap: 10px;">
+      <div style="display: grid; gap: 12px;">
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Download Link:</label>
+          <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">Download Link:</label>
           <input type="url" placeholder="https://example.com/download-movie" 
-                 style="width: 100%; padding: 8px; border: 1px solid #90CAF9; border-radius: 4px;">
+                 style="width: 100%; padding: 10px; border: 1px solid #81C784; border-radius: 4px; background: #fff;">
         </div>
         
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Embed Code:</label>
+          <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">Embed Code:</label>
           <textarea placeholder="Paste embed code here..." 
-                    style="width: 100%; height: 80px; padding: 8px; border: 1px solid #90CAF9; border-radius: 4px;"></textarea>
+                    style="width: 100%; height: 90px; padding: 10px; border: 1px solid #81C784; border-radius: 4px; background: #fff; resize: vertical;"></textarea>
         </div>
       </div>
     </div>
@@ -601,9 +558,9 @@ export const displayMovieData = async (movieData) => {
   `;
 };
 
-// Debug function for horizontal images
-export const debugHorizontalImages = async (identifier) => {
-  console.log('🔍 Debugging HORIZONTAL images for:', identifier);
+// Debug function for landscape images only
+export const debugLandscapeImages = async (identifier) => {
+  console.log('🏞️ Debugging LANDSCAPE images only for:', identifier);
   
   const result = await fetchMovieData(identifier);
   
@@ -611,23 +568,17 @@ export const debugHorizontalImages = async (identifier) => {
     console.log('🎬 Movie:', result.data.titleWithYear);
     console.log('📊 Image Type:', result.data.imageType);
     console.log('📐 Aspect Ratio:', result.data.aspectRatio);
-    console.log('🖼️ Has Horizontal Image:', result.data.hasHorizontalImage);
+    console.log('✅ Has Landscape Image:', result.data.hasLandscapeImage);
     
-    // Test image URLs
-    const imagesToTest = [
-      { name: 'HORIZONTAL 16:9', url: result.data.horizontal16x9 },
-      { name: 'Original Poster', url: result.data.originalPoster }
-    ];
-    
-    for (const img of imagesToTest) {
-      if (img.url) {
-        const test = await testImageUrl(img.url);
-        console.log(`🏞️ ${img.name}:`, test.works ? '✅ WORKS' : '❌ FAILED');
-        console.log(`   URL: ${img.url}`);
-        if (!test.works) console.log(`   Error: ${test.error}`);
-      } else {
-        console.log(`🏞️ ${img.name}: ❌ NO URL`);
-      }
+    // Test only landscape URL
+    if (result.data.landscapeImage) {
+      const test = await testImageUrl(result.data.landscapeImage);
+      console.log('🏞️ LANDSCAPE IMAGE:', test.works ? '✅ WORKS' : '❌ FAILED');
+      console.log('   URL:', result.data.landscapeImage);
+      if (!test.works) console.log('   Error:', test.error);
+    } else {
+      console.log('🏞️ LANDSCAPE IMAGE: ❌ NOT AVAILABLE');
+      console.log('   Note: Only fetching landscape backdrops, no poster fallback');
     }
   } else {
     console.log('❌ Error:', result.error);
@@ -636,21 +587,21 @@ export const debugHorizontalImages = async (identifier) => {
   return result;
 };
 
-// Test movies that should have good horizontal images
-export const testHorizontalImageMovies = async () => {
+// Test movies for landscape images
+export const testLandscapeImageMovies = async () => {
   const movies = [
-    'Avengers: Endgame', // Big movie with many backdrops
+    'Avengers: Endgame', // Should have landscape backdrops
     'The Dark Knight',
-    'Inception',
     'Dune',
-    'Interstellar'
+    'Interstellar',
+    'Blade Runner 2049'
   ];
   
-  console.log('🎯 Testing HORIZONTAL 16:9 images for popular movies:\n');
+  console.log('🎯 Testing LANDSCAPE-ONLY images for movies:\n');
   
   for (const movie of movies) {
     console.log(`\n--- Testing: ${movie} ---`);
-    await debugHorizontalImages(movie);
+    await debugLandscapeImages(movie);
   }
 };
 
@@ -664,7 +615,13 @@ export const setupMovieFetcher = async (inputId, displayId) => {
       const identifier = e.target.value.trim();
       if (!identifier) return;
       
-      displayElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #2196F3;">🔄 Fetching movie data with HORIZONTAL images...</div>';
+      displayElement.innerHTML = `
+        <div style="padding: 30px; text-align: center; color: #4CAF50; background: #f8fff8; border-radius: 8px; border: 2px dashed #4CAF50;">
+          <div style="font-size: 48px; margin-bottom: 10px;">🏞️</div>
+          <div style="font-size: 16px; font-weight: bold;">Fetching movie data with LANDSCAPE images only...</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">No poster images will be used</div>
+        </div>
+      `;
       
       const result = await fetchMovieData(identifier);
       const html = await displayMovieData(result);
