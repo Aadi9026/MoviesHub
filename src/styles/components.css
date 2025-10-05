@@ -4282,3 +4282,265 @@ html:has(.video-detail-page) {
   border-radius: 4px;
   font-family: monospace;
 }
+
+
+
+
+/* Horizontal Cards Layout - Latest Section Only */
+.latest-movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.latest-movie-card {
+  display: flex;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 200px;
+}
+
+.latest-movie-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.latest-card-thumbnail {
+  position: relative;
+  width: 160px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.latest-thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.latest-movie-card:hover .latest-thumbnail-img {
+  transform: scale(1.05);
+}
+
+.quality-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.latest-movie-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.play-button {
+  width: 50px;
+  height: 50px;
+  background: #e50914;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+}
+
+.latest-card-content {
+  flex: 1;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 5px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-year {
+  color: #666;
+  font-size: 14px;
+}
+
+.card-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+  font-size: 12px;
+}
+
+.meta-item i {
+  color: #e50914;
+  font-size: 12px;
+}
+
+.card-description {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0 0 10px 0;
+  flex: 1;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.download-options {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.quality-tag {
+  background: #f1f3f4;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.upload-date {
+  color: #999;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-watch, .btn-download {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-watch {
+  background: #e50914;
+  color: white;
+}
+
+.btn-watch:hover {
+  background: #b8070f;
+}
+
+.btn-download {
+  background: #f1f3f4;
+  color: #333;
+}
+
+.btn-download:hover {
+  background: #e4e6e8;
+}
+
+/* Responsive Design for Horizontal Cards */
+@media (max-width: 768px) {
+  .latest-movies-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .latest-movie-card {
+    height: auto;
+    flex-direction: column;
+  }
+  
+  .latest-card-thumbnail {
+    width: 100%;
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-meta {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .card-actions {
+    width: 100%;
+  }
+  
+  .latest-movies-grid {
+    grid-template-columns: 1fr;
+  }
+}
