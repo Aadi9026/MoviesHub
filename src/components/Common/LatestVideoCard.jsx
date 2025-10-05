@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 const LatestVideoCard = ({ video }) => {
   const { id, title, thumbnail, quality, language, year, createdAt, genre } = video;
 
-  // Format date like "02 Oct 2025"
+  // Format date like "05 OCT 2025" - ALL CAPS like screenshot
   const formatMovieDate = (timestamp) => {
-    if (!timestamp) return 'Unknown Date';
+    if (!timestamp) return 'UNKNOWN DATE';
     
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     
     const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleString('en', { month: 'short' });
+    const month = date.toLocaleString('en', { month: 'short' }).toUpperCase();
     const year = date.getFullYear();
     
     return `${day} ${month} ${year}`;
@@ -35,7 +35,7 @@ const LatestVideoCard = ({ video }) => {
     if (quality && typeof quality === 'string') {
       return quality.split(' - ').map(q => q.trim());
     }
-    return ['480p', '720p', '1080p'];
+    return ['480P', '720P', '1080P']; // ALL CAPS like screenshot
   };
 
   const movieDate = formatMovieDate(createdAt);
@@ -45,7 +45,7 @@ const LatestVideoCard = ({ video }) => {
 
   return (
     <div className="latest-video-card">
-      {/* Date Badge */}
+      {/* Date Badge - ALL CAPS like screenshot */}
       <div className="latest-date-badge">{movieDate}</div>
       
       <Link to={`/video/${id}`}>
@@ -55,19 +55,16 @@ const LatestVideoCard = ({ video }) => {
       </Link>
       
       <div className="latest-card-content">
-        {/* Title with Year */}
+        {/* Title */}
         <Link to={`/video/${id}`}>
           <h3 className="latest-movie-title">{movieTitle}</h3>
-          <div className="latest-movie-year">{movieYear}</div>
         </Link>
         
-        {/* Language and Quality Info */}
-        <div className="latest-language-quality">
-          {language && <span className="latest-language">{language}</span>}
-          {qualityOptions[0] && (
-            <span className="latest-primary-quality">{qualityOptions[0]}</span>
-          )}
-        </div>
+        {/* Year - Separate line like screenshot */}
+        <div className="latest-movie-year">{movieYear}</div>
+        
+        {/* Primary Quality - Separate line like screenshot */}
+        <div className="latest-primary-quality">{qualityOptions[0]}</div>
         
         {/* Quality Options */}
         <div className="latest-quality-options">
