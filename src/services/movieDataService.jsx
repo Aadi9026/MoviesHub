@@ -1,432 +1,547 @@
-// Movie Data Fetcher Service - Working Version
+// Movie Data Fetcher Service - Fixed Version
 const TMDB_API_KEY = 'your_tmdb_api_key_here'; // Still need to get from https://www.themoviedb.org/settings/api
 const OMDB_API_KEY = '53cca1db'; // Your OMDB API key
+
 export const fetchMovieData = async (identifier) => {
-  try {
-    console.log('Fetching movie data for:', identifier);
-    
-    // Clean the identifier
-    identifier = identifier.trim();
-    
-    // Check if it's an IMDb ID (starts with tt)
-    if (identifier.startsWith('tt')) {
-      return await fetchMovieByIMDb(identifier);
-    }
-    
-    // Check if it's a TMDB ID (numeric)
-    if (/^\d+$/.test(identifier)) {
-      return await fetchMovieByTMDB(identifier);
-    }
-    
-    // Otherwise treat it as a movie title
-    return await fetchMovieByTitle(identifier);
-    
-  } catch (error) {
-    console.error('Error fetching movie data:', error);
-    return { 
-      success: false, 
-      error: error.message,
-      data: null
-    };
-  }
+  try {
+    console.log('Fetching movie data for:', identifier);
+    
+    // Clean the identifier
+    identifier = identifier.trim();
+    
+    // Check if it's an IMDb ID (starts with tt)
+    if (identifier.startsWith('tt')) {
+      return await fetchMovieByIMDb(identifier);
+    }
+    
+    // Check if it's a TMDB ID (numeric)
+    if (/^\d+$/.test(identifier)) {
+      return await fetchMovieByTMDB(identifier);
+    }
+    
+    // Otherwise treat it as a movie title
+    return await fetchMovieByTitle(identifier);
+    
+  } catch (error) {
+    console.error('Error fetching movie data:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      data: null
+    };
+  }
 };
+
 // Fetch movie by IMDb ID - USING YOUR OMDB API KEY
 const fetchMovieByIMDb = async (imdbId) => {
-  try {
-    // First try OMDB API with your key (most reliable for IMDb IDs)
-    const omdbResponse = await fetch(
-      `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}&plot=full`
-    );
-    
-    if (!omdbResponse.ok) {
-      throw new Error(`OMDB API error: ${omdbResponse.status}`);
-    }
-    
-    const omdbData = await omdbResponse.json();
-    
-    if (omdbData.Response === 'True') {
-      console.log('Found movie via OMDB:', omdbData.Title);
-      return {
-        success: true,
-        data: formatOMDBData(omdbData),
-        source: 'omdb'
-      };
-    }
-    
-    // Fallback to TMDB if OMDB fails
-    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
-      console.log('Trying TMDB fallback for IMDb ID:', imdbId);
-      const tmdbResponse = await fetch(
-        `https://api.themoviedb.org/3/find/${imdbId}?api_key=${TMDB_API_KEY}&language=en-US&external_source=imdb_id`
-      );
-      
-      if (tmdbResponse.ok) {
-        const tmdbData = await tmdbResponse.json();
-        
-        if (tmdbData.movie_results && tmdbData.movie_results.length > 0) {
-          const movieId = tmdbData.movie_results[0].id;
-          return await fetchMovieByTMDB(movieId);
-        }
-      }
-    }
-    
-    throw new Error(`Movie not found with IMDb ID: ${imdbId}`);
-    
-  } catch (error) {
-    console.error('Error in fetchMovieByIMDb:', error);
-    return {
-      success: false,
-      error: error.message,
-      data: null
-    };
-  }
+  try {
+    // First try OMDB API with your key (most reliable for IMDb IDs)
+    const omdbResponse = await fetch(
+      `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}&plot=full`
+    );
+    
+    if (!omdbResponse.ok) {
+      throw new Error(`OMDB API error: ${omdbResponse.status}`);
+    }
+    
+    const omdbData = await omdbResponse.json();
+    
+    if (omdbData.Response === 'True') {
+      console.log('Found movie via OMDB:', omdbData.Title);
+      
+      // Enhance with TMDB backdrop image if available
+      let enhancedData = formatOMDBData(omdbData);
+      if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+        try {
+          const backdropUrl = await fetchBackdropImage(omdbData.Title, omdbData.Year);
+          if (backdropUrl) {
+            enhancedData.backdrop = backdropUrl;
+            enhancedData.thumbnail = backdropUrl; // Use 16:9 image as thumbnail too
+          }
+        } catch (imgError) {
+          console.log('Could not fetch backdrop image:', imgError.message);
+        }
+      }
+      
+      return {
+        success: true,
+        data: enhancedData,
+        source: 'omdb'
+      };
+    }
+    
+    // Fallback to TMDB if OMDB fails
+    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+      console.log('Trying TMDB fallback for IMDb ID:', imdbId);
+      const tmdbResponse = await fetch(
+        `https://api.themoviedb.org/3/find/${imdbId}?api_key=${TMDB_API_KEY}&language=en-US&external_source=imdb_id`
+      );
+      
+      if (tmdbResponse.ok) {
+        const tmdbData = await tmdbResponse.json();
+        
+        if (tmdbData.movie_results && tmdbData.movie_results.length > 0) {
+          const movieId = tmdbData.movie_results[0].id;
+          return await fetchMovieByTMDB(movieId);
+        }
+      }
+    }
+    
+    throw new Error(`Movie not found with IMDb ID: ${imdbId}`);
+    
+  } catch (error) {
+    console.error('Error in fetchMovieByIMDb:', error);
+    return {
+      success: false,
+      error: error.message,
+      data: null
+    };
+  }
 };
+
 // Fetch movie by TMDB ID
 const fetchMovieByTMDB = async (tmdbId) => {
-  try {
-    // If TMDB API key is not set, fallback to OMDB search
-    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
-      return await searchMovieByTitle(tmdbId); // This will search by title or try OMDB
-    }
-    
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=videos,credits`
-    );
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Movie not found on TMDB');
-      }
-      throw new Error(`TMDB API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (data.id) {
-      return {
-        success: true,
-        data: formatTMDBData(data),
-        source: 'tmdb'
-      };
-    }
-    
-    throw new Error('Movie not found on TMDB');
-  } catch (error) {
-    console.error('Error in fetchMovieByTMDB:', error);
-    // Fallback to title search
-    return await searchMovieByTitle(tmdbId);
-  }
+  try {
+    // If TMDB API key is not set, fallback to OMDB search
+    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
+      return await searchMovieByTitle(tmdbId);
+    }
+    
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=videos,credits,images`
+    );
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Movie not found on TMDB');
+      }
+      throw new Error(`TMDB API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.id) {
+      return {
+        success: true,
+        data: formatTMDBData(data),
+        source: 'tmdb'
+      };
+    }
+    
+    throw new Error('Movie not found on TMDB');
+  } catch (error) {
+    console.error('Error in fetchMovieByTMDB:', error);
+    // Fallback to title search
+    return await searchMovieByTitle(tmdbId);
+  }
 };
-// Search movie by title
+
+// Search movie by title - FIXED VERSION
 const fetchMovieByTitle = async (title) => {
-  return await searchMovieByTitle(title);
+  return await searchMovieByTitle(title);
 };
-// Search movie by title across multiple APIs
+
+// Search movie by title across multiple APIs - FIXED VERSION
 const searchMovieByTitle = async (title) => {
-  try {
-    // First try OMDB with your API key (most reliable)
-    const omdbResponse = await fetch(
-      `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&plot=full`
-    );
-    
-    if (!omdbResponse.ok) {
-      throw new Error(`OMDB API error: ${omdbResponse.status}`);
-    }
-    
-    const omdbData = await omdbResponse.json();
-    
-    if (omdbData.Response === 'True') {
-      console.log('Found movie via OMDB title search:', omdbData.Title);
-      return {
-        success: true,
-        data: formatOMDBData(omdbData),
-        source: 'omdb'
-      };
-    }
-    
-    // Fallback to TMDB if OMDB fails and TMDB key is available
-    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
-      console.log('Trying TMDB fallback for title:', title);
-      const tmdbResponse = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1&include_adult=false`
-      );
-      
-      if (!tmdbResponse.ok) {
-        throw new Error(`TMDB search error: ${tmdbResponse.status}`);
-      }
-      
-      const tmdbData = await tmdbResponse.json();
-      
-      if (tmdbData.results && tmdbData.results.length > 0) {
-        const movie = tmdbData.results[0];
-        console.log('Found movie via TMDB:', movie.title);
-        // Get full movie details
-        return await fetchMovieByTMDB(movie.id);
-      }
-    }
-    
-    return {
-      success: false,
-      error: `Movie "${title}" not found on any database`,
-      data: null
-    };
-    
-  } catch (error) {
-    console.error('Error in searchMovieByTitle:', error);
-    return {
-      success: false,
-      error: error.message,
-      data: null
-    };
-  }
+  try {
+    console.log('Searching for movie by title:', title);
+    
+    // First try OMDB with your API key (most reliable)
+    const omdbResponse = await fetch(
+      `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&plot=full`
+    );
+    
+    if (!omdbResponse.ok) {
+      throw new Error(`OMDB API error: ${omdbResponse.status}`);
+    }
+    
+    const omdbData = await omdbResponse.json();
+    
+    if (omdbData.Response === 'True') {
+      console.log('Found movie via OMDB title search:', omdbData.Title);
+      
+      // Enhance with TMDB backdrop image
+      let enhancedData = formatOMDBData(omdbData);
+      if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+        try {
+          const backdropUrl = await fetchBackdropImage(omdbData.Title, omdbData.Year);
+          if (backdropUrl) {
+            enhancedData.backdrop = backdropUrl;
+            enhancedData.thumbnail = backdropUrl; // Use 16:9 image as thumbnail
+          }
+        } catch (imgError) {
+          console.log('Could not fetch backdrop image:', imgError.message);
+        }
+      }
+      
+      return {
+        success: true,
+        data: enhancedData,
+        source: 'omdb'
+      };
+    }
+    
+    // If OMDB fails, try TMDB search
+    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+      console.log('Trying TMDB search for title:', title);
+      const tmdbResponse = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1&include_adult=false`
+      );
+      
+      if (!tmdbResponse.ok) {
+        throw new Error(`TMDB search error: ${tmdbResponse.status}`);
+      }
+      
+      const tmdbData = await tmdbResponse.json();
+      
+      if (tmdbData.results && tmdbData.results.length > 0) {
+        const movie = tmdbData.results[0];
+        console.log('Found movie via TMDB search:', movie.title);
+        // Get full movie details using TMDB ID
+        return await fetchMovieByTMDB(movie.id);
+      }
+    }
+    
+    // Final fallback: Try searching OMDB with "s" parameter for search
+    console.log('Trying OMDB search as fallback');
+    const omdbSearchResponse = await fetch(
+      `https://www.omdbapi.com/?s=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&type=movie`
+    );
+    
+    if (omdbSearchResponse.ok) {
+      const omdbSearchData = await omdbSearchResponse.json();
+      
+      if (omdbSearchData.Response === 'True' && omdbSearchData.Search && omdbSearchData.Search.length > 0) {
+        const firstResult = omdbSearchData.Search[0];
+        console.log('Found movie via OMDB search fallback:', firstResult.Title);
+        // Use the IMDb ID from search result to get full details
+        return await fetchMovieByIMDb(firstResult.imdbID);
+      }
+    }
+    
+    return {
+      success: false,
+      error: `Movie "${title}" not found on any database`,
+      data: null
+    };
+    
+  } catch (error) {
+    console.error('Error in searchMovieByTitle:', error);
+    return {
+      success: false,
+      error: error.message,
+      data: null
+    };
+  }
 };
-// Format OMDB data to our schema - ENHANCED
+
+// Helper function to fetch backdrop image (16:9) from TMDB
+const fetchBackdropImage = async (title, year) => {
+  try {
+    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
+      return null;
+    }
+    
+    const searchResponse = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&year=${year || ''}&language=en-US&page=1`
+    );
+    
+    if (!searchResponse.ok) return null;
+    
+    const searchData = await searchResponse.json();
+    
+    if (searchData.results && searchData.results.length > 0) {
+      const movie = searchData.results[0];
+      if (movie.backdrop_path) {
+        return `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching backdrop image:', error);
+    return null;
+  }
+};
+
+// Format OMDB data to our schema - ENHANCED with 16:9 image support
 const formatOMDBData = (data) => {
-  // Extract year from "2020–2021" or "2020" format
-  let year = data.Year || '';
-  if (year.includes('–')) {
-    year = year.split('–')[0];
-  }
-  year = year.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-  
-  // Extract duration from "136 min" format
-  let duration = 120;
-  if (data.Runtime && data.Runtime !== 'N/A') {
-    const runtimeMatch = data.Runtime.match(/(\d+)/);
-    duration = runtimeMatch ? parseInt(runtimeMatch[1]) : 120;
-  }
-  
-  // Extract rating
-  let rating = 'N/A';
-  if (data.imdbRating && data.imdbRating !== 'N/A') {
-    rating = parseFloat(data.imdbRating).toFixed(1);
-  }
-  
-  return {
-    title: data.Title || '',
-    originalTitle: data.Title || '',
-    description: data.Plot || '',
-    genre: data.Genre?.split(', ')[0] || 'Unknown',
-    allGenres: data.Genre?.split(', ') || ['Unknown'],
-    duration: duration,
-    thumbnail: data.Poster !== 'N/A' ? data.Poster : '',
-    year: year,
-    rating: rating,
-    actors: data.Actors?.split(', ') || [],
-    director: data.Director?.split(', ') || [],
-    releaseDate: data.Released || '',
-    country: data.Country?.split(', ') || [],
-    language: data.Language?.split(', ') || [],
-    production: data.Production || '',
-    imdbID: data.imdbID || '',
-    type: data.Type || 'movie',
-    rated: data.Rated || '',
-    awards: data.Awards || '',
-    
-    // Additional fields for your post (to be filled by admin)
-    downloadLink: '',
-    embedCode: '',
-    
-    // Metadata
-    source: 'omdb',
-    fetchedAt: new Date().toISOString()
-  };
+  // Extract year from "2020–2021" or "2020" format
+  let year = data.Year || '';
+  if (year.includes('–')) {
+    year = year.split('–')[0];
+  }
+  year = year.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+  
+  // Extract duration from "136 min" format
+  let duration = 120;
+  if (data.Runtime && data.Runtime !== 'N/A') {
+    const runtimeMatch = data.Runtime.match(/(\d+)/);
+    duration = runtimeMatch ? parseInt(runtimeMatch[1]) : 120;
+  }
+  
+  // Extract rating
+  let rating = 'N/A';
+  if (data.imdbRating && data.imdbRating !== 'N/A') {
+    rating = parseFloat(data.imdbRating).toFixed(1);
+  }
+
+  // Use poster as thumbnail, but we'll enhance with backdrop later
+  const thumbnail = data.Poster !== 'N/A' ? data.Poster : '';
+  
+  return {
+    title: data.Title || '',
+    originalTitle: data.Title || '',
+    description: data.Plot || '',
+    genre: data.Genre?.split(', ')[0] || 'Unknown',
+    allGenres: data.Genre?.split(', ') || ['Unknown'],
+    duration: duration,
+    thumbnail: thumbnail, // This might be 16:9 if we enhanced it
+    backdrop: '', // Will be populated if we fetch from TMDB
+    year: year,
+    rating: rating,
+    actors: data.Actors?.split(', ') || [],
+    director: data.Director?.split(', ') || [],
+    releaseDate: data.Released || '',
+    country: data.Country?.split(', ') || [],
+    language: data.Language?.split(', ') || [],
+    production: data.Production || '',
+    imdbID: data.imdbID || '',
+    type: data.Type || 'movie',
+    rated: data.Rated || '',
+    awards: data.Awards || '',
+    
+    // Additional fields for your post (to be filled by admin)
+    downloadLink: '',
+    embedCode: '',
+    
+    // Metadata
+    source: 'omdb',
+    fetchedAt: new Date().toISOString()
+  };
 };
-// Format TMDB data to our schema
+
+// Format TMDB data to our schema - ENHANCED for 16:9 images
 const formatTMDBData = (data) => {
-  return {
-    title: data.title || '',
-    originalTitle: data.original_title || '',
-    description: data.overview || '',
-    genre: data.genres?.[0]?.name || 'Unknown',
-    allGenres: data.genres?.map(g => g.name) || ['Unknown'],
-    duration: data.runtime || 120,
-    thumbnail: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
-    backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '',
-    year: data.release_date ? new Date(data.release_date).getFullYear().toString() : '',
-    rating: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-    releaseDate: data.release_date || '',
-    country: data.production_countries?.map(c => c.name) || [],
-    language: data.original_language || '',
-    production: data.production_companies?.[0]?.name || '',
-    budget: data.budget || 0,
-    revenue: data.revenue || 0,
-    tagline: data.tagline || '',
-    status: data.status || '',
-    imdbID: data.imdb_id || '',
-    
-    // Additional fields for your post
-    downloadLink: '',
-    embedCode: '',
-    
-    // Cast information
-    cast: data.credits?.cast?.slice(0, 5).map(actor => actor.name) || [],
-    director: data.credits?.crew?.find(person => person.job === 'Director')?.name || '',
-    
-    // Metadata
-    source: 'tmdb',
-    fetchedAt: new Date().toISOString()
-  };
+  // Use backdrop as primary thumbnail for 16:9 aspect ratio
+  const backdropUrl = data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '';
+  const posterUrl = data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '';
+  
+  return {
+    title: data.title || '',
+    originalTitle: data.original_title || '',
+    description: data.overview || '',
+    genre: data.genres?.[0]?.name || 'Unknown',
+    allGenres: data.genres?.map(g => g.name) || ['Unknown'],
+    duration: data.runtime || 120,
+    thumbnail: backdropUrl || posterUrl, // Prefer 16:9 backdrop, fallback to poster
+    backdrop: backdropUrl,
+    poster: posterUrl, // Keep poster as separate field
+    year: data.release_date ? new Date(data.release_date).getFullYear().toString() : '',
+    rating: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+    releaseDate: data.release_date || '',
+    country: data.production_countries?.map(c => c.name) || [],
+    language: data.original_language || '',
+    production: data.production_companies?.[0]?.name || '',
+    budget: data.budget || 0,
+    revenue: data.revenue || 0,
+    tagline: data.tagline || '',
+    status: data.status || '',
+    imdbID: data.imdb_id || '',
+    
+    // Additional fields for your post
+    downloadLink: '',
+    embedCode: '',
+    
+    // Cast information
+    cast: data.credits?.cast?.slice(0, 5).map(actor => actor.name) || [],
+    director: data.credits?.crew?.find(person => person.job === 'Director')?.name || '',
+    
+    // Metadata
+    source: 'tmdb',
+    fetchedAt: new Date().toISOString()
+  };
 };
+
 // Get movie trailer from TMDB
 export const fetchMovieTrailer = async (tmdbId) => {
-  try {
-    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
-      return null;
-    }
-    
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${tmdbId}/videos?api_key=${TMDB_API_KEY}&language=en-US`
-    );
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const data = await response.json();
-    
-    if (data.results && data.results.length > 0) {
-      const trailer = data.results.find(video => 
-        video.type === 'Trailer' && video.site === 'YouTube' && video.official
-      ) || data.results.find(video => 
-        video.type === 'Trailer' && video.site === 'YouTube'
-      );
-      
-      if (trailer) {
-        return `https://www.youtube.com/embed/${trailer.key}`;
-      }
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error fetching trailer:', error);
-    return null;
-  }
+  try {
+    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
+      return null;
+    }
+    
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${tmdbId}/videos?api_key=${TMDB_API_KEY}&language=en-US`
+    );
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      const trailer = data.results.find(video => 
+        video.type === 'Trailer' && video.site === 'YouTube' && video.official
+      ) || data.results.find(video => 
+        video.type === 'Trailer' && video.site === 'YouTube'
+      );
+      
+      if (trailer) {
+        return `https://www.youtube.com/embed/${trailer.key}`;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching trailer:', error);
+    return null;
+  }
 };
+
 // Search multiple movies
 export const searchMovies = async (query) => {
-  try {
-    // Try OMDB first since we have a working API key
-    const omdbResponse = await fetch(
-      `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${OMDB_API_KEY}&type=movie`
-    );
-    
-    if (omdbResponse.ok) {
-      const omdbData = await omdbResponse.json();
-      
-      if (omdbData.Response === 'True' && omdbData.Search) {
-        return {
-          success: true,
-          movies: omdbData.Search.map(movie => ({
-            id: movie.imdbID,
-            title: movie.Title,
-            year: movie.Year,
-            poster: movie.Poster !== 'N/A' ? movie.Poster : '',
-            type: movie.Type
-          })),
-          source: 'omdb'
-        };
-      }
-    }
-    
-    // Fallback to TMDB
-    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
-      const tmdbResponse = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1&include_adult=false`
-      );
-      
-      if (tmdbResponse.ok) {
-        const tmdbData = await tmdbResponse.json();
-        
-        if (tmdbData.results && tmdbData.results.length > 0) {
-          return {
-            success: true,
-            movies: tmdbData.results.map(movie => ({
-              id: movie.id,
-              title: movie.title,
-              year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown',
-              poster: movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '',
-              overview: movie.overview,
-              rating: movie.vote_average
-            })),
-            source: 'tmdb'
-          };
-        }
-      }
-    }
-    
-    return {
-      success: false,
-      error: 'No movies found',
-      movies: []
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-      movies: []
-    };
-  }
+  try {
+    // Try OMDB first since we have a working API key
+    const omdbResponse = await fetch(
+      `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${OMDB_API_KEY}&type=movie`
+    );
+    
+    if (omdbResponse.ok) {
+      const omdbData = await omdbResponse.json();
+      
+      if (omdbData.Response === 'True' && omdbData.Search) {
+        return {
+          success: true,
+          movies: omdbData.Search.map(movie => ({
+            id: movie.imdbID,
+            title: movie.Title,
+            year: movie.Year,
+            poster: movie.Poster !== 'N/A' ? movie.Poster : '',
+            type: movie.Type
+          })),
+          source: 'omdb'
+        };
+      }
+    }
+    
+    // Fallback to TMDB
+    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+      const tmdbResponse = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1&include_adult=false`
+      );
+      
+      if (tmdbResponse.ok) {
+        const tmdbData = await tmdbResponse.json();
+        
+        if (tmdbData.results && tmdbData.results.length > 0) {
+          return {
+            success: true,
+            movies: tmdbData.results.map(movie => ({
+              id: movie.id,
+              title: movie.title,
+              year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown',
+              poster: movie.backdrop_path ? `https://image.tmdb.org/t/p/w300${movie.backdrop_path}` : 
+                     movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '',
+              overview: movie.overview,
+              rating: movie.vote_average
+            })),
+            source: 'tmdb'
+          };
+        }
+      }
+    }
+    
+    return {
+      success: false,
+      error: 'No movies found',
+      movies: []
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      movies: []
+    };
+  }
 };
-// Generate embed code for movie
+
+// Generate embed code for movie with 16:9 image
 export const generateEmbedCode = (movieData, videoUrl = '') => {
-  const embedUrl = videoUrl || `https://www.youtube.com/embed/dQw4w9WgXcQ`; // Default trailer
-  
-  return `
+  const embedUrl = videoUrl || `https://www.youtube.com/embed/dQw4w9WgXcQ`; // Default trailer
+  const thumbnailUrl = movieData.backdrop || movieData.thumbnail || '';
+  
+  return `
 <div class="movie-embed">
-  <div class="embed-container">
-    <iframe 
-      width="100%" 
-      height="400" 
-      src="${embedUrl}" 
-      frameborder="0" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-      allowfullscreen>
-    </iframe>
-  </div>
-  <div class="movie-info">
-    <h3>${movieData.title} (${movieData.year})</h3>
-    <p><strong>Rating:</strong> ${movieData.rating}/10</p>
-    <p><strong>Genre:</strong> ${movieData.allGenres?.join(', ') || movieData.genre}</p>
-    <p><strong>Duration:</strong> ${movieData.duration} minutes</p>
-    <p>${movieData.description}</p>
-    ${movieData.downloadLink ? `<p><a href="${movieData.downloadLink}" class="download-link">Download Movie</a></p>` : ''}
-  </div>
+  <div class="embed-container">
+    <iframe 
+      width="100%" 
+      height="400" 
+      src="${embedUrl}" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+      allowfullscreen>
+    </iframe>
+  </div>
+  ${thumbnailUrl ? `
+  <div class="movie-poster">
+    <img src="${thumbnailUrl}" alt="${movieData.title}" style="width: 100%; max-height: 400px; object-fit: cover;" />
+  </div>
+  ` : ''}
+  <div class="movie-info">
+    <h3>${movieData.title} (${movieData.year})</h3>
+    <p><strong>Rating:</strong> ${movieData.rating}/10</p>
+    <p><strong>Genre:</strong> ${movieData.allGenres?.join(', ') || movieData.genre}</p>
+    <p><strong>Duration:</strong> ${movieData.duration} minutes</p>
+    <p>${movieData.description}</p>
+    ${movieData.downloadLink ? `<p><a href="${movieData.downloadLink}" class="download-link">Download Movie</a></p>` : ''}
+  </div>
 </div>
 <style>
 .embed-container {
-  position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
-  overflow: hidden;
-  max-width: 100%;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin-bottom: 20px;
 }
 .embed-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.movie-poster {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 .download-link {
-  display: inline-block;
-  background: #007cba;
-  color: white;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 5px;
-  margin-top: 10px;
+  display: inline-block;
+  background: #007cba;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-top: 10px;
 }
 </style>
-  `.trim();
+  `.trim();
 };
+
 // Test function to verify everything works
 export const testMovieFetch = async () => {
-  console.log('Testing movie fetch with your OMDB API key...');
-  
-  // Test with your example IMDb ID
-  const testResult = await fetchMovieData('tt3896198');
-  console.log('Test result:', testResult);
-  
-  return testResult;
+  console.log('Testing movie fetch with your OMDB API key...');
+  
+  // Test with your example IMDb ID
+  const testResult = await fetchMovieData('tt3896198');
+  console.log('Test result:', testResult);
+  
+  // Test with movie name
+  const testTitleResult = await fetchMovieData('Guardians of the Galaxy');
+  console.log('Title test result:', testTitleResult);
+  
+  return testResult;
 };
