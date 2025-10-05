@@ -4292,6 +4292,7 @@ html:has(.video-detail-page) {
   gap: 16px;
   margin-top: 16px;
   padding: 0 8px;
+  width: 100%;
 }
 
 /* Latest Video Card Styles */
@@ -4303,165 +4304,47 @@ html:has(.video-detail-page) {
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   padding: 12px;
-}
-
-.latest-video-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  border-color: rgba(229, 9, 20, 0.3);
-}
-
-/* Date Badge - Exact like screenshot */
-.latest-date-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
-  z-index: 2;
-  line-height: 1.2;
-}
-
-/* Thumbnail container */
-.latest-thumbnail-container {
-  position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--dark-lighter);
-  margin-bottom: 12px;
+  display: block;
 }
 
-.latest-thumbnail {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+/* Force 2-column layout and prevent any overriding styles */
+.latest-page .latest-movies-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
 }
 
-.latest-video-card:hover .latest-thumbnail {
-  transform: scale(1.05);
+.latest-page .video-grid,
+.latest-page .video-list {
+  display: none !important;
 }
 
-/* Card content */
-.latest-card-content {
-  padding: 0 4px;
-}
-
-/* Movie title styling */
-.latest-movie-title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text);
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.latest-movie-year {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-
-/* Language and quality info - exact like screenshot */
-.latest-language-quality {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-
-.latest-language-quality .latest-language {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.latest-language-quality .latest-primary-quality {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* Quality options - exact like screenshot */
-.latest-quality-options {
-  margin-bottom: 4px;
-}
-
-.latest-quality-option {
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.quality-separator {
-  color: var(--text-secondary);
-}
-
-.latest-quality-option:last-child {
-  color: var(--text);
+/* Ensure each card takes full width of grid cell */
+.latest-page .latest-video-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: none !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .latest-movies-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 12px;
     padding: 0 4px;
   }
-  
-  .latest-video-card {
-    padding: 10px;
-  }
-  
-  .latest-date-badge {
-    top: 6px;
-    left: 6px;
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-  
-  .latest-movie-title {
-    font-size: 14px;
-  }
-  
-  .latest-movie-year {
-    font-size: 13px;
-  }
-  
-  .latest-language-quality .latest-language,
-  .latest-language-quality .latest-primary-quality {
-    font-size: 12px;
-  }
-  
-  .latest-quality-option {
-    font-size: 12px;
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .latest-movies-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
-/* Ensure this design ONLY applies to latest section */
-.latest-page .video-grid {
-  display: none; /* Hide the original video grid in latest page */
-}
-
-.latest-page .latest-movies-grid {
-  display: grid; /* Show our new grid */
+@media (min-width: 1025px) {
+  .latest-movies-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
