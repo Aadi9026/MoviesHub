@@ -1,16 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { useVideos } from '../hooks/useVideos';
+import { getLatestVideosForSection } from '../services/database';
 import VideoList from '../components/User/VideoList';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import AdSlot from '../components/Common/AdSlot';
 
 const LatestMovies = () => {
-  const { videos, loading, error, loadLatestVideos } = useVideos();
+  const [latestVideos, setLatestVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const loadLatestVideos = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const result = await getLatestVideosForSection(12);
+      
+      if (result.success) {
+        setLatestVideos(result.videos);
+      } else {
+        setError(result.error || 'Failed to load latest videos');
+      }
+    } catch (err) {
+      setError('Error loading latest videos: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Load latest videos when component mounts
     loadLatestVideos();
-  }, [loadLatestVideos]);
+  }, []);
 
   if (loading) {
     return <LoadingSpinner text="Loading latest movies..." />;
@@ -45,7 +64,12 @@ const LatestMovies = () => {
           </div>
         </div>
 
-        <VideoList videos={videos} className="latest-grid" />
+        {/* Use VideoList with horizontal layout */}
+        <VideoList 
+          videos={latestVideos} 
+          className="latest-grid"
+          layout="horizontal"
+        />
         
         <AdSlot position="footer" />
       </div>
