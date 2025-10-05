@@ -1,95 +1,49 @@
-// Enhanced Movie Data Fetcher with Year in Title & 16:9 Images - FIXED VERSION
-const TMDB_API_KEY = 'your_tmdb_api_key_here'; // Get from https://www.themoviedb.org/settings/api
-const OMDB_API_KEY = '53cca1db'; // Your OMDB API key
+// Movie Data Fetcher Service - WORKING FIXED VERSION
+const TMDB_API_KEY = 'your_tmdb_api_key_here'; // Replace with actual key
+const OMDB_API_KEY = '53cca1db'; // Your working OMDB API key
 
 export const fetchMovieData = async (identifier) => {
   try {
     console.log('Fetching movie data for:', identifier);
     
+    if (!identifier || identifier.trim() === '') {
+      return {
+        success: false,
+        error: 'Please enter a movie title, IMDb ID, or TMDB ID',
+        data: null
+      };
+    }
+    
     // Clean the identifier
     identifier = identifier.trim();
     
-    // Extract year from identifier if present
-    const { cleanIdentifier, year } = extractYearFromTitle(identifier);
-    
-    let result;
-    
     // Check if it's an IMDb ID (starts with tt)
-    if (cleanIdentifier.startsWith('tt')) {
-      result = await fetchMovieByIMDb(cleanIdentifier);
+    if (identifier.startsWith('tt')) {
+      return await fetchMovieByIMDb(identifier);
     }
+    
     // Check if it's a TMDB ID (numeric)
-    else if (/^\d+$/.test(cleanIdentifier)) {
-      result = await fetchMovieByTMDB(cleanIdentifier);
+    if (/^\d+$/.test(identifier)) {
+      return await fetchMovieByTMDB(identifier);
     }
+    
     // Otherwise treat it as a movie title
-    else {
-      result = await fetchMovieByTitle(cleanIdentifier, year);
-    }
-    
-    // Ensure year is included in title for all results
-    if (result.success && result.data) {
-      result.data = ensureYearInTitle(result.data);
-    }
-    
-    return result;
+    return await fetchMovieByTitle(identifier);
     
   } catch (error) {
     console.error('Error fetching movie data:', error);
     return { 
       success: false, 
-      error: error.message,
+      error: 'Network error: ' + error.message,
       data: null
     };
   }
 };
 
-// Ensure year is always included in title formats
-const ensureYearInTitle = (data) => {
-  const year = data.year || '';
-  
-  if (!data.titleWithYear) {
-    data.titleWithYear = year ? `${data.title} (${year})` : data.title;
-  }
-  
-  if (!data.displayTitle) {
-    data.displayTitle = year ? `${data.title} ${year}` : data.title;
-  }
-  
-  return data;
-};
-
-// Extract year from movie title - IMPROVED
-const extractYearFromTitle = (title) => {
-  // Patterns: "Movie Name 2025", "Movie Name (2025)", "2025 Movie Name"
-  const yearInParentheses = title.match(/\((\d{4})\)/);
-  const yearAtEnd = title.match(/(\d{4})$/);
-  const yearAtStart = title.match(/^(\d{4})/);
-  
-  let year = null;
-  let cleanTitle = title;
-  
-  if (yearInParentheses) {
-    year = yearInParentheses[1];
-    cleanTitle = title.replace(/\(\d{4}\)/, '').trim();
-  } else if (yearAtEnd) {
-    year = yearAtEnd[1];
-    cleanTitle = title.replace(/\d{4}$/, '').trim();
-  } else if (yearAtStart) {
-    year = yearAtStart[1];
-    cleanTitle = title.replace(/^\d{4}/, '').trim();
-  }
-  
-  // Clean up any extra spaces or parentheses
-  cleanTitle = cleanTitle.replace(/\s+/g, ' ').replace(/\s*\(\s*\)\s*/, '').trim();
-  
-  return { cleanIdentifier: cleanTitle, year };
-};
-
-// Fetch movie by IMDb ID - IMPROVED with 16:9 images
+// Fetch movie by IMDb ID - FIXED
 const fetchMovieByIMDb = async (imdbId) => {
   try {
-    // First try OMDB API with your key
+    // Use OMDB API with your key
     const omdbResponse = await fetch(
       `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}&plot=full`
     );
@@ -103,17 +57,23 @@ const fetchMovieByIMDb = async (imdbId) => {
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB:', omdbData.Title);
       
-      // ALWAYS try to get 16:9 backdrop from TMDB
-      const backdropImage = await fetchTMDBBackdrop(omdbData.Title, omdbData.Year);
+      // Get 16:9 image from TMDB if available
+      let backdropImage = '';
+      try {
+        backdropImage = await fetchTMDBBackdrop(omdbData.Title, omdbData.Year);
+      } catch (e) {
+        console.log('Could not fetch TMDB backdrop:', e.message);
+      }
       
+      const formattedData = formatOMDBData(omdbData, backdropImage);
       return {
         success: true,
-        data: formatOMDBData(omdbData, backdropImage),
+        data: formattedData,
         source: 'omdb'
       };
+    } else {
+      throw new Error(omdbData.Error || 'Movie not found on OMDB');
     }
-    
-    throw new Error(`Movie not found with IMDb ID: ${imdbId}`);
     
   } catch (error) {
     console.error('Error in fetchMovieByIMDb:', error);
@@ -125,16 +85,20 @@ const fetchMovieByIMDb = async (imdbId) => {
   }
 };
 
-// Fetch movie by TMDB ID - IMPROVED
+// Fetch movie by TMDB ID - FIXED
 const fetchMovieByTMDB = async (tmdbId) => {
   try {
-    // If TMDB API key is not set, fallback to OMDB search
+    // If TMDB API key is not set, fallback to title search
     if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
-      return await searchMovieByTitle(tmdbId);
+      return {
+        success: false,
+        error: 'TMDB API key not configured',
+        data: null
+      };
     }
     
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=videos,credits`
+      `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`
     );
     
     if (!response.ok) {
@@ -147,9 +111,10 @@ const fetchMovieByTMDB = async (tmdbId) => {
     const data = await response.json();
     
     if (data.id) {
+      const formattedData = formatTMDBData(data);
       return {
         success: true,
-        data: formatTMDBData(data),
+        data: formattedData,
         source: 'tmdb'
       };
     }
@@ -157,25 +122,21 @@ const fetchMovieByTMDB = async (tmdbId) => {
     throw new Error('Movie not found on TMDB');
   } catch (error) {
     console.error('Error in fetchMovieByTMDB:', error);
-    return await searchMovieByTitle(tmdbId);
+    return {
+      success: false,
+      error: error.message,
+      data: null
+    };
   }
 };
 
-// Search movie by title - IMPROVED
-const fetchMovieByTitle = async (title, year = null) => {
-  return await searchMovieByTitle(title, year);
-};
-
-// Search movie by title across multiple APIs - IMPROVED
-const searchMovieByTitle = async (title, year = null) => {
+// Search movie by title - FIXED
+const fetchMovieByTitle = async (title) => {
   try {
-    // First try OMDB with your API key
-    let omdbUrl = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&plot=full`;
-    if (year) {
-      omdbUrl += `&y=${year}`;
-    }
-    
-    const omdbResponse = await fetch(omdbUrl);
+    // Use OMDB with your API key
+    const omdbResponse = await fetch(
+      `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&plot=full`
+    );
     
     if (!omdbResponse.ok) {
       throw new Error(`OMDB API error: ${omdbResponse.status}`);
@@ -186,31 +147,26 @@ const searchMovieByTitle = async (title, year = null) => {
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB title search:', omdbData.Title);
       
-      // ALWAYS try to get 16:9 backdrop from TMDB
-      const backdropImage = await fetchTMDBBackdrop(omdbData.Title, omdbData.Year);
+      // Get 16:9 image from TMDB if available
+      let backdropImage = '';
+      try {
+        backdropImage = await fetchTMDBBackdrop(omdbData.Title, omdbData.Year);
+      } catch (e) {
+        console.log('Could not fetch TMDB backdrop:', e.message);
+      }
       
+      const formattedData = formatOMDBData(omdbData, backdropImage);
       return {
         success: true,
-        data: formatOMDBData(omdbData, backdropImage),
+        data: formattedData,
         source: 'omdb'
       };
+    } else {
+      throw new Error(omdbData.Error || `Movie "${title}" not found on OMDB`);
     }
-    
-    // If OMDB fails, try TMDB search
-    const tmdbResults = await searchTMDBMovies(title, year);
-    if (tmdbResults.success && tmdbResults.movies.length > 0) {
-      const movie = tmdbResults.movies[0];
-      return await fetchMovieByTMDB(movie.id);
-    }
-    
-    return {
-      success: false,
-      error: `Movie "${title}" not found on any database`,
-      data: null
-    };
     
   } catch (error) {
-    console.error('Error in searchMovieByTitle:', error);
+    console.error('Error in fetchMovieByTitle:', error);
     return {
       success: false,
       error: error.message,
@@ -219,56 +175,28 @@ const searchMovieByTitle = async (title, year = null) => {
   }
 };
 
-// Search TMDB movies - NEW FUNCTION
-const searchTMDBMovies = async (title, year = null) => {
-  try {
-    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
-      return { success: false, movies: [] };
-    }
-    
-    let tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1&include_adult=false`;
-    if (year) {
-      tmdbUrl += `&year=${year}`;
-    }
-    
-    const tmdbResponse = await fetch(tmdbUrl);
-    
-    if (!tmdbResponse.ok) {
-      return { success: false, movies: [] };
-    }
-    
-    const tmdbData = await tmdbResponse.json();
-    
-    if (tmdbData.results && tmdbData.results.length > 0) {
-      return {
-        success: true,
-        movies: tmdbData.results.map(movie => ({
-          id: movie.id,
-          title: movie.title,
-          year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown',
-          backdrop: movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : '',
-          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : ''
-        }))
-      };
-    }
-    
-    return { success: false, movies: [] };
-  } catch (error) {
-    return { success: false, movies: [] };
-  }
-};
-
-// Fetch 16:9 backdrop image from TMDB - IMPROVED
+// Fetch 16:9 backdrop image from TMDB - FIXED
 const fetchTMDBBackdrop = async (title, year) => {
   try {
-    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') return '';
+    if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
+      return '';
+    }
     
-    const searchResults = await searchTMDBMovies(title, year);
+    const searchResponse = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1`
+    );
     
-    if (searchResults.success && searchResults.movies.length > 0) {
-      const movie = searchResults.movies[0];
-      if (movie.backdrop) {
-        return movie.backdrop;
+    if (!searchResponse.ok) {
+      return '';
+    }
+    
+    const searchData = await searchResponse.json();
+    
+    if (searchData.results && searchData.results.length > 0) {
+      const movie = searchData.results[0];
+      if (movie.backdrop_path) {
+        // Return 16:9 backdrop image
+        return `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`;
       }
     }
     
@@ -279,7 +207,7 @@ const fetchTMDBBackdrop = async (title, year) => {
   }
 };
 
-// Format OMDB data to our schema - IMPROVED with guaranteed year in title
+// Format OMDB data to our schema - FIXED with year in title
 const formatOMDBData = (data, backdropImage = '') => {
   // Extract year from "2020–2021" or "2020" format
   let year = data.Year || '';
@@ -300,12 +228,16 @@ const formatOMDBData = (data, backdropImage = '') => {
   if (data.imdbRating && data.imdbRating !== 'N/A') {
     rating = parseFloat(data.imdbRating).toFixed(1);
   }
+  
+  // Ensure title with year
+  const titleWithYear = year ? `${data.Title} (${year})` : data.Title;
+  const displayTitle = year ? `${data.Title} ${year}` : data.Title;
 
-  const formattedData = {
-    // GUARANTEED: Multiple title formats with year
+  return {
+    // Title with year included
     title: data.Title || '',
-    titleWithYear: `${data.Title} (${year})`, // Format: "Movie Name (2025)"
-    displayTitle: `${data.Title} ${year}`, // Format: "Movie Name 2025"
+    titleWithYear: titleWithYear,
+    displayTitle: displayTitle,
     originalTitle: data.Title || '',
     
     // Basic info
@@ -316,7 +248,7 @@ const formatOMDBData = (data, backdropImage = '') => {
     year: year,
     rating: rating,
     
-    // 16:9 image support - GUARANTEED to try TMDB
+    // Images
     thumbnail: data.Poster !== 'N/A' ? data.Poster : '',
     backdrop: backdropImage, // 16:9 image from TMDB
     poster: data.Poster !== 'N/A' ? data.Poster : '',
@@ -344,20 +276,20 @@ const formatOMDBData = (data, backdropImage = '') => {
     source: 'omdb',
     fetchedAt: new Date().toISOString()
   };
-
-  // Ensure year formats are correct
-  return ensureYearInTitle(formattedData);
 };
 
-// Format TMDB data to our schema - IMPROVED
+// Format TMDB data to our schema - FIXED
 const formatTMDBData = (data) => {
   const year = data.release_date ? new Date(data.release_date).getFullYear().toString() : '';
+  
+  const titleWithYear = year ? `${data.title} (${year})` : data.title;
+  const displayTitle = year ? `${data.title} ${year}` : data.title;
 
-  const formattedData = {
-    // GUARANTEED: Multiple title formats with year
+  return {
+    // Title with year
     title: data.title || '',
-    titleWithYear: `${data.title} (${year})`,
-    displayTitle: `${data.title} ${year}`,
+    titleWithYear: titleWithYear,
+    displayTitle: displayTitle,
     originalTitle: data.original_title || '',
     
     // Basic info
@@ -368,7 +300,7 @@ const formatTMDBData = (data) => {
     year: year,
     rating: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
     
-    // 16:9 image support - GUARANTEED from TMDB
+    // Images
     thumbnail: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
     backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '', // 16:9
     poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
@@ -391,248 +323,140 @@ const formatTMDBData = (data) => {
     downloadLink: '',
     embedCode: '',
     
-    // Cast information
-    cast: data.credits?.cast?.slice(0, 5).map(actor => actor.name) || [],
-    director: data.credits?.crew?.find(person => person.job === 'Director')?.name || '',
-    
     // Metadata
     source: 'tmdb',
     fetchedAt: new Date().toISOString()
   };
-
-  // Ensure year formats are correct
-  return ensureYearInTitle(formattedData);
 };
 
-// Generate HTML for admin panel like your screenshot - FIXED
-export const generateAdminMovieDisplay = (movieData) => {
+// Simple display function for admin panel - FIXED
+export const displayMovieData = (movieData) => {
   if (!movieData || !movieData.success) {
     return `
-    <div class="movie-fetch-error">
-      <p>❌ Movie data not available. Please check the identifier and try again.</p>
+    <div style="padding: 20px; background: #fee; border: 1px solid #fcc; border-radius: 5px; color: #c00;">
+      <strong>Error:</strong> ${movieData?.error || 'Failed to fetch movie data'}
     </div>
     `;
   }
   
   const data = movieData.data;
+  const imageUrl = data.backdrop || data.thumbnail;
   
   return `
-<div class="movie-fetch-result">
-  <div class="success-message">✅ Movie data fetched successfully!</div>
-  
-  <div class="movie-preview">
-    <h3>Preview:</h3>
-    <div class="preview-content">
-      ${data.backdrop ? `
-      <div class="preview-image">
-        <img src="${data.backdrop}" alt="${data.title}" 
-             style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid #007cba;">
-        <div class="image-info">16:9 Backdrop Image</div>
+  <div style="border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; background: white; margin: 20px 0;">
+    <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 5px; margin: -20px -20px 20px -20px;">
+      <h3 style="margin: 0;">✅ Movie Data Fetched Successfully</h3>
+    </div>
+    
+    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+      ${imageUrl ? `
+      <div style="flex: 0 0 300px;">
+        <img src="${imageUrl}" alt="${data.title}" 
+             style="width: 100%; height: 169px; object-fit: cover; border-radius: 5px; border: 2px solid #ddd;">
+        <div style="text-align: center; margin-top: 5px; font-size: 12px; color: #666;">
+          ${data.backdrop ? '16:9 Backdrop Image' : 'Poster Image'}
+        </div>
       </div>
-      ` : data.thumbnail ? `
-      <div class="preview-image">
-        <img src="${data.thumbnail}" alt="${data.title}" 
-             style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 2px solid #ccc;">
-        <div class="image-info">Poster Image</div>
+      ` : ''}
+      
+      <div style="flex: 1;">
+        <h2 style="color: #333; margin-top: 0;">${data.titleWithYear}</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;">
+          <div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+            <strong>Rating:</strong> ${data.rating}/10
+          </div>
+          <div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+            <strong>Duration:</strong> ${data.duration} min
+          </div>
+          <div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+            <strong>Genre:</strong> ${data.genre}
+          </div>
+          <div style="background: #f5f5f5; padding: 8px; border-radius: 4px;">
+            <strong>Year:</strong> ${data.year}
+          </div>
+        </div>
+        
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50;">
+          <strong>Description:</strong><br>
+          ${data.description || 'No description available.'}
+        </div>
       </div>
-      ` : '<p>No image available</p>'}
+    </div>
+    
+    <div style="background: #e7f3ff; padding: 15px; border-radius: 5px;">
+      <h4 style="margin-top: 0;">Add Download & Embed Information</h4>
+      
+      <div style="display: grid; gap: 10px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Download Link:</label>
+          <input type="url" placeholder="https://example.com/download-movie" 
+                 style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Embed Code:</label>
+          <textarea placeholder="Paste embed code here..." 
+                    style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="movie-details-form">
-    <div class="form-group">
-      <label><strong>Title with Year:</strong></label>
-      <input type="text" value="${data.titleWithYear}" readonly 
-             style="width: 100%; padding: 8px; border: 1px solid #007cba; border-radius: 4px; background: #f0f8ff;">
-      <small>Automatically formatted with year</small>
-    </div>
-
-    <div class="form-group">
-      <label><strong>Description:</strong></label>
-      <textarea readonly style="width: 100%; height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">${data.description || 'No description available'}</textarea>
-    </div>
-
-    <div class="movie-meta-grid">
-      <div class="meta-item">
-        <strong>Year:</strong> ${data.year || 'N/A'}
-      </div>
-      <div class="meta-item">
-        <strong>Rating:</strong> ${data.rating}/10
-      </div>
-      <div class="meta-item">
-        <strong>Duration:</strong> ${data.duration} min
-      </div>
-      <div class="meta-item">
-        <strong>Genre:</strong> ${data.genre}
-      </div>
-      <div class="meta-item">
-        <strong>Language:</strong> ${data.language || 'N/A'}
-      </div>
-      <div class="meta-item">
-        <strong>Country:</strong> ${data.country?.[0] || 'N/A'}
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label><strong>Download Link:</strong></label>
-      <input type="url" placeholder="https://example.com/download-movie" 
-             style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-    </div>
-
-    <div class="form-group">
-      <label><strong>Embed Code (Primary) *</strong></label>
-      <textarea placeholder="Paste embed code here..." 
-                style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-    </div>
-  </div>
-</div>
-
-<style>
-.movie-fetch-result {
-  border: 2px solid #28a745;
-  border-radius: 8px;
-  padding: 20px;
-  background: white;
-  margin: 15px 0;
-}
-
-.success-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  font-weight: bold;
-}
-
-.movie-preview {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.movie-preview h3 {
-  margin-top: 0;
-  color: #333;
-}
-
-.preview-image {
-  position: relative;
-  margin: 10px 0;
-}
-
-.image-info {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 0.8em;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.form-group small {
-  color: #666;
-  font-style: italic;
-}
-
-.movie-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin: 15px 0;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.meta-item {
-  padding: 8px;
-  background: white;
-  border-radius: 4px;
-  border-left: 3px solid #007cba;
-}
-
-.movie-fetch-error {
-  border: 2px solid #dc3545;
-  border-radius: 8px;
-  padding: 15px;
-  background: #f8d7da;
-  color: #721c24;
-  margin: 15px 0;
-}
-</style>
-  `.trim();
+  `;
 };
 
-// Test with guaranteed features
-export const testGuaranteedFeatures = async () => {
-  console.log('Testing guaranteed year in title and 16:9 images...');
+// Test function - FIXED
+export const testMovieFetcher = async () => {
+  console.log('Testing movie fetcher...');
   
   const testCases = [
     'tt3896198', // Guardians of the Galaxy Vol. 2
     'Avengers: Endgame',
-    'Kantara 2022',
-    'The Dark Knight (2008)'
+    'The Dark Knight'
   ];
   
   for (const testCase of testCases) {
-    console.log(`\nTesting: "${testCase}"`);
+    console.log(`Testing: "${testCase}"`);
     const result = await fetchMovieData(testCase);
     
     if (result.success) {
-      console.log('✅ SUCCESS');
-      console.log('Title with Year:', result.data.titleWithYear);
-      console.log('16:9 Image:', result.data.backdrop ? '✅ Available' : '❌ Not available');
-      console.log('Year:', result.data.year);
+      console.log('✅ SUCCESS:', result.data.titleWithYear);
+      console.log('   Year:', result.data.year);
+      console.log('   16:9 Image:', result.data.backdrop ? 'Yes' : 'No');
     } else {
       console.log('❌ FAILED:', result.error);
     }
   }
 };
 
-// Get TMDB API key reminder
-export const getTMDBKeyReminder = () => {
-  if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
-    return `
-    <div class="tmdb-warning">
-      <h4>⚠️ TMDB API Key Required for 16:9 Images</h4>
-      <p>To get 16:9 backdrop images, you need to:</p>
-      <ol>
-        <li>Visit <a href="https://www.themoviedb.org/settings/api" target="_blank">TMDB API Settings</a></li>
-        <li>Register for a free account</li>
-        <li>Get your API key</li>
-        <li>Replace 'your_tmdb_api_key_here' in the code</li>
-      </ol>
-      <p><strong>Current Status:</strong> Using OMDB only - limited to poster images</p>
-    </div>
-    <style>
-    .tmdb-warning {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      border-radius: 6px;
-      padding: 15px;
-      margin: 15px 0;
-      color: #856404;
-    }
-    .tmdb-warning a {
-      color: #007cba;
-      font-weight: bold;
-    }
-    </style>
-    `;
+// Simple usage example
+export const setupMovieFetcher = (inputId, displayId) => {
+  const inputElement = document.getElementById(inputId);
+  const displayElement = document.getElementById(displayId);
+  
+  if (!inputElement || !displayElement) {
+    console.error('Input or display element not found');
+    return;
   }
-  return '';
+  
+  inputElement.addEventListener('change', async (e) => {
+    const identifier = e.target.value.trim();
+    if (!identifier) return;
+    
+    displayElement.innerHTML = '<div style="padding: 20px; text-align: center;">Fetching movie data...</div>';
+    
+    const result = await fetchMovieData(identifier);
+    displayElement.innerHTML = displayMovieData(result);
+  });
 };
+
+// Initialize when DOM is ready
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Movie Fetcher initialized');
+    // Auto-setup if elements exist
+    if (document.getElementById('movie-input') && document.getElementById('movie-display')) {
+      setupMovieFetcher('movie-input', 'movie-display');
+    }
+  });
+}
