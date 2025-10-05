@@ -4285,4 +4285,172 @@ html:has(.video-detail-page) {
 
 
 
+/* ===== SCREENSHOT MOVIE CARD STYLES ===== */
+.video-card.movie-card-screenshot {
+  background: var(--dark-light);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
 
+.video-card.movie-card-screenshot:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: rgba(229, 9, 20, 0.3);
+}
+
+/* Thumbnail container */
+.video-card.movie-card-screenshot .thumbnail-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--dark-lighter);
+  margin-bottom: 0;
+}
+
+.video-card.movie-card-screenshot .thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.video-card.movie-card-screenshot:hover .thumbnail {
+  transform: scale(1.05);
+}
+
+/* Movie card content */
+.movie-card-content {
+  padding: 16px;
+  position: relative;
+}
+
+/* Date styling - top left like screenshot */
+.movie-date {
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
+  z-index: 2;
+}
+
+/* Movie title styling */
+.movie-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  margin: 8px 0 6px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Language and quality info */
+.movie-language-quality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.movie-language-quality .language {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.movie-language-quality .primary-quality {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Quality options */
+.quality-options {
+  margin-bottom: 8px;
+}
+
+.quality-option {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.quality-option:last-child {
+  color: var(--text);
+}
+
+/* Genre tag */
+.movie-genre {
+  margin-top: 8px;
+}
+
+.movie-genre .genre-tag {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .movie-card-content {
+    padding: 12px;
+  }
+  
+  .movie-date {
+    left: 12px;
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .movie-title {
+    font-size: 14px;
+    margin: 6px 0 4px 0;
+  }
+  
+  .movie-language-quality {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  
+  .movie-language-quality .language,
+  .movie-language-quality .primary-quality {
+    font-size: 12px;
+  }
+  
+  .quality-option {
+    font-size: 12px;
+  }
+}
+
+/* Ensure the new design only applies to latest section */
+.latest-grid .video-card {
+  /* This will ensure only latest section uses the new design */
+}
