@@ -3,7 +3,21 @@ import { Link } from 'react-router-dom';
 import { formatDuration, formatViews } from '../../utils/helpers';
 
 const VideoCard = ({ video }) => {
-  const { id, title, thumbnail, duration, views, genre, createdAt } = video;
+  const { 
+    id, 
+    title, 
+    thumbnail, // Always use vertical thumbnail for VideoCard
+    duration, 
+    views, 
+    genre, 
+    createdAt,
+    year,
+    rating,
+    downloadLinks = {}
+  } = video;
+
+  // Ensure we always use vertical thumbnail (ignore horizontalThumbnail)
+  const displayThumbnail = thumbnail;
 
   // Simple date formatting function inside component
   const formatDate = (timestamp) => {
@@ -21,24 +35,55 @@ const VideoCard = ({ video }) => {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
+  // Check if download links are available
+  const hasDownloadLinks = downloadLinks && Object.values(downloadLinks).some(link => link);
+
   return (
     <div className="video-card">
-      <Link to={`/video/${id}`}>
+      <Link to={`/movie/${id}`}>
         <div className="thumbnail-container">
-          <img src={thumbnail} alt={title} className="thumbnail" />
+          <img 
+            src={displayThumbnail} 
+            alt={title} 
+            className="thumbnail"
+            onError={(e) => {
+              e.target.src = '/images/placeholder-vertical.jpg';
+            }}
+          />
           <div className="video-duration">{formatDuration(duration)}</div>
+          
+          {/* Quality Indicator */}
+          {hasDownloadLinks && (
+            <div className="quality-indicator">
+              {downloadLinks['4K'] ? '4K' : downloadLinks['1080p'] ? 'HD' : 'SD'}
+            </div>
+          )}
         </div>
       </Link>
       
       <div className="video-info-container">
         <div className="video-details">
-          <Link to={`/video/${id}`}>
-            <h3 className="video-title">{title}</h3>
+          <Link to={`/movie/${id}`}>
+            <h3 className="video-title" title={title}>
+              {title}
+              {year && <span className="year-badge"> ({year})</span>}
+            </h3>
           </Link>
+          
           <div className="video-meta">
             <span>{formatViews(views)} views</span>
             <span className="separator"> • </span>
             <span>{formatDate(createdAt)}</span>
+            
+            {rating && rating !== 'N/A' && (
+              <>
+                <span className="separator"> • </span>
+                <span className="rating">
+                  <i className="fas fa-star"></i> {rating}
+                </span>
+              </>
+            )}
+            
             {genre && (
               <>
                 <span className="separator"> • </span>
@@ -46,6 +91,16 @@ const VideoCard = ({ video }) => {
               </>
             )}
           </div>
+
+          {/* Download Quality Tags */}
+          {hasDownloadLinks && (
+            <div className="quality-tags">
+              {downloadLinks['480p'] && <span className="quality-tag">480p</span>}
+              {downloadLinks['720p'] && <span className="quality-tag">720p</span>}
+              {downloadLinks['1080p'] && <span className="quality-tag">1080p</span>}
+              {downloadLinks['4K'] && <span className="quality-tag">4K</span>}
+            </div>
+          )}
         </div>
       </div>
     </div>
