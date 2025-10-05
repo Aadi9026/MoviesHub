@@ -44,7 +44,7 @@ const LatestMovies = () => {
           </div>
         </div>
 
-        {/* New 2-column grid for latest movies only */}
+        {/* 2-column grid for latest movies only */}
         <div className="latest-movies-grid">
           {videos.map(video => (
             <LatestVideoCard key={video.id} video={video} />
