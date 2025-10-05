@@ -1,6 +1,6 @@
 import React from 'react';
 import VideoCard from '../Common/VideoCard';
-import LatestMovieCard from './LatestMovieCard'; // Import the horizontal card component
+import LatestMovieCard from './LatestMovieCard'; // Make sure this component exists
 
 const VideoList = ({ videos, className = '', layout = 'vertical' }) => {
   if (videos.length === 0) {
@@ -13,7 +13,7 @@ const VideoList = ({ videos, className = '', layout = 'vertical' }) => {
     );
   }
 
-  // Use horizontal layout for latest section
+  // Use horizontal layout only for latest section
   if (layout === 'horizontal' || className.includes('latest-grid')) {
     return (
       <div className={`latest-movies-grid ${className}`}>
@@ -27,7 +27,7 @@ const VideoList = ({ videos, className = '', layout = 'vertical' }) => {
     );
   }
 
-  // Default vertical layout for all other sections
+  // Default vertical layout - uses your existing VideoCard with vertical thumbnails
   return (
     <div className={`video-list ${className}`}>
       <div className={`video-grid ${className}`}>
