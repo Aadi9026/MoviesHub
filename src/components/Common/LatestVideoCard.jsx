@@ -2,122 +2,69 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const LatestVideoCard = ({ video }) => {
-  const { id, title, thumbnail, quality, language, year, createdAt, genre } = video;
+  const { id, title, thumbnail, language, year, createdAt, genre } = video;
 
-  // Format date like "05 OCT 2025" - ALL CAPS like screenshot
+  // Simple date formatting - no heavy operations
   const formatMovieDate = (timestamp) => {
-    if (!timestamp) return 'UNKNOWN DATE';
+    if (!timestamp) return 'NEW';
     
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleString('en', { month: 'short' }).toUpperCase();
-    const year = date.getFullYear();
-    
-    return `${day} ${month} ${year}`;
-  };
-
-  // Extract year from title or use video year property
-  const getMovieYear = () => {
-    if (year) return year;
-    const yearMatch = title.match(/\b(20\d{2})\b/);
-    return yearMatch ? yearMatch[1] : new Date().getFullYear();
-  };
-
-  // Format title without year if year is already extracted
-  const getMovieTitle = () => {
-    if (year) return title;
-    return title.replace(/\s*(20\d{2})\s*$/, '').trim();
-  };
-
-  // Get quality options
-  const getQualityOptions = () => {
-    if (quality && typeof quality === 'string') {
-      return quality.split(' - ').map(q => q.trim().toUpperCase());
+    try {
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = date.toLocaleString('en', { month: 'short' }).toUpperCase();
+      return `${day} ${month}`;
+    } catch {
+      return 'NEW';
     }
-    return ['480P', '720P', '1080P'];
+  };
+
+  // Simple year extraction
+  const getMovieYear = () => {
+    return year || new Date().getFullYear();
+  };
+
+  // Simple title formatting
+  const getMovieTitle = () => {
+    return title.replace(/\s*(20\d{2})\s*$/, '').trim() || title;
   };
 
   const movieDate = formatMovieDate(createdAt);
   const movieYear = getMovieYear();
   const movieTitle = getMovieTitle();
-  const qualityOptions = getQualityOptions();
 
   return (
-    <div className="premium-video-card">
-      {/* Premium Glow Effect Container */}
-      <div className="premium-glow"></div>
+    <div className="pro-video-card">
+      {/* Simple Date Badge */}
+      <div className="pro-date-badge">{movieDate}</div>
       
-      {/* Date Badge with Premium Style */}
-      <div className="premium-date-badge">
-        <i className="fas fa-calendar-alt"></i>
-        {movieDate}
-      </div>
-      
-      {/* Premium Thumbnail with Overlay */}
+      {/* Optimized Thumbnail */}
       <Link to={`/video/${id}`}>
-        <div className="premium-thumbnail-container">
-          <img src={thumbnail} alt={title} className="premium-thumbnail" />
-          {/* Gradient Overlay */}
-          <div className="thumbnail-overlay"></div>
-          {/* Play Button Icon */}
-          <div className="play-icon">
-            <i className="fas fa-play"></i>
-          </div>
+        <div className="pro-thumbnail-container">
+          <img 
+            src={thumbnail} 
+            alt={title} 
+            className="pro-thumbnail"
+            loading="lazy"
+          />
         </div>
       </Link>
       
-      {/* Premium Card Content */}
-      <div className="premium-card-content">
-        {/* Movie Title with Premium Typography */}
+      {/* Clean Content */}
+      <div className="pro-card-content">
         <Link to={`/video/${id}`}>
-          <h3 className="premium-movie-title" title={movieTitle}>
-            {movieTitle}
-          </h3>
+          <h3 className="pro-movie-title">{movieTitle}</h3>
         </Link>
         
-        {/* Year Badge */}
-        <div className="premium-year-badge">
-          <i className="fas fa-star"></i>
-          {movieYear}
-        </div>
-        
-        {/* Quality Info Section */}
-        <div className="premium-quality-section">
-          {/* Primary Quality Highlight */}
-          {qualityOptions[0] && (
-            <div className="premium-primary-quality">
-              <i className="fas fa-hd"></i>
-              {qualityOptions[0]}
-            </div>
-          )}
-          
-          {/* All Quality Options */}
-          <div className="premium-quality-options">
-            {qualityOptions.map((quality, index) => (
-              <span key={index} className="premium-quality-option">
-                <span className="quality-dot"></span>
-                {quality}
-              </span>
-            ))}
-          </div>
-        </div>
-        
-        {/* Language & Genre Info */}
-        <div className="premium-meta-info">
+        <div className="pro-movie-info">
+          <span className="pro-year">{movieYear}</span>
           {language && (
-            <span className="premium-language">
-              <i className="fas fa-globe"></i>
-              {language}
-            </span>
-          )}
-          {genre && (
-            <span className="premium-genre">
-              <i className="fas fa-tag"></i>
-              {genre}
-            </span>
+            <span className="pro-language">{language}</span>
           )}
         </div>
+
+        {genre && (
+          <div className="pro-genre">{genre}</div>
+        )}
       </div>
     </div>
   );
