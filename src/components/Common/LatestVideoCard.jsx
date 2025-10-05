@@ -35,7 +35,7 @@ const LatestVideoCard = ({ video }) => {
     if (quality && typeof quality === 'string') {
       return quality.split(' - ').map(q => q.trim().toUpperCase());
     }
-    return ['480P', '720P', '1080P']; // ALL CAPS like screenshot
+    return ['480P', '720P', '1080P'];
   };
 
   const movieDate = formatMovieDate(createdAt);
@@ -44,40 +44,79 @@ const LatestVideoCard = ({ video }) => {
   const qualityOptions = getQualityOptions();
 
   return (
-    <div className="latest-video-card">
-      {/* Date Badge - ALL CAPS like screenshot */}
-      <div className="latest-date-badge">{movieDate}</div>
+    <div className="premium-video-card">
+      {/* Premium Glow Effect Container */}
+      <div className="premium-glow"></div>
       
+      {/* Date Badge with Premium Style */}
+      <div className="premium-date-badge">
+        <i className="fas fa-calendar-alt"></i>
+        {movieDate}
+      </div>
+      
+      {/* Premium Thumbnail with Overlay */}
       <Link to={`/video/${id}`}>
-        <div className="latest-thumbnail-container">
-          <img src={thumbnail} alt={title} className="latest-thumbnail" />
+        <div className="premium-thumbnail-container">
+          <img src={thumbnail} alt={title} className="premium-thumbnail" />
+          {/* Gradient Overlay */}
+          <div className="thumbnail-overlay"></div>
+          {/* Play Button Icon */}
+          <div className="play-icon">
+            <i className="fas fa-play"></i>
+          </div>
         </div>
       </Link>
       
-      <div className="latest-card-content">
-        {/* Title - Limited to 2 lines */}
+      {/* Premium Card Content */}
+      <div className="premium-card-content">
+        {/* Movie Title with Premium Typography */}
         <Link to={`/video/${id}`}>
-          <h3 className="latest-movie-title" title={movieTitle}>
+          <h3 className="premium-movie-title" title={movieTitle}>
             {movieTitle}
           </h3>
         </Link>
         
-        {/* Year - Separate line like screenshot */}
-        <div className="latest-movie-year">{movieYear}</div>
+        {/* Year Badge */}
+        <div className="premium-year-badge">
+          <i className="fas fa-star"></i>
+          {movieYear}
+        </div>
         
-        {/* Primary Quality - Separate line like screenshot */}
-        {qualityOptions[0] && (
-          <div className="latest-primary-quality">{qualityOptions[0]}</div>
-        )}
+        {/* Quality Info Section */}
+        <div className="premium-quality-section">
+          {/* Primary Quality Highlight */}
+          {qualityOptions[0] && (
+            <div className="premium-primary-quality">
+              <i className="fas fa-hd"></i>
+              {qualityOptions[0]}
+            </div>
+          )}
+          
+          {/* All Quality Options */}
+          <div className="premium-quality-options">
+            {qualityOptions.map((quality, index) => (
+              <span key={index} className="premium-quality-option">
+                <span className="quality-dot"></span>
+                {quality}
+              </span>
+            ))}
+          </div>
+        </div>
         
-        {/* Quality Options - All in one line */}
-        <div className="latest-quality-options">
-          {qualityOptions.map((quality, index) => (
-            <span key={index} className="latest-quality-option">
-              {quality}
-              {index < qualityOptions.length - 1 && <span className="quality-separator"> - </span>}
+        {/* Language & Genre Info */}
+        <div className="premium-meta-info">
+          {language && (
+            <span className="premium-language">
+              <i className="fas fa-globe"></i>
+              {language}
             </span>
-          ))}
+          )}
+          {genre && (
+            <span className="premium-genre">
+              <i className="fas fa-tag"></i>
+              {genre}
+            </span>
+          )}
         </div>
       </div>
     </div>
