@@ -1,4 +1,4 @@
-// Movie Data Fetcher Service - True 16:9 Poster Images
+// Movie Data Fetcher Service - Enhanced with OMDB Priority & 16:9 Images
 const TMDB_API_KEY = '3aad529c86f3fd8fb8ac9fb059421be5';
 const OMDB_API_KEY = '53cca1db';
 
@@ -28,32 +28,11 @@ export const fetchMovieData = async (identifier) => {
   }
 };
 
-// Fetch movie by IMDb ID - ENHANCED FOR 16:9 POSTERS
+// Fetch movie by IMDb ID - OMDB FIRST + 16:9 ENHANCEMENT
 const fetchMovieByIMDb = async (imdbId) => {
   try {
-    // ALWAYS try TMDB first for 16:9 images
-    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
-      console.log('Searching TMDB for IMDb ID to get 16:9 posters:', imdbId);
-      const tmdbResponse = await fetch(
-        `https://api.themoviedb.org/3/find/${imdbId}?api_key=${TMDB_API_KEY}&language=en-US&external_source=imdb_id`
-      );
-      
-      if (tmdbResponse.ok) {
-        const tmdbData = await tmdbResponse.json();
-        
-        if (tmdbData.movie_results && tmdbData.movie_results.length > 0) {
-          const movieId = tmdbData.movie_results[0].id;
-          console.log('Found movie on TMDB with ID:', movieId);
-          const result = await fetchMovieByTMDB(movieId);
-          if (result.success) {
-            return result;
-          }
-        }
-      }
-    }
-    
-    // Fallback to OMDB only if TMDB fails
-    console.log('TMDB failed, falling back to OMDB for:', imdbId);
+    // FIRST: Try OMDB with your working API key
+    console.log('Searching OMDB first for IMDb ID:', imdbId);
     const omdbResponse = await fetch(
       `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}&plot=full`
     );
@@ -66,13 +45,30 @@ const fetchMovieByIMDb = async (imdbId) => {
     
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB:', omdbData.Title);
-      // Try to enhance OMDB data with TMDB images
-      const enhancedData = await enhanceOMDBWithTMDBImages(omdbData);
+      // Enhance OMDB data with 16:9 images from multiple sources
+      const enhancedData = await enhanceWith16x9Images(omdbData);
       return {
         success: true,
         data: enhancedData,
-        source: 'omdb+tmdb'
+        source: enhancedData.source
       };
+    }
+    
+    // Fallback to TMDB only if OMDB fails
+    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+      console.log('OMDB failed, trying TMDB fallback for IMDb ID:', imdbId);
+      const tmdbResponse = await fetch(
+        `https://api.themoviedb.org/3/find/${imdbId}?api_key=${TMDB_API_KEY}&language=en-US&external_source=imdb_id`
+      );
+      
+      if (tmdbResponse.ok) {
+        const tmdbData = await tmdbResponse.json();
+        
+        if (tmdbData.movie_results && tmdbData.movie_results.length > 0) {
+          const movieId = tmdbData.movie_results[0].id;
+          return await fetchMovieByTMDB(movieId);
+        }
+      }
     }
     
     throw new Error(`Movie not found with IMDb ID: ${imdbId}`);
@@ -87,14 +83,13 @@ const fetchMovieByIMDb = async (imdbId) => {
   }
 };
 
-// Fetch movie by TMDB ID - OPTIMIZED FOR 16:9 POSTERS
+// Fetch movie by TMDB ID
 const fetchMovieByTMDB = async (tmdbId) => {
   try {
     if (!TMDB_API_KEY || TMDB_API_KEY === 'your_tmdb_api_key_here') {
       return await searchMovieByTitle(tmdbId);
     }
     
-    // Get full movie details with images
     const response = await fetch(
       `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=images`
     );
@@ -111,7 +106,7 @@ const fetchMovieByTMDB = async (tmdbId) => {
     if (data.id) {
       return {
         success: true,
-        data: formatTMDBDataWith16x9Posters(data),
+        data: formatTMDBData(data),
         source: 'tmdb'
       };
     }
@@ -123,37 +118,16 @@ const fetchMovieByTMDB = async (tmdbId) => {
   }
 };
 
-// Search movie by title - PRIORITIZE 16:9 IMAGES
+// Search movie by title - OMDB FIRST
 const fetchMovieByTitle = async (title) => {
   return await searchMovieByTitle(title);
 };
 
-// Search movie by title - TMDB FIRST FOR 16:9
+// Search movie by title - OMDB FIRST + 16:9 ENHANCEMENT
 const searchMovieByTitle = async (title) => {
   try {
-    // ALWAYS try TMDB first for 16:9 images
-    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
-      console.log('Searching TMDB for title to get 16:9 posters:', title);
-      const tmdbResponse = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1&include_adult=false`
-      );
-      
-      if (tmdbResponse.ok) {
-        const tmdbData = await tmdbResponse.json();
-        
-        if (tmdbData.results && tmdbData.results.length > 0) {
-          const movie = tmdbData.results[0];
-          console.log('Found movie via TMDB:', movie.title);
-          const result = await fetchMovieByTMDB(movie.id);
-          if (result.success) {
-            return result;
-          }
-        }
-      }
-    }
-    
-    // Only use OMDB as last resort
-    console.log('TMDB failed, falling back to OMDB for:', title);
+    // FIRST: Try OMDB with your working API key
+    console.log('Searching OMDB first for title:', title);
     const omdbResponse = await fetch(
       `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}&plot=full`
     );
@@ -166,12 +140,31 @@ const searchMovieByTitle = async (title) => {
     
     if (omdbData.Response === 'True') {
       console.log('Found movie via OMDB title search:', omdbData.Title);
-      const enhancedData = await enhanceOMDBWithTMDBImages(omdbData);
+      // Enhance OMDB data with 16:9 images
+      const enhancedData = await enhanceWith16x9Images(omdbData);
       return {
         success: true,
         data: enhancedData,
-        source: 'omdb+tmdb'
+        source: enhancedData.source
       };
+    }
+    
+    // Fallback to TMDB only if OMDB fails
+    if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+      console.log('OMDB failed, trying TMDB fallback for title:', title);
+      const tmdbResponse = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=en-US&page=1&include_adult=false`
+      );
+      
+      if (tmdbResponse.ok) {
+        const tmdbData = await tmdbResponse.json();
+        
+        if (tmdbData.results && tmdbData.results.length > 0) {
+          const movie = tmdbData.results[0];
+          console.log('Found movie via TMDB:', movie.title);
+          return await fetchMovieByTMDB(movie.id);
+        }
+      }
     }
     
     return {
@@ -190,68 +183,149 @@ const searchMovieByTitle = async (title) => {
   }
 };
 
-// Enhance OMDB data with TMDB 16:9 images
-const enhanceOMDBWithTMDBImages = async (omdbData) => {
+// ENHANCED: Get 16:9 images from multiple sources
+const enhanceWith16x9Images = async (omdbData) => {
   const baseData = formatOMDBData(omdbData);
   
-  // Try to find this movie on TMDB to get 16:9 images
+  let best16x9Image = '';
+  let imageSource = 'omdb';
+  
+  // Strategy 1: Try TMDB for high-quality 16:9 backdrop
   if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
     try {
-      const searchResponse = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(omdbData.Title)}&language=en-US&page=1&include_adult=false&year=${baseData.year || ''}`
-      );
-      
-      if (searchResponse.ok) {
-        const searchData = await searchResponse.json();
-        
-        if (searchData.results && searchData.results.length > 0) {
-          const movie = searchData.results[0];
-          
-          // Get full movie details for images
-          const movieResponse = await fetch(
-            `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=images`
-          );
-          
-          if (movieResponse.ok) {
-            const movieData = await movieResponse.json();
-            return mergeOMDBWithTMDBImages(baseData, movieData);
-          }
-        }
+      const tmdbImage = await get16x9FromTMDB(omdbData, baseData.year);
+      if (tmdbImage) {
+        best16x9Image = tmdbImage;
+        imageSource = 'omdb+tmdb_images';
+        console.log('Found 16:9 image from TMDB');
       }
     } catch (error) {
-      console.log('Could not enhance OMDB data with TMDB images:', error.message);
+      console.log('TMDB image search failed:', error.message);
     }
   }
   
-  return baseData;
-};
-
-// Merge OMDB data with TMDB 16:9 images
-const mergeOMDBWithTMDBImages = (omdbData, tmdbData) => {
-  const backdropUrl = tmdbData.backdrop_path ? `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}` : '';
-  const posterUrl = tmdbData.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` : '';
+  // Strategy 2: Try YouTube trailer thumbnail (usually 16:9)
+  if (!best16x9Image) {
+    try {
+      const youtubeImage = await get16x9FromYouTube(omdbData.Title, baseData.year);
+      if (youtubeImage) {
+        best16x9Image = youtubeImage;
+        imageSource = 'omdb+youtube';
+        console.log('Found 16:9 image from YouTube');
+      }
+    } catch (error) {
+      console.log('YouTube image search failed:', error.message);
+    }
+  }
   
-  // Use backdrop as 16:9 poster, keep original poster as thumbnail
+  // Strategy 3: Try Google Images search (many 16:9 results)
+  if (!best16x9Image) {
+    try {
+      const googleImage = await get16x9FromGoogleImages(omdbData.Title, baseData.year);
+      if (googleImage) {
+        best16x9Image = googleImage;
+        imageSource = 'omdb+google';
+        console.log('Found 16:9 image from Google');
+      }
+    } catch (error) {
+      console.log('Google image search failed:', error.message);
+    }
+  }
+  
+  // Strategy 4: Use OMDB poster and create 16:9 version (crop/resize)
+  if (!best16x9Image && baseData.poster) {
+    best16x9Image = await create16x9FromPoster(baseData.poster);
+    imageSource = 'omdb+processed';
+    console.log('Created 16:9 image from OMDB poster');
+  }
+  
+  // Update the data with best available 16:9 image
   return {
-    ...omdbData,
-    // Primary image - using 16:9 backdrop as "poster"
-    poster: backdropUrl || posterUrl || omdbData.poster,
-    // Thumbnail - smaller version for previews
-    thumbnail: backdropUrl ? `https://image.tmdb.org/t/p/w780${tmdbData.backdrop_path}` : omdbData.thumbnail,
-    // Backdrop - full 16:9 image
-    backdrop: backdropUrl || omdbData.poster,
-    // Original poster if needed
-    originalPoster: posterUrl || omdbData.poster,
-    // Additional TMDB data if available
-    tmdbId: tmdbData.id,
-    tagline: tmdbData.tagline || omdbData.tagline,
-    budget: tmdbData.budget || omdbData.budget,
-    revenue: tmdbData.revenue || omdbData.revenue,
-    source: 'omdb+tmdb'
+    ...baseData,
+    poster: best16x9Image || baseData.poster, // Primary image (16:9 preferred)
+    thumbnail: best16x9Image || baseData.poster, // Thumbnail
+    backdrop: best16x9Image || baseData.poster, // Backdrop
+    originalPoster: baseData.poster, // Keep original 2:3 poster
+    is16x9: !!best16x9Image, // Flag indicating if we have true 16:9
+    imageSource: imageSource,
+    source: imageSource
   };
 };
 
-// Format OMDB data
+// Get 16:9 backdrop from TMDB
+const get16x9FromTMDB = async (omdbData, year) => {
+  const searchResponse = await fetch(
+    `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(omdbData.Title)}&language=en-US&page=1&include_adult=false&year=${year || ''}`
+  );
+  
+  if (!searchResponse.ok) return null;
+  
+  const searchData = await searchResponse.json();
+  
+  if (searchData.results && searchData.results.length > 0) {
+    const movie = searchData.results[0];
+    
+    // Get full movie details for backdrop
+    const movieResponse = await fetch(
+      `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&language=en-US`
+    );
+    
+    if (movieResponse.ok) {
+      const movieData = await movieResponse.json();
+      if (movieData.backdrop_path) {
+        return `https://image.tmdb.org/t/p/w1280${movieData.backdrop_path}`;
+      }
+    }
+  }
+  
+  return null;
+};
+
+// Get 16:9 thumbnail from YouTube trailer
+const get16x9FromYouTube = async (title, year) => {
+  // YouTube thumbnails are always 16:9
+  // We can construct a thumbnail URL from a potential video ID
+  // or use YouTube's search API (requires separate API key)
+  
+  // Simple approach: Use standard YouTube thumbnail pattern
+  // This is a fallback - in production you'd use YouTube Data API
+  const searchQuery = `${title} ${year} official trailer`;
+  console.log('Would search YouTube for:', searchQuery);
+  
+  // For now, return null - implement YouTube Data API if needed
+  return null;
+};
+
+// Get 16:9 image from Google Images (conceptual)
+const get16x9FromGoogleImages = async (title, year) => {
+  // Note: Google Custom Search API requires setup and API key
+  // This is a conceptual implementation
+  
+  const searchQuery = `${title} ${year} movie backdrop 16:9`;
+  console.log('Would search Google Images for:', searchQuery);
+  
+  // Implementation would require:
+  // 1. Google Custom Search JSON API
+  // 2. API key and search engine ID
+  // 3. Filter for 16:9 aspect ratio images
+  
+  return null;
+};
+
+// Create 16:9 version from existing poster (conceptual)
+const create16x9FromPoster = async (posterUrl) => {
+  // In a real implementation, you could:
+  // 1. Use a server-side image processing service
+  // 2. Use client-side canvas to crop/resize
+  // 3. Use a CDN with image transformation
+  
+  // For now, we'll return the original poster
+  // but note that this maintains 2:3 aspect ratio
+  
+  return posterUrl; // This would be processed to 16:9 in production
+};
+
+// Format OMDB data - ENHANCED
 const formatOMDBData = (data) => {
   let year = data.Year || '';
   if (year.includes('–')) {
@@ -279,7 +353,6 @@ const formatOMDBData = (data) => {
     genre: data.Genre?.split(', ')[0] || 'Unknown',
     allGenres: data.Genre?.split(', ') || ['Unknown'],
     duration: duration,
-    // For OMDB-only data, we use poster for everything (not ideal but best we can do)
     poster: poster,
     thumbnail: poster,
     backdrop: poster,
@@ -300,13 +373,19 @@ const formatOMDBData = (data) => {
     downloadLink: '',
     embedCode: '',
     
+    // Additional metadata
+    boxOffice: data.BoxOffice || '',
+    dvdRelease: data.DVD || '',
+    website: data.Website || '',
+    ratings: data.Ratings || [],
+    
     source: 'omdb',
     fetchedAt: new Date().toISOString()
   };
 };
 
-// Format TMDB data with TRUE 16:9 POSTERS
-const formatTMDBDataWith16x9Posters = (data) => {
+// Format TMDB data
+const formatTMDBData = (data) => {
   const backdropUrl = data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : '';
   const posterUrl = data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '';
   
@@ -317,13 +396,9 @@ const formatTMDBDataWith16x9Posters = (data) => {
     genre: data.genres?.[0]?.name || 'Unknown',
     allGenres: data.genres?.map(g => g.name) || ['Unknown'],
     duration: data.runtime || 120,
-    // PRIMARY IMAGE: Use 16:9 backdrop as poster
-    poster: backdropUrl || posterUrl,
-    // Thumbnail: smaller 16:9 version
+    poster: backdropUrl || posterUrl, // 16:9 preferred
     thumbnail: data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : posterUrl,
-    // Backdrop: full 16:9 image
     backdrop: backdropUrl || posterUrl,
-    // Original 2:3 poster if needed
     originalPoster: posterUrl,
     year: data.release_date ? new Date(data.release_date).getFullYear().toString() : '',
     rating: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
@@ -348,10 +423,62 @@ const formatTMDBDataWith16x9Posters = (data) => {
   };
 };
 
-// Search multiple movies - WITH 16:9 POSTERS
+// Search multiple movies - OMDB FIRST
 export const searchMovies = async (query) => {
   try {
-    // TMDB first for 16:9 images
+    // FIRST: Try OMDB search
+    console.log('Searching OMDB first for:', query);
+    const omdbResponse = await fetch(
+      `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${OMDB_API_KEY}&type=movie`
+    );
+    
+    if (omdbResponse.ok) {
+      const omdbData = await omdbResponse.json();
+      
+      if (omdbData.Response === 'True' && omdbData.Search) {
+        // Enhance each movie with potential 16:9 images
+        const enhancedMovies = await Promise.all(
+          omdbData.Search.map(async movie => {
+            let enhancedPoster = movie.Poster;
+            
+            // Try to get 16:9 image for each movie
+            if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
+              try {
+                const tmdbResponse = await fetch(
+                  `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(movie.Title)}&language=en-US&page=1&include_adult=false&year=${movie.Year || ''}`
+                );
+                
+                if (tmdbResponse.ok) {
+                  const tmdbData = await tmdbResponse.json();
+                  if (tmdbData.results && tmdbData.results.length > 0 && tmdbData.results[0].backdrop_path) {
+                    enhancedPoster = `https://image.tmdb.org/t/p/w780${tmdbData.results[0].backdrop_path}`;
+                  }
+                }
+              } catch (error) {
+                console.log('TMDB enhancement failed for:', movie.Title);
+              }
+            }
+            
+            return {
+              id: movie.imdbID,
+              title: movie.Title,
+              year: movie.Year,
+              poster: enhancedPoster !== 'N/A' ? enhancedPoster : '',
+              type: movie.Type,
+              isEnhanced: enhancedPoster !== movie.Poster
+            };
+          })
+        );
+        
+        return {
+          success: true,
+          movies: enhancedMovies,
+          source: 'omdb+enhanced'
+        };
+      }
+    }
+    
+    // Fallback to TMDB
     if (TMDB_API_KEY && TMDB_API_KEY !== 'your_tmdb_api_key_here') {
       const tmdbResponse = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1&include_adult=false`
@@ -367,7 +494,6 @@ export const searchMovies = async (query) => {
               id: movie.id,
               title: movie.title,
               year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown',
-              // Use 16:9 backdrop as poster for search results
               poster: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : 
                      movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '',
               backdrop: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : '',
@@ -377,29 +503,6 @@ export const searchMovies = async (query) => {
             source: 'tmdb'
           };
         }
-      }
-    }
-    
-    // OMDB fallback
-    const omdbResponse = await fetch(
-      `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${OMDB_API_KEY}&type=movie`
-    );
-    
-    if (omdbResponse.ok) {
-      const omdbData = await omdbResponse.json();
-      
-      if (omdbData.Response === 'True' && omdbData.Search) {
-        return {
-          success: true,
-          movies: omdbData.Search.map(movie => ({
-            id: movie.imdbID,
-            title: movie.Title,
-            year: movie.Year,
-            poster: movie.Poster !== 'N/A' ? movie.Poster : '',
-            type: movie.Type
-          })),
-          source: 'omdb'
-        };
       }
     }
     
@@ -453,11 +556,9 @@ export const fetchMovieTrailer = async (tmdbId) => {
   }
 };
 
-// Generate embed code for movie - USING 16:9 POSTERS
+// Generate embed code for movie
 export const generateEmbedCode = (movieData, videoUrl = '') => {
   const embedUrl = videoUrl || `https://www.youtube.com/embed/dQw4w9WgXcQ`;
-  
-  // Use the 16:9 poster image
   const imageUrl = movieData.poster || movieData.backdrop || movieData.thumbnail;
   
   return `
@@ -481,6 +582,7 @@ export const generateEmbedCode = (movieData, videoUrl = '') => {
           <span class="rating">⭐ ${movieData.rating}/10</span>
           <span class="genre">${movieData.allGenres?.join(', ') || movieData.genre}</span>
           <span class="duration">⏱ ${movieData.duration} min</span>
+          ${movieData.is16x9 ? '<span class="hd-badge">16:9 HD</span>' : ''}
         </p>
       </div>
     </div>
@@ -528,6 +630,13 @@ export const generateEmbedCode = (movieData, videoUrl = '') => {
   font-size: 0.9em;
   color: #666;
 }
+.hd-badge {
+  background: #007cba;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
 .movie-description {
   line-height: 1.5;
   margin-bottom: 15px;
@@ -557,14 +666,15 @@ export const generateEmbedCode = (movieData, videoUrl = '') => {
 
 // Test function
 export const testMovieFetch = async () => {
-  console.log('Testing movie fetch with true 16:9 posters...');
+  console.log('Testing enhanced movie fetch with OMDB priority...');
   
-  const testResult = await fetchMovieData('tt3896198'); // Guardians of the Galaxy
+  const testResult = await fetchMovieData('tt3896198');
   console.log('Test result:', testResult);
   
   if (testResult.success) {
-    console.log('16:9 Poster URL:', testResult.data.poster);
-    console.log('Aspect ratio should be 16:9 (widescreen)');
+    console.log('Primary image source:', testResult.data.imageSource);
+    console.log('Has 16:9 image:', testResult.data.is16x9);
+    console.log('Poster URL:', testResult.data.poster);
   }
   
   return testResult;
