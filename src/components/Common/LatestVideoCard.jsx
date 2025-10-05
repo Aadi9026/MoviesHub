@@ -33,7 +33,7 @@ const LatestVideoCard = ({ video }) => {
   // Get quality options
   const getQualityOptions = () => {
     if (quality && typeof quality === 'string') {
-      return quality.split(' - ').map(q => q.trim());
+      return quality.split(' - ').map(q => q.trim().toUpperCase());
     }
     return ['480P', '720P', '1080P']; // ALL CAPS like screenshot
   };
@@ -55,18 +55,22 @@ const LatestVideoCard = ({ video }) => {
       </Link>
       
       <div className="latest-card-content">
-        {/* Title */}
+        {/* Title - Limited to 2 lines */}
         <Link to={`/video/${id}`}>
-          <h3 className="latest-movie-title">{movieTitle}</h3>
+          <h3 className="latest-movie-title" title={movieTitle}>
+            {movieTitle}
+          </h3>
         </Link>
         
         {/* Year - Separate line like screenshot */}
         <div className="latest-movie-year">{movieYear}</div>
         
         {/* Primary Quality - Separate line like screenshot */}
-        <div className="latest-primary-quality">{qualityOptions[0]}</div>
+        {qualityOptions[0] && (
+          <div className="latest-primary-quality">{qualityOptions[0]}</div>
+        )}
         
-        {/* Quality Options */}
+        {/* Quality Options - All in one line */}
         <div className="latest-quality-options">
           {qualityOptions.map((quality, index) => (
             <span key={index} className="latest-quality-option">
