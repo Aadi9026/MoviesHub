@@ -1,6 +1,6 @@
 // Movie Data Fetcher Service - Working Version
-const TMDB_API_KEY = 'your_tmdb_api_key_here'; // Still need to get from https://www.themoviedb.org/settings/api
-const OMDB_API_KEY = '53cca1db'; // Your OMDB API key
+const TMDB_API_KEY = '3aad529c86f3fd8fb8ac9fb059421be5'; // Still need to get from https://www.themoviedb.org/settings/api
+const OMDB_API_KEY = ''; // Your OMDB API key
 export const fetchMovieData = async (identifier) => {
   try {
     console.log('Fetching movie data for:', identifier);
