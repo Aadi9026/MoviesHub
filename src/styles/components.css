@@ -4754,3 +4754,147 @@ html:has(.video-detail-page) {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ===== ENHANCED THUMBNAIL FIX - PREVENTS DISTORTION ===== */
+
+/* Main video card thumbnail container - FIXED ASPECT RATIO */
+.thumbnail-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--dark-lighter);
+  margin-bottom: 12px;
+  min-height: 0;
+}
+
+/* Main thumbnail image - PROPER OBJECT FIT */
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Hover effect */
+.video-card:hover .thumbnail {
+  transform: scale(1.05);
+}
+
+/* Search result thumbnails - FIXED */
+.result-thumb {
+  width: 50px;
+  height: 35px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Suggested video thumbnails - FIXED */
+.suggested-thumb {
+  width: 100px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--dark-lighter);
+}
+
+.suggested-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Movie thumbnails in admin - FIXED */
+.movie-thumb {
+  width: 120px;
+  height: 70px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--dark-lighter);
+}
+
+.movie-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Search result item images - FIXED */
+.search-result-item img {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Duplicate item images - FIXED */
+.duplicate-item img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  display: block;
+}
+
+/* Ensure all images maintain aspect ratio */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Specific fix for video grid images */
+.video-grid img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .thumbnail-container {
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+  }
+  
+  .result-thumb {
+    width: 45px;
+    height: 30px;
+  }
+  
+  .suggested-thumb {
+    width: 120px;
+    height: 68px;
+  }
+}
+
+@media (max-width: 480px) {
+  .thumbnail-container {
+    border-radius: 8px;
+  }
+}
+
+/* Desktop large screens */
+@media (min-width: 1024px) {
+  .suggested-thumb {
+    width: 168px;
+    height: 94px;
+  }
+}
