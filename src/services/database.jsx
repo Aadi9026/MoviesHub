@@ -307,30 +307,39 @@ export const searchVideos = async (searchTerm) => {
   }
 };
 
-// FIXED: getRelatedVideos with null checks
-export const getRelatedVideos = async (genre, excludeId, limitCount = 6) => {
+// ✅ UPDATED: Get unlimited related videos with RANDOM GENRES (Mixed)
+export const getRelatedVideos = async (genre, excludeId, limitCount = null) => {
   try {
     // Fetch ALL videos first
     const allVideosResult = await getVideos();
-
+    
     // Ensure we have a valid videos array
     const videos = Array.isArray(allVideosResult.videos) ? allVideosResult.videos : [];
-
-    const relatedVideos = videos
-      .filter(video => {
-        if (!video || !video.id) return false;
-        return video.id !== excludeId && 
-               video.genre === genre &&
-               video.isActive !== false;
-      })
-      .slice(0, limitCount);
-
-    return { success: true, videos: relatedVideos };
+    
+    // Get ALL videos except the current one
+    const allRelatedVideos = videos.filter(video => {
+      if (!video || !video.id) return false;
+      return video.id !== excludeId && video.isActive !== false;
+    });
+    
+    // RANDOMIZE/SHUFFLE the videos (mix all genres randomly)
+    const shuffledVideos = [...allRelatedVideos].sort(() => Math.random() - 0.5);
+    
+    // If limitCount is specified, return that many videos
+    // Otherwise return ALL related videos
+    const finalVideos = limitCount 
+      ? shuffledVideos.slice(0, limitCount)
+      : shuffledVideos;
+    
+    console.log(`✅ Found ${finalVideos.length} related videos (random genres mixed)`);
+    
+    return { success: true, videos: finalVideos };
   } catch (error) {
     console.error('❌ Error getting related videos:', error);
-    return { success: true, videos: [] }; // Return empty array on error
+    return { success: true, videos: [] };
   }
 };
+
 
 // Ad Management
 export const getAdSettings = async () => {
