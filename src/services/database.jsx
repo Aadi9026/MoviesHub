@@ -369,7 +369,7 @@ export const updateAdSettings = async (adSettings) => {
 };
 
 // Get random videos (for Home page) - fetches ALL then randomizes
-export const getRandomVideos = async (limit = 50) => {
+export const getRandomVideos = async (limit = 100) => {
   try {
     const result = await getVideos(); // Get ALL videos
     if (result.success) {
