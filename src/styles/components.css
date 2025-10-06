@@ -4351,8 +4351,7 @@ html:has(.video-detail-page) {
 .pro-thumbnail {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background: #000;
+  object-fit: cover;
   transition: transform 0.3s ease;
   /* Critical for performance */
   backface-visibility: hidden;
