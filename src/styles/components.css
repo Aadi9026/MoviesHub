@@ -4564,16 +4564,4 @@ html:has(.video-detail-page) {
   display: grid !important;
 }
 
-/* EMERGENCY FIX - Add this to your main CSS */
-body {
-  background: #0a0a0a !important;
-}
 
-* {
-  background: #1a1a1a !important;
-  color: #ffffff !important;
-}
-
-.admin-page {
-  background: #0a0a0a !important;
-}
