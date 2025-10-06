@@ -4754,3 +4754,41 @@ html:has(.video-detail-page) {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* FIX: Show full images without cut-off in movie cards */
+.pro-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important; /* Changed from cover to contain */
+  background: #000; /* Black background for letterboxing */
+  transition: transform 0.3s ease;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Also fix for regular video cards if they exist */
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important; /* Changed from cover to contain */
+  background: #000; /* Black background for letterboxing */
+  transition: transform 0.3s ease;
+}
+
+/* Fix for suggested video thumbnails too */
+.suggested-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important; /* Changed from cover to contain */
+  background: #000;
+}
+
+/* Fix for search result thumbnails */
+.result-thumb {
+  width: 50px;
+  height: 35px;
+  object-fit: contain !important; /* Changed from cover to contain */
+  background: #000;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
