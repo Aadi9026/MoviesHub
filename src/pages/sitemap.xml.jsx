@@ -1,0 +1,36 @@
+export const revalidate = 0;
+
+export default function Sitemap() {}
+
+export async function getServerSideProps({ res }) {
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://ytmovieshub.website/</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://ytmovieshub.website/latest</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://ytmovieshub.website/trending</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>`;
+
+  res.setHeader('Content-Type', 'application/xml');
+  res.write(sitemap);
+  res.end();
+
+  return {
+    props: {},
+  };
+}
