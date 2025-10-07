@@ -3,6 +3,7 @@ import { addVideo, updateVideo } from '../../services/database';
 import { fetchMovieData, searchMovies, fetchMovieTrailer } from '../../services/movieDataService';
 import { GENRES, QUALITIES } from '../../utils/constants';
 import { validateEmbedCode } from '../../utils/helpers';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -228,16 +229,29 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     try {
       let thumbnailUrl = formData.thumbnail;
 
+      // FIXED: Actually upload to Firebase Storage instead of using temporary URL
       if (formData.thumbnailFile) {
-        // Simulate upload - in production, upload to Firebase Storage
-        thumbnailUrl = URL.createObjectURL(formData.thumbnailFile);
+        const storage = getStorage();
+        
+        // Create a unique filename with timestamp to avoid conflicts
+        const fileName = `thumbnails/${Date.now()}_${formData.thumbnailFile.name.replace(/\s+/g, '_')}`;
+        const storageRef = ref(storage, fileName);
+        
+        // Upload the file to Firebase Storage
+        console.log('Uploading thumbnail to Firebase Storage...');
+        const snapshot = await uploadBytes(storageRef, formData.thumbnailFile);
+        
+        // Get the permanent download URL from Firebase
+        thumbnailUrl = await getDownloadURL(snapshot.ref);
+        
+        console.log('Thumbnail uploaded successfully:', thumbnailUrl);
       }
 
       const videoData = {
         title: formData.title,
         description: formData.description,
         genre: formData.genre,
-        thumbnail: thumbnailUrl,
+        thumbnail: thumbnailUrl, // This is now a permanent Firebase Storage URL
         embedCode: formData.embedCode,
         duration: parseInt(formData.duration),
         altSources: formData.altSources,
@@ -283,6 +297,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
         setError(result.error);
       }
     } catch (err) {
+      console.error('Error in handleSubmit:', err);
       setError('Error: ' + err.message);
     }
     
