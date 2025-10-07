@@ -29,9 +29,8 @@ const SearchBar = ({ onSearchClose }) => {
       const result = await searchVideos(searchTerm);
       if (result.success) {
         setSearchResults(result.videos);
-        // Generate suggestions from search results
-        const newSuggestions = result.videos.slice(0, 5).map(video => video.title);
-        setSuggestions(newSuggestions);
+        // Remove suggestions generation since we don't want them
+        setSuggestions([]);
       } else {
         setSearchResults([]);
         setSuggestions([]);
@@ -93,7 +92,7 @@ const SearchBar = ({ onSearchClose }) => {
     navigate('/'); // Clear search and go to homepage
   };
 
-  const showSuggestions = (suggestions.length > 0 || searchResults.length > 0) && hasSearched;
+  const showSuggestions = searchResults.length > 0 && hasSearched;
 
   return (
     <div className="search-container" ref={searchContainerRef}>
@@ -128,26 +127,7 @@ const SearchBar = ({ onSearchClose }) => {
 
       {showSuggestions && (
         <div className="search-suggestions">
-          {/* Search suggestions */}
-          {suggestions.length > 0 && (
-            <>
-              <div className="suggestions-header">
-                <span>Suggestions</span>
-              </div>
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="suggestion-item"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  <i className="fas fa-search"></i>
-                  <span>{suggestion}</span>
-                </div>
-              ))}
-            </>
-          )}
-          
-          {/* Search results preview */}
+          {/* Only show search results - REMOVED SUGGESTIONS SECTION */}
           {searchResults.length > 0 && (
             <div className="search-results-preview">
               <div className="results-header">
@@ -178,7 +158,7 @@ const SearchBar = ({ onSearchClose }) => {
             </div>
           )}
 
-          {suggestions.length === 0 && searchResults.length === 0 && hasSearched && (
+          {searchResults.length === 0 && hasSearched && (
             <div className="no-results">
               <i className="fas fa-search"></i>
               <span>No movies found. Try different keywords.</span>
