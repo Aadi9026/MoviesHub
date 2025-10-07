@@ -3,7 +3,6 @@ import { addVideo, updateVideo } from '../../services/database';
 import { fetchMovieData, searchMovies, fetchMovieTrailer } from '../../services/movieDataService';
 import { GENRES, QUALITIES } from '../../utils/constants';
 import { validateEmbedCode } from '../../utils/helpers';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +27,9 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+
+  // Your ImgBB API Key
+  const IMGBB_API_KEY = 'b7d351f49501256a4ca80620497c3254';
 
   // Sample embed codes for testing
   const sampleEmbedCodes = [
@@ -229,35 +231,40 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
     try {
       let thumbnailUrl = formData.thumbnail;
 
-      // FIXED: Actually upload to Firebase Storage instead of using temporary URL
+      // Upload to ImgBB if file is selected
       if (formData.thumbnailFile) {
-        const storage = getStorage();
+        console.log('Uploading thumbnail to ImgBB...');
         
-        // Create a unique filename with timestamp to avoid conflicts
-        const fileName = `thumbnails/${Date.now()}_${formData.thumbnailFile.name.replace(/\s+/g, '_')}`;
-        const storageRef = ref(storage, fileName);
+        const formDataToSend = new FormData();
+        formDataToSend.append('image', formData.thumbnailFile);
         
-        // Upload the file to Firebase Storage
-        console.log('Uploading thumbnail to Firebase Storage...');
-        const snapshot = await uploadBytes(storageRef, formData.thumbnailFile);
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+          method: 'POST',
+          body: formDataToSend
+        });
         
-        // Get the permanent download URL from Firebase
-        thumbnailUrl = await getDownloadURL(snapshot.ref);
+        const result = await response.json();
         
-        console.log('Thumbnail uploaded successfully:', thumbnailUrl);
+        if (result.success) {
+          thumbnailUrl = result.data.url; // Get the permanent image URL
+          console.log('✅ Thumbnail uploaded to ImgBB:', thumbnailUrl);
+        } else {
+          throw new Error(result.error?.message || 'ImgBB upload failed');
+        }
       }
 
       const videoData = {
         title: formData.title,
         description: formData.description,
         genre: formData.genre,
-        thumbnail: thumbnailUrl, // This is now a permanent Firebase Storage URL
+        thumbnail: thumbnailUrl, // This is now a permanent ImgBB URL
         embedCode: formData.embedCode,
         duration: parseInt(formData.duration),
         altSources: formData.altSources,
         altSourcesEnabled: formData.altSourcesEnabled,
         downloadLinks: formData.downloadLinks,
         adCode: formData.adCode,
+        createdAt: new Date().toISOString(),
         // Add movie metadata if available
         ...(selectedMovie && {
           year: selectedMovie.year,
@@ -298,7 +305,7 @@ const MovieForm = ({ editVideo, onSuccess, onCancel }) => {
       }
     } catch (err) {
       console.error('Error in handleSubmit:', err);
-      setError('Error: ' + err.message);
+      setError('Error uploading image: ' + err.message);
     }
     
     setLoading(false);
