@@ -1,7 +1,7 @@
 {
   "name": "YTMoviesHub - Stream HD Movies Online",
   "short_name": "YTMoviesHub",
-  "description": "Watch latest movies online free in HD quality. Stream Hollywood, Bollywood movies with English subtitles.",
+  "description": "Watch latest movies online free in HD quality. Stream South, Bollywood, Hollywood movies with English subtitles.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#141414",
