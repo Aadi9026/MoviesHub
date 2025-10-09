@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "YTMoviesHub - YouTube-like movie streaming platform",
   "scripts": {
-    "sitemap": "node scr/generate-sitemap.js",
     "dev": "vite"
     "build": "vite build",
     "preview": "vite preview",
