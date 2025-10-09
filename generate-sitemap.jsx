@@ -1,4 +1,4 @@
-import { getVideos } from '../src/services/firebase';
+import { getVideos } from '../src/services/database';
 
 export default async function handler(req, res) {
   try {
