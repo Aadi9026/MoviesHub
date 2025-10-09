@@ -4,10 +4,10 @@
   "description": "YTMoviesHub - YouTube-like movie streaming platform",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate-sitemap && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "generate-sitemap": "node api/generate-sitemap.js"
+    "predeploy": "npm run build"
+    
   },
   "dependencies": {
     "react": "^18.2.0",
