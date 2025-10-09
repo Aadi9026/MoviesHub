@@ -7,7 +7,7 @@
     "build": "npm run generate-sitemap && vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "generate-sitemap": "node generate-sitemap.jsx"
+    "generate-sitemap": "node generate-sitemap.js"
   },
   "dependencies": {
     "react": "^18.2.0",
