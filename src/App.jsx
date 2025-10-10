@@ -12,6 +12,7 @@ import AdminPage from './pages/AdminPage';
 import LoadingSpinner from './components/Common/LoadingSpinner';
 import SeoHead from './components/SEO/SeoHead'; // ADD THIS IMPORT
 import StructuredData, { generateWebsiteSchema } from './components/SEO/StructuredData'; // ADD THIS IMPORT
+import './Admin.css';
 import './App.css';
 
 function App() {
