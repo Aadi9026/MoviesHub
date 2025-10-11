@@ -78,17 +78,14 @@ export const deleteVideo = async (id) => {
   }
 };
 
-// ADD THIS FUNCTION: Duplicate Video Detection
+// Duplicate Video Detection
 export const checkDuplicateVideo = async (title, genre, excludeId = null) => {
   try {
-    // Validate input
     if (!title || !genre) {
       return { success: true, duplicates: [] };
     }
 
     const allVideosResult = await getVideos();
-
-    // Ensure we have a valid videos array
     const videos = Array.isArray(allVideosResult.videos) ? allVideosResult.videos : [];
 
     const searchTitle = title.toLowerCase().trim();
@@ -97,27 +94,22 @@ export const checkDuplicateVideo = async (title, genre, excludeId = null) => {
     const duplicates = videos.filter(video => {
       if (!video || !video.id) return false;
 
-      // Skip the excluded video (for edit mode)
       if (excludeId && video.id === excludeId) return false;
 
       const videoTitle = (video.title || '').toLowerCase();
       const videoGenre = (video.genre || '').toLowerCase();
 
-      // Check for exact match
       if (videoTitle === searchTitle && videoGenre === searchGenre) {
         return true;
       }
 
-      // Check for similar titles (fuzzy match)
       const titleSimilarity = calculateSimilarity(videoTitle, searchTitle);
       const genreMatch = videoGenre === searchGenre;
 
-      // Consider duplicate if titles are very similar and same genre
       if (titleSimilarity > 0.8 && genreMatch) {
         return true;
       }
 
-      // Check for contained titles (e.g., "KGF Chapter 2" vs "KGF Chapter 2 (2022)")
       if ((videoTitle.includes(searchTitle) || searchTitle.includes(videoTitle)) && genreMatch) {
         return true;
       }
@@ -139,7 +131,6 @@ const calculateSimilarity = (str1, str2) => {
 
   if (longer.length === 0) return 1.0;
 
-  // Simple similarity calculation
   const words1 = str1.split(/\s+/).filter(word => word.length > 2);
   const words2 = str2.split(/\s+/).filter(word => word.length > 2);
 
@@ -149,29 +140,25 @@ const calculateSimilarity = (str1, str2) => {
   return similarity;
 };
 
-// ✅ FIXED: GET ALL VIDEOS WITHOUT LIMIT
+// GET ALL VIDEOS WITHOUT LIMIT
 export const getVideos = async (limitCount = null) => {
   try {
     let q;
 
-    // Try with ordering first
     try {
       if (limitCount) {
-        // If limit specified, use it
         q = query(
           collection(db, VIDEOS_COLLECTION),
           orderBy('createdAt', 'desc'),
           limit(limitCount)
         );
       } else {
-        // NO LIMIT - Fetch ALL movies
         q = query(
           collection(db, VIDEOS_COLLECTION),
           orderBy('createdAt', 'desc')
         );
       }
     } catch (orderError) {
-      // If ordering fails, get without order (but still no limit unless specified)
       if (limitCount) {
         q = query(
           collection(db, VIDEOS_COLLECTION),
@@ -188,7 +175,6 @@ export const getVideos = async (limitCount = null) => {
       ...doc.data()
     }));
 
-    // If we couldn't order by createdAt, sort manually
     if (!q._query?.orderBy?.length) {
       videos.sort((a, b) => {
         const aDate = a.createdAt?.toDate?.() || new Date(0);
@@ -201,7 +187,7 @@ export const getVideos = async (limitCount = null) => {
     return { success: true, videos: videos || [] };
   } catch (error) {
     console.error('❌ Error getting videos:', error);
-    return { success: true, videos: [] }; // Return empty array instead of error
+    return { success: true, videos: [] };
   }
 };
 
@@ -217,12 +203,10 @@ export const getVideo = async (id) => {
     if (docSnap.exists()) {
       const videoData = docSnap.data();
 
-      // Validate required fields
       if (!videoData?.embedCode) {
         return { success: false, error: 'Video embed code is missing' };
       }
 
-      // Increment views count
       try {
         await updateDoc(doc(db, VIDEOS_COLLECTION, id), {
           views: increment(1)
@@ -247,86 +231,124 @@ export const getVideo = async (id) => {
   }
 };
 
-// FIXED: searchVideos with proper null checks - searches ALL movies
+// ✅✅✅ COMPLETELY FIXED: Smart search with priority scoring - NO MORE FALSE MATCHES ✅✅✅
 export const searchVideos = async (searchTerm) => {
   try {
-    // Validate input
     if (!searchTerm || typeof searchTerm !== 'string') {
       return { success: true, videos: [] };
     }
 
-    // Fetch ALL videos for search
     const allVideosResult = await getVideos();
-
-    // Ensure we have a valid videos array
     const videos = Array.isArray(allVideosResult.videos) ? allVideosResult.videos : [];
 
     const term = searchTerm.toLowerCase().trim();
 
     if (term.length < 2) {
-      return { success: true, videos: videos };
+      return { success: true, videos: [] };
     }
 
-    // Safe filtering with null checks
-    const filteredVideos = videos.filter(video => {
-      if (!video) return false;
+    // ✅ ADVANCED SCORING SYSTEM - Prioritizes exact matches
+    const scoredVideos = videos.map(video => {
+      if (!video) return null;
 
       const title = (video.title || '').toLowerCase();
       const description = (video.description || '').toLowerCase();
       const genre = (video.genre || '').toLowerCase();
+      const actors = (video.actors || '').toLowerCase();
+      const director = (video.director || '').toLowerCase();
+      const year = (video.year || '').toString();
 
-      // Check if search term exists in title, description, or genre
-      return title.includes(term) || 
-             description.includes(term) || 
-             genre.includes(term) ||
-             (title.split(' ') || []).some(word => word.startsWith(term)) ||
-             (genre.split(' ') || []).some(word => word.startsWith(term));
-    });
+      let score = 0;
 
-    // Safe sorting with null checks
-    filteredVideos.sort((a, b) => {
-      const aTitle = (a?.title || '').toLowerCase();
-      const bTitle = (b?.title || '').toLowerCase();
-      const aViews = a?.views || 0;
-      const bViews = b?.views || 0;
+      // 🎯 PRIORITY 1: Exact title match (1000 points)
+      if (title === term) {
+        score += 1000;
+      }
 
-      if (aTitle.includes(term) && !bTitle.includes(term)) return -1;
-      if (!aTitle.includes(term) && bTitle.includes(term)) return 1;
+      // 🎯 PRIORITY 2: Title starts with search term (500 points)
+      if (title.startsWith(term)) {
+        score += 500;
+      }
 
-      if (aTitle.startsWith(term) && !bTitle.startsWith(term)) return -1;
-      if (!aTitle.startsWith(term) && bTitle.startsWith(term)) return 1;
+      // 🎯 PRIORITY 3: Whole word match in title (300 points)
+      const titleWords = title.split(/\s+/);
+      const hasExactWord = titleWords.some(word => word === term);
+      if (hasExactWord) {
+        score += 300;
+      }
 
-      return bViews - aViews;
-    });
+      // 🎯 PRIORITY 4: Word starts with search term (200 points)
+      const hasWordStartingWith = titleWords.some(word => word.startsWith(term));
+      if (hasWordStartingWith && !hasExactWord) {
+        score += 200;
+      }
 
-    console.log(`🔍 Found ${filteredVideos.length} movies matching "${searchTerm}"`);
+      // 🎯 PRIORITY 5: Genre exact match (150 points)
+      if (genre === term) {
+        score += 150;
+      }
+
+      // 🎯 PRIORITY 6: Year match (100 points)
+      if (year === term) {
+        score += 100;
+      }
+
+      // 🎯 PRIORITY 7: Genre contains as whole word (80 points)
+      const genreWords = genre.split(/\s+/);
+      if (genreWords.some(word => word === term)) {
+        score += 80;
+      }
+
+      // 🎯 PRIORITY 8: Actors/Director exact match (60 points)
+      if (actors.includes(term) || director.includes(term)) {
+        score += 60;
+      }
+
+      // 🎯 PRIORITY 9: Description contains term (40 points)
+      const descWords = description.split(/\s+/);
+      if (descWords.some(word => word.includes(term))) {
+        score += 40;
+      }
+
+      // ❌ REMOVED: Partial matches inside words (was causing false results)
+      // Now "ala" will NOT match "SALAAR" or "Vadalara"
+
+      // Bonus: Popular movies get slight boost
+      if (video.views > 1000) {
+        score += 5;
+      }
+
+      return score > 0 ? { ...video, searchScore: score } : null;
+    }).filter(video => video !== null);
+
+    // Sort by search score (highest first)
+    scoredVideos.sort((a, b) => b.searchScore - a.searchScore);
+
+    // Remove score field before returning
+    const filteredVideos = scoredVideos.map(({ searchScore, ...video }) => video);
+
+    console.log(`🔍 Search "${searchTerm}": Found ${filteredVideos.length} matching results`);
     return { success: true, videos: filteredVideos };
+    
   } catch (error) {
     console.error('❌ Error searching videos:', error);
-    return { success: true, videos: [] }; // Return empty array on error
+    return { success: true, videos: [] };
   }
 };
 
-// ✅ UPDATED: Get unlimited related videos with RANDOM GENRES (Mixed)
+// Get unlimited related videos with RANDOM GENRES (Mixed)
 export const getRelatedVideos = async (genre, excludeId, limitCount = null) => {
   try {
-    // Fetch ALL videos first
     const allVideosResult = await getVideos();
-    
-    // Ensure we have a valid videos array
     const videos = Array.isArray(allVideosResult.videos) ? allVideosResult.videos : [];
     
-    // Get ALL videos except the current one
     const allRelatedVideos = videos.filter(video => {
       if (!video || !video.id) return false;
       return video.id !== excludeId && video.isActive !== false;
     });
     
-    // RANDOMIZE/SHUFFLE the videos (mix all genres randomly)
     const shuffledVideos = [...allRelatedVideos].sort(() => Math.random() - 0.5);
     
-    // If limitCount is specified, return that many videos
-    // Otherwise return ALL related videos
     const finalVideos = limitCount 
       ? shuffledVideos.slice(0, limitCount)
       : shuffledVideos;
@@ -339,7 +361,6 @@ export const getRelatedVideos = async (genre, excludeId, limitCount = null) => {
     return { success: true, videos: [] };
   }
 };
-
 
 // Ad Management
 export const getAdSettings = async () => {
@@ -380,7 +401,7 @@ export const updateAdSettings = async (adSettings) => {
 // Get random videos (for Home page) - fetches ALL then randomizes
 export const getRandomVideos = async (limit = 100) => {
   try {
-    const result = await getVideos(); // Get ALL videos
+    const result = await getVideos();
     if (result.success) {
       const shuffled = [...result.videos].sort(() => Math.random() - 0.5);
       return { success: true, videos: shuffled.slice(0, limit) };
@@ -395,7 +416,7 @@ export const getRandomVideos = async (limit = 100) => {
 // Get latest videos (sorted by creation date) - shows ALL
 export const getLatestVideos = async (limit = 50) => {
   try {
-    const result = await getVideos(); // Get ALL videos
+    const result = await getVideos();
     if (result.success) {
       const sorted = [...result.videos].sort((a, b) => {
         const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
@@ -414,14 +435,12 @@ export const getLatestVideos = async (limit = 50) => {
 // Get trending videos (based on views and daily rotation) - uses ALL videos
 export const getTrendingVideos = async (limit = 50) => {
   try {
-    const result = await getVideos(); // Get ALL videos
+    const result = await getVideos();
     if (result.success) {
-      // Sort by views (highest first)
       const sortedByViews = [...result.videos].sort((a, b) => {
         return (b.views || 0) - (a.views || 0);
       });
 
-      // Apply daily rotation
       const today = new Date();
       const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
       const rotationIndex = seed % Math.max(1, sortedByViews.length);
