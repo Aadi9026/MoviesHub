@@ -29,6 +29,7 @@ const SearchBar = ({ onSearchClose }) => {
       const result = await searchVideos(searchTerm);
       if (result.success) {
         setSearchResults(result.videos);
+        // Remove suggestions generation since we don't want them
         setSuggestions([]);
       } else {
         setSearchResults([]);
@@ -64,6 +65,11 @@ const SearchBar = ({ onSearchClose }) => {
     handleSearch(query);
   };
 
+  const handleSuggestionClick = (suggestion) => {
+    setQuery(suggestion);
+    handleSearch(suggestion);
+  };
+
   const handleResultClick = (videoId) => {
     navigate(`/video/${videoId}`);
     setQuery('');
@@ -83,6 +89,7 @@ const SearchBar = ({ onSearchClose }) => {
     setSuggestions([]);
     setSearchResults([]);
     setHasSearched(false);
+    navigate('/'); // Clear search and go to homepage
   };
 
   const showSuggestions = searchResults.length > 0 && hasSearched;
@@ -90,10 +97,9 @@ const SearchBar = ({ onSearchClose }) => {
   return (
     <div className="search-container" ref={searchContainerRef}>
       <form className="search-bar" onSubmit={handleSubmit}>
-        {/* ✅ REMOVED: Search icon from inside input */}
         <input
           type="text"
-          placeholder="Search movies by title, year, or genre..."
+          placeholder="Search for movies by title, genre..."
           value={query}
           onChange={handleInputChange}
           autoComplete="off"
@@ -106,27 +112,14 @@ const SearchBar = ({ onSearchClose }) => {
             onClick={handleClearSearch}
             aria-label="Clear search"
           >
-            ✕
+            <i className="fas fa-times"></i>
           </button>
         )}
-        
-        {/* ✅ HIDDEN: Submit button - search happens automatically as you type */}
-        <button 
-          type="submit" 
-          style={{ display: 'none' }}
-          disabled={loading} 
-          aria-label="Search"
-        >
-          {loading ? (
-            <i className="fas fa-spinner fa-spin"></i>
-          ) : (
-            <i className="fas fa-search"></i>
-          )}
-        </button>
       </form>
 
       {showSuggestions && (
         <div className="search-suggestions">
+          {/* Only show search results - REMOVED SUGGESTIONS SECTION */}
           {searchResults.length > 0 && (
             <div className="search-results-preview">
               <div className="results-header">
@@ -157,17 +150,12 @@ const SearchBar = ({ onSearchClose }) => {
             </div>
           )}
 
-          {searchResults.length === 0 && hasSearched && !loading && (
+          {searchResults.length === 0 && hasSearched && (
             <div className="no-results">
+              <i className="fas fa-search"></i>
               <span>No movies found. Try different keywords.</span>
             </div>
           )}
-        </div>
-      )}
-
-      {loading && (
-        <div className="search-loading">
-          <i className="fas fa-spinner fa-spin"></i> Searching...
         </div>
       )}
     </div>
