@@ -247,7 +247,7 @@ export const getVideo = async (id) => {
   }
 };
 
-// FIXED: searchVideos with IMDb-like exact match prioritization
+// FIXED: searchVideos - ONLY shows movies with title matches
 export const searchVideos = async (searchTerm) => {
   try {
     // Validate input
@@ -267,96 +267,44 @@ export const searchVideos = async (searchTerm) => {
       return { success: true, videos: videos };
     }
 
-    // Safe filtering with null checks and scoring system
-    const scoredVideos = videos.map(video => {
-      if (!video) return { video: null, score: 0 };
+    // STRICT TITLE-ONLY FILTERING
+    const filteredVideos = videos.filter(video => {
+      if (!video || !video.title) return false;
 
       const title = (video.title || '').toLowerCase();
-      const description = (video.description || '').toLowerCase();
-      const genre = (video.genre || '').toLowerCase();
-      const year = (video.year || '').toString();
       
-      let score = 0;
-
-      // EXACT TITLE MATCH - Highest priority (score: 100)
-      if (title === term) {
-        score += 100;
-      }
-
-      // TITLE STARTS WITH search term (score: 80)
-      if (title.startsWith(term)) {
-        score += 80;
-      }
-
-      // EXACT TITLE WORDS MATCH (score: 70)
-      const titleWords = title.split(/\s+/);
-      const searchWords = term.split(/\s+/);
-      
-      // If all search words are in title
-      const allWordsMatch = searchWords.every(word => 
-        titleWords.some(titleWord => titleWord === word)
-      );
-      if (allWordsMatch) {
-        score += 70;
-      }
-
-      // TITLE CONTAINS search term as substring (score: 60)
-      if (title.includes(term)) {
-        score += 60;
-      }
-
-      // INDIVIDUAL WORDS MATCH in title (score: 10 per word)
-      searchWords.forEach(word => {
-        if (titleWords.includes(word)) {
-          score += 10;
-        }
-      });
-
-      // YEAR MATCH (score: 30)
-      if (year === term) {
-        score += 30;
-      }
-
-      // GENRE MATCH (score: 5)
-      if (genre.includes(term)) {
-        score += 5;
-      }
-
-      // DESCRIPTION MATCH (score: 1) - Lowest priority
-      if (description.includes(term)) {
-        score += 1;
-      }
-
-      return { video, score };
+      // ONLY return movies where title contains the search term
+      return title.includes(term);
     });
 
-    // Filter out null videos and videos with score 0
-    const filteredScoredVideos = scoredVideos.filter(item => 
-      item.video && item.score > 0
-    );
+    // Sort by relevance (exact matches first, then partial matches)
+    filteredVideos.sort((a, b) => {
+      const aTitle = (a.title || '').toLowerCase();
+      const bTitle = (b.title || '').toLowerCase();
 
-    // Sort by score (highest first) and then by views
-    filteredScoredVideos.sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score; // Higher score first
-      }
-      // If same score, sort by views (higher views first)
-      return (b.video.views || 0) - (a.video.views || 0);
+      // Exact title match gets highest priority
+      if (aTitle === term && bTitle !== term) return -1;
+      if (aTitle !== term && bTitle === term) return 1;
+
+      // Title starts with search term gets second priority
+      if (aTitle.startsWith(term) && !bTitle.startsWith(term)) return -1;
+      if (!aTitle.startsWith(term) && bTitle.startsWith(term)) return 1;
+
+      // Then sort by views (higher views first)
+      return (b.views || 0) - (a.views || 0);
     });
 
-    // Extract only the videos
-    const filteredVideos = filteredScoredVideos.map(item => item.video);
-
-    console.log(`🔍 Found ${filteredVideos.length} movies matching "${searchTerm}"`);
+    console.log(`🔍 Found ${filteredVideos.length} movies with title matching "${searchTerm}"`);
     
     // Log search results for debugging
     if (filteredVideos.length > 0) {
-      console.log('Search results order:');
+      console.log('Search results (TITLE MATCHES ONLY):');
       filteredVideos.forEach((video, index) => {
         const title = video.title || 'No Title';
-        const score = filteredScoredVideos[index].score;
-        console.log(`${index + 1}. "${title}" - Score: ${score}`);
+        console.log(`${index + 1}. "${title}"`);
       });
+    } else {
+      console.log(`❌ No movies found with title containing "${searchTerm}"`);
     }
 
     return { success: true, videos: filteredVideos };
