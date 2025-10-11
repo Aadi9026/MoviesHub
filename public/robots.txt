@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ytmovieshub.website/sitemap.xml
+Sitemap: https://www.ytmovieshub.website/sitemap.xml
