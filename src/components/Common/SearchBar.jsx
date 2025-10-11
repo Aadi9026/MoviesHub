@@ -115,6 +115,12 @@ const SearchBar = ({ onSearchClose }) => {
             <i className="fas fa-times"></i>
           </button>
         )}
+        
+        {loading && (
+          <button type="submit" disabled={true} aria-label="Search">
+            <i className="fas fa-spinner fa-spin"></i>
+          </button>
+        )}
       </form>
 
       {showSuggestions && (
