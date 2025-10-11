@@ -1,4 +1,4 @@
 User-agent: *
-Allow: /sitemap.xml
+Allow: /
 
 Sitemap: https://ytmovieshub.website/sitemap.xml
