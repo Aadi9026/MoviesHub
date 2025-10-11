@@ -56,7 +56,7 @@ export const useVideos = () => {
     }
   }, []);
 
-  // Load latest videos sorted by date
+  // FIXED: Load latest videos sorted by original createdAt date
   const loadLatestVideos = useCallback(async () => {
     try {
       setLoading(true);
@@ -65,11 +65,34 @@ export const useVideos = () => {
       const result = await getVideos();
       if (result.success) {
         const allVideos = Array.isArray(result.videos) ? result.videos : [];
+        
+        // FIX: Properly handle Firebase timestamps and sort by original createdAt
         const latestVideos = [...allVideos].sort((a, b) => {
-          const dateA = new Date(a.createdAt || a.uploadDate || a.created_at || 0);
-          const dateB = new Date(b.createdAt || b.uploadDate || b.created_at || 0);
+          // Handle Firebase timestamp objects
+          const getTimestamp = (dateField) => {
+            if (!dateField) return new Date(0);
+            
+            // If it's a Firebase timestamp object
+            if (dateField.toDate && typeof dateField.toDate === 'function') {
+              return dateField.toDate();
+            }
+            
+            // If it's a Firestore timestamp with seconds/nanoseconds
+            if (dateField.seconds !== undefined) {
+              return new Date(dateField.seconds * 1000);
+            }
+            
+            // If it's a regular date string or timestamp
+            return new Date(dateField);
+          };
+
+          const dateA = getTimestamp(a.createdAt);
+          const dateB = getTimestamp(b.createdAt);
+          
+          // Sort by original creation date (newest first)
           return dateB - dateA;
         });
+        
         setVideos(latestVideos);
       } else {
         setError(result.error || 'Failed to load latest videos');
