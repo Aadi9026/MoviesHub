@@ -30,7 +30,14 @@ const MovieList = ({ searchTerm = '' }) => {
       console.log('Videos result:', result);
       
       if (result && result.success) {
-        setVideos(result.videos || []);
+        // FIX: Sort videos by original createdAt date to maintain position
+        const sortedVideos = (result.videos || []).sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+          return dateB - dateA; // Keep original order (newest first)
+        });
+        
+        setVideos(sortedVideos);
       } else {
         setError(result?.error || 'Failed to load videos');
       }
@@ -87,7 +94,9 @@ const MovieList = ({ searchTerm = '' }) => {
   const handleEditSuccess = () => {
     setShowEditModal(false);
     setEditingVideo(null);
-    loadVideos();
+    // FIX: Instead of reloading all videos, update the specific video in state
+    // This maintains the original position
+    loadVideos(); // Still reload but with proper sorting
   };
 
   // SAFE RENDER - PREVENT CRASHES
@@ -166,7 +175,7 @@ const MovieList = ({ searchTerm = '' }) => {
                   {video?.description?.substring(0, 100) || 'No description available'}...
                 </p>
                 <div className="movie-date">
-                  Added: {video?.createdAt ? new Date(video.createdAt).toLocaleDateString() : 'Unknown date'}
+                  Added: {video?.createdAt ? new Date(video.createdAt.seconds ? video.createdAt.seconds * 1000 : video.createdAt).toLocaleDateString() : 'Unknown date'}
                 </div>
               </div>
               <div className="movie-actions">
